@@ -1,0 +1,235 @@
+# 配置项全集
+
+> 来源文档（相对 `04.v2.16.X文档/`）：
+> - `050.🍢配置项/010.说明.md`
+> - `050.🍢配置项/020.Springboot下的配置项.md`
+> - `050.🍢配置项/030.Spring下的配置项.md`
+> - `050.🍢配置项/035.Solon下的配置项.md`
+> - `050.🍢配置项/040.其他场景代码设置配置项.md`
+>
+> 版本对齐：LiteFlow **v2.16.X**。本章配置项在 SpringBoot / Spring / Solon / 纯代码四种场景下**完全一样**，仅表现形式不同。下文以 **SpringBoot 为主线**给出完整表格与示例，其余场景只列差异点。
+
+---
+
+## 一、总则
+
+- LiteFlow 配置项大多**非必须**，系统都有默认值。看不懂的项**保持默认**即可。
+- `rule-source` 是唯一强依赖：只要用了规则文件就必须配置；若改为**代码动态构造规则**，则 `rule-source` 自动失效（不需要规则文件）。
+- 监控相关项在 SpringBoot 下位于 `liteflow.monitor.*` 子节点；在 Spring XML / 纯代码下被**拍平**为 `enableLog / queueLimit / delay / period`。
+
+---
+
+## 二、SpringBoot 配置项完整表（主体）
+
+| key（`liteflow.*`） | 含义 | 默认值 | 取值 / 备注 |
+|---|---|---|---|
+| `rule-source` | 规则文件路径 | 无 | **必填**（用代码动态构造规则时自动失效） |
+| `enable` | liteflow 是否开启 | `true` | |
+| `print-banner` | banner 打印是否开启 | `true` | |
+| `slot-size` | 上下文的初始数量槽 | `1024` | 会自动扩容，不用刻意配置 |
+| `main-executor-works` | `FlowExecutor.execute2Future` 的线程数 | `64` | |
+| `main-executor-class` | `execute2Future` 自定义线程池 Builder | `com.yomahub.liteflow.thread.LiteFlowDefaultMainExecutorBuilder` | LiteFlow 提供默认 Builder |
+| `request-id-generator-class` | 自定义请求 ID 生成类 | `com.yomahub.liteflow.flow.id.DefaultRequestIdGenerator` | LiteFlow 提供默认生成类 |
+| `global-thread-pool-size` | 全局异步节点线程池大小 | `64` | |
+| `global-thread-pool-queue-size` | 全局异步节点线程池队列大小 | `512` | |
+| `global-thread-pool-executor-class` | 全局异步节点线程池自定义 Builder | `com.yomahub.liteflow.thread.LiteFlowDefaultGlobalExecutorBuilder` | LiteFlow 提供默认 Builder |
+| `when-max-wait-time` | 异步线程最长等待时间（只用于 `when`） | `15000` | 数值，配合单位项 |
+| `when-max-wait-time-unit` | `when-max-wait-time` 的单位 | `MILLISECONDS`（毫秒） | |
+| `when-thread-pool-isolate` | 每个 `WHEN` 是否用单独的线程池 | `false` | |
+| `parse-mode` | 解析模式 | `PARSE_ALL_ON_START` | 三选一：`PARSE_ALL_ON_START`（启动全解析）/ `PARSE_ALL_ON_FIRST_EXEC`（首次执行全解析）/ `PARSE_ONE_ON_FIRST_EXEC`（首次执行单条解析） |
+| `retry-count` | 全局重试次数 | `0` | 源码中字段与 getter 已 `@Deprecated`，建议改用 EL 的 `.retry(n)` |
+| `support-multiple-type` | 是否支持不同类型的加载方式混用 | `false` | |
+| `node-executor-class` | 全局默认节点执行器 | `com.yomahub.liteflow.flow.executor.DefaultNodeExecutor` | |
+| `print-execution-log` | 是否打印执行过程中的日志 | `true` | |
+| `enable-monitor-file` | 是否开启本地文件监听 | `false` | 改文件自动重载规则 |
+| `fast-load` | 是否开启快速解析模式 | `false` | |
+| `enable-node-instance-id` | 是否开启 Node 节点实例 ID 持久化 | `false` | |
+| `enable-virtual-thread` | 是否开启虚拟线程 | `true` | **只在 JDK21+ 环境有效** |
+| `fallback-cmp-enable` | 是否启用组件降级（`@FallbackCmp`） | `false` | 见 `references/advanced.md` |
+| `check-node-exists` | 是否校验规则里引用的节点是否存在 | `true` | **仅 SpringBoot 场景**（属 `LiteflowProperty`，非 `LiteflowConfig` 字段；Spring XML / 纯代码无法设置） |
+| `chain-cache.enabled` | 是否开启 chain 缓存 | `false` | |
+| `chain-cache.capacity` | chain 缓存容量 | `10000` | |
+| `monitor.enable-log` | 监控是否开启 | `false` | 默认不开启 |
+| `monitor.queue-limit` | 监控队列存储大小 | `200` | |
+| `monitor.delay` | 监控一开始延迟多少执行 | `300000` | 毫秒，即 5 分钟 |
+| `monitor.period` | 监控日志打印间隔（每过多少时间执行一次） | `300000` | 毫秒，即 5 分钟 |
+
+> 注：原 Spring 章节 md 中 `<property name="period">` 与 `<property name="delay">` 的中文注释被互换，但**属性名本身正确**。语义以本表为准：`delay`=初始延迟，`period`=打印间隔（与 SpringBoot / 纯代码两章一致）。
+
+### 1. application.yaml 示例
+
+```yaml
+liteflow:
+  # 规则文件路径（必填）
+  rule-source: config/flow.xml
+  # ---------- 以下均有默认值，按需开启 ----------
+  enable: true
+  print-banner: true
+  slot-size: 1024
+  parse-mode: PARSE_ALL_ON_START          # 启动即全量解析
+  retry-count: 0
+  support-multiple-type: false
+  print-execution-log: true
+  enable-monitor-file: false              # 文件变更自动重载
+  fast-load: false
+  enable-virtual-thread: true             # 仅 JDK21+ 生效
+  # when 并发相关
+  when-max-wait-time: 15000
+  when-max-wait-time-unit: MILLISECONDS
+  when-thread-pool-isolate: false
+  # 线程池
+  main-executor-works: 64
+  global-thread-pool-size: 64
+  global-thread-pool-queue-size: 512
+  # 简易监控
+  monitor:
+    enable-log: false
+    queue-limit: 200
+    delay: 300000
+    period: 300000
+```
+
+### 2. application.properties 示例
+
+```properties
+liteflow.rule-source=config/flow.xml
+# ---------- 以下非必须 ----------
+liteflow.enable=true
+liteflow.print-banner=true
+liteflow.slot-size=1024
+liteflow.parse-mode=PARSE_ALL_ON_START
+liteflow.retry-count=0
+liteflow.support-multiple-type=false
+liteflow.print-execution-log=true
+liteflow.enable-monitor-file=false
+liteflow.fast-load=false
+liteflow.enable-virtual-thread=true
+liteflow.when-max-wait-time=15000
+liteflow.when-max-wait-time-unit=MILLISECONDS
+liteflow.when-thread-pool-isolate=false
+liteflow.global-thread-pool-size=64
+liteflow.global-thread-pool-queue-size=512
+liteflow.main-executor-works=64
+liteflow.monitor.enable-log=false
+liteflow.monitor.queue-limit=200
+liteflow.monitor.delay=300000
+liteflow.monitor.period=300000
+```
+
+> 上面两段均只列出常用项；完整项见上表。各类 `*-class` 项默认即用 LiteFlow 自带实现，自定义时再覆盖。
+
+---
+
+## 三、Spring（非 Boot）场景差异
+
+通过 XML bean 注册 `com.yomahub.liteflow.property.LiteflowConfig`，用 `<property>` 注入。差异点：
+
+- **属性名改为驼峰**（Java 字段名），不是 kebab-case：`ruleSource`、`printBanner`、`slotSize`、`mainExecutorWorks`、`mainExecutorClass`、`requestIdGeneratorClass`、`globalThreadPoolSize`、`globalThreadPoolQueueSize`、`globalThreadPoolExecutorClass`、`whenMaxWaitTime`、`whenMaxWaitTimeUnit`、`whenThreadPoolIsolate`、`parseMode`、`retryCount`、`supportMultipleType`、`nodeExecutorClass`、`printExecutionLog`、`enableMonitorFile`、`fastLoad`、`enableNodeInstanceId`、`enableVirtualThread`。
+- **监控项被拍平**（不再有 `monitor.` 前缀）：`enableLog`、`queueLimit`、`delay`、`period`，全部直接挂在同一个 bean 上。
+- `whenMaxWaitTimeUnit` / `parseMode` 以**字符串**形式注入（如 `"MILLISECONDS"`、`"PARSE_ALL_ON_START"`）。
+
+```xml
+<bean id="liteflowConfig" class="com.yomahub.liteflow.property.LiteflowConfig">
+    <property name="ruleSource" value="config/flow.xml"/>
+    <!-- 以下均非必须 -->
+    <property name="enable" value="true"/>
+    <property name="printBanner" value="true"/>
+    <property name="slotSize" value="1024"/>
+    <property name="parseMode" value="PARSE_ALL_ON_START"/>
+    <property name="retryCount" value="0"/>
+    <property name="supportMultipleType" value="false"/>
+    <property name="printExecutionLog" value="true"/>
+    <property name="enableMonitorFile" value="false"/>
+    <property name="fastLoad" value="false"/>
+    <property name="enableVirtualThread" value="true"/>
+    <property name="whenMaxWaitTime" value="15000"/>
+    <property name="whenMaxWaitTimeUnit" value="MILLISECONDS"/>
+    <property name="whenThreadPoolIsolate" value="false"/>
+    <property name="globalThreadPoolSize" value="64"/>
+    <!-- 监控（拍平） -->
+    <property name="enableLog" value="false"/>
+    <property name="queueLimit" value="200"/>
+    <property name="delay" value="300000"/>
+    <property name="period" value="300000"/>
+</bean>
+```
+
+---
+
+## 四、Solon 场景差异
+
+**配置项与 SpringBoot 完全相同**（同样的 key、同样的默认值），写法一致。详见第二节表格与示例。
+
+---
+
+## 五、纯代码场景差异（`LiteflowConfig` setter）
+
+适用于非 Spring/非 Solon 的纯 Java 场景。`new LiteflowConfig()` 后逐项 `setXxx`。差异点：
+
+- 属性名同 Spring XML（驼峰），通过 setter 注入：`setRuleSource`、`setEnable`、`setPrintBanner`、`setSlotSize`、`setMainExecutorWorks`、`setMainExecutorClass`、`setRequestIdGeneratorClass`、`setGlobalThreadPoolSize`、`setGlobalThreadPoolQueueSize`、`setGlobalThreadPoolExecutorClass`、`setWhenMaxWaitTime`、`setWhenMaxWaitTimeUnit`、`setWhenThreadPoolIsolate`、`setParseMode`、`setRetryCount`、`setSupportMultipleType`、`setNodeExecutorClass`、`setPrintExecutionLog`、`setEnableMonitorFile`、`setFastLoad`、`setEnableNodeInstanceId`、`setEnableVirtualThread`、`setEnableLog`、`setQueueLimit`、`setDelay`、`setPeriod`。
+- **类型为强类型枚举/对象**，不再是字符串：
+  - `setWhenMaxWaitTimeUnit(TimeUnit.MILLISECONDS)` —— `java.util.concurrent.TimeUnit`
+  - `setParseMode(ParseModeEnum.PARSE_ALL_ON_START)` —— `ParseModeEnum`
+  - `setDelay(300000L)` / `setPeriod(300000L)` —— `long`
+- 监控项同样拍平：`setEnableLog` / `setQueueLimit` / `setDelay` / `setPeriod`。
+
+```java
+LiteflowConfig config = new LiteflowConfig();
+// 规则文件路径（必填，代码动态构造规则时自动失效）
+config.setRuleSource("config/flow.xml");
+// ---------- 以下非必须 ----------
+config.setEnable(true);
+config.setPrintBanner(true);
+config.setSlotSize(1024);
+config.setParseMode(ParseModeEnum.PARSE_ALL_ON_START);
+config.setRetryCount(0);
+config.setSupportMultipleType(false);
+config.setPrintExecutionLog(true);
+config.setEnableMonitorFile(false);
+config.setFastLoad(false);
+config.setEnableVirtualThread(true);          // 仅 JDK21+ 生效
+// when 并发
+config.setWhenMaxWaitTime(15000);
+config.setWhenMaxWaitTimeUnit(TimeUnit.MILLISECONDS);
+config.setWhenThreadPoolIsolate(false);
+// 线程池
+config.setMainExecutorWorks(64);
+config.setGlobalThreadPoolSize(64);
+config.setGlobalThreadPoolQueueSize(512);
+// 监控（拍平）
+config.setEnableLog(false);
+config.setQueueLimit(200);
+config.setDelay(300000L);
+config.setPeriod(300000L);
+```
+
+---
+
+## 六、重点配置速记
+
+| 重点项 | 默认 | 何时改 |
+|---|---|---|
+| `rule-source` | — | 用规则文件时必填；代码动态构造规则时不填 |
+| `parse-mode` | `PARSE_ALL_ON_START` | 想懒加载规则时改 `PARSE_ONE_ON_FIRST_EXEC` / `PARSE_ALL_ON_FIRST_EXEC` |
+| `slot-size` | `1024` | 一般不动，会自动扩容 |
+| `enable-monitor-file` | `false` | 需要本地规则文件变更自动重载时设 `true` |
+| `support-multiple-type` | `false` | 需要「规则文件 + 代码 / 多种来源」混装时设 `true` |
+| `when-max-wait-time` (+unit) | `15000` ms | `when` 并发整体超时阈值，按业务最长分支调整 |
+| `global-thread-pool-size` | `64` | 全局异步节点并发上限（v2.16.X 的并发线程数由它控制） |
+| `fast-load` | `false` | 开启快速解析模式 |
+| `enable-log`（`monitor.enable-log`） | `false` | 开启简易监控统计 |
+| `print-execution-log` | `true` | 关闭可减少执行过程日志 |
+| `enable-virtual-thread` | `true` | JDK21+ 用虚拟线程；低于 JDK21 不生效 |
+
+---
+
+## 七、确实不存在的命名（避免臆造）
+
+> ⚠️ 修正：早期版本曾把 `chainCache*` 列为"不存在的配置项"，这是**错误**的。`chain-cache.enabled`(默认 `false`) 与 `chain-cache.capacity`(默认 `10000`) 是**真实存在**的配置（见上表与源码 `liteflow-default.properties`、`LiteflowConfig.chainCacheEnabled/chainCacheCapacity`），只是未出现在官方「050.配置项」章节里。请勿因此避开该特性。
+
+下列名称在 v2.16.X 的**源码与默认配置中均不存在**（既不在 050 文档，也不在 `liteflow-default.properties`），易与真实项混淆，请勿使用：
+
+- `whenMaxWorkers` —— 并发线程数由 **`global-thread-pool-size`**（全局异步节点线程池大小，默认 64）控制，源码中无 `whenMaxWorkers`。
+- `printExecutionResult` —— 只有 `print-execution-log`（执行过程日志），无 `printExecutionResult`。
+
+> 提示：判断一个配置名是否真实，最可靠的方式是查 `liteflow-spring-boot-starter/src/main/resources/META-INF/liteflow-default.properties` 与 `LiteflowConfig` / `LiteflowProperty` 字段（可用 `scripts/source-lookup.sh grep`）。**"没写进 050 文档" ≠ "不存在"**——050 章节本身相对源码并不完整。

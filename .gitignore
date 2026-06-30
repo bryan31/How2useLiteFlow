@@ -1,0 +1,6 @@
+# 本地安装/测试用的 skill 副本，不随仓库发布
+# （避免与 skills/ 下的源出现同名 skill，导致 npx skills add 解析歧义）
+.claude/
+
+# macOS
+.DS_Store
