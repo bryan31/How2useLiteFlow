@@ -21,6 +21,16 @@ npx skills add bryan31/How2useLiteFlow@how2useliteflow -g -a claude-code -y
 
 安装后整个 skill 目录（含 `references/`、`scripts/`）会被拷贝到你的 agent 配置目录，无需额外配置。
 
+## 工作原理
+
+**你只需要安装这个 skill，不需要任何额外配置。** 它能回答**任何** LiteFlow 问题，靠的是一套分层策略：
+
+1. **蒸馏知识（覆盖约 90%）** — 内置高频速查表 + 分主题参考文档（`references/`），全部从 LiteFlow 官方文档与源码蒸馏而来。绝大多数问题——EL 算子、组件类型、执行 API、配置项、源码实现——都直接由这些内容作答，不联网、无需额外设置。
+2. **源码托底** — 对于蒸馏知识未覆盖的少数冷门或深层问题，skill 会去读 LiteFlow 的真实源码：优先查找本地 LiteFlow 仓库，没有则在征得你同意后克隆官方仓库，再用精确的 `path:line` 引用作答。
+3. **绝不杜撰** — 若 reference 与源码都无法确认，skill 会如实说明，而不是臆测、也不拿网络内容充当 LiteFlow 的行为依据。
+
+也就是说：装上这个 skill，你的 AI 就能可靠地回答 LiteFlow 问题——从日常用法一直到源码级实现。
+
 ## 触发方式
 
 当你向 AI 提到 LiteFlow 相关内容（组件、EL 规则、上下文、脚本组件、规则源、执行器、ReAct Agent 编排、测试、源码细节等）时，该 skill 会自动启用。

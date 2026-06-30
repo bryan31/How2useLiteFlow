@@ -21,6 +21,16 @@ npx skills add bryan31/How2useLiteFlow@how2useliteflow -g -a claude-code -y
 
 The entire skill directory (including `references/` and `scripts/`) is copied into your agent's config directory — no extra setup needed.
 
+## How it works
+
+**Just install this skill — nothing else to configure.** It can answer **any** LiteFlow question through a layered strategy:
+
+1. **Distilled knowledge (covers ~90%)** — a built-in quick-reference plus topic-by-topic reference docs (`references/`), distilled from LiteFlow's official documentation and source code. The vast majority of questions — EL operators, component types, the execution API, config keys, internals — are answered directly from these, with no network access and no extra setup.
+2. **Source-code fallback** — for the rare deep or obscure question the distilled knowledge doesn't cover, the skill reads the actual LiteFlow source: it first looks for a local LiteFlow repo, and otherwise (with your consent) clones the official repo, then answers with exact `path:line` citations.
+3. **Never fabricate** — if something can't be confirmed from the references or the source, the skill says so plainly instead of guessing or passing web content off as LiteFlow's behavior.
+
+Net effect: install the skill, and your AI can reliably answer LiteFlow questions — from everyday usage all the way down to source-level internals.
+
 ## How it triggers
 
 The skill activates automatically when you mention anything LiteFlow-related (components, EL rules, context, script components, rule sources, executor, ReAct Agent orchestration, testing, source internals, etc.).
