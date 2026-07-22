@@ -124,7 +124,7 @@ public class MyScriptInitLifeCycle implements PostProcessScriptEngineInitLifeCyc
 
 ## 三、执行时生命周期（运行阶段）
 
-发生在 `FlowExecutor` 和 `Chain` 实际执行规则期间，**每次执行都会触发**。
+发生在 `FlowExecutor`、`Chain` 和 `Node`（组件）实际执行规则期间，**每次执行都会触发**。
 
 ### 1. `PostProcessFlowExecuteLifeCycle` —— FlowExecutor 执行前后
 
@@ -197,13 +197,44 @@ public class MyChainExecuteLifeCycle implements PostProcessChainExecuteLifeCycle
 - `PostProcessFlowExecuteLifeCycle`：触发 **1 次**（仅 `mainChain`）；
 - `PostProcessChainExecuteLifeCycle`：触发 **2 次**——`mainChain` 执行前后各一组、`subChain` 执行前后各一组。
 
-> 补充：源码 `LifeCycleHolder` 中还存在第 6 个执行时接口 **`PostProcessNodeExecuteLifeCycle`**（节点执行前后触发），但官方 v2.16.X 文档**未文档化**它。如需使用，请按 `SKILL.md` 决策流程查源码确认其方法签名，勿臆测。
+### 3. `PostProcessNodeExecuteLifeCycle` —— Node（组件）执行前后（v2.16.1 新增）
+
+每个组件**每次执行**都会触发一组，是框架级生命周期中粒度最细的钩子——入参直接是 `NodeComponent` 本身（可拿 `getNodeId()`、`getType()`、`getRefNode()` 等），after 方法还带回耗时与异常。适合做节点级耗时统计、指标采集、执行审计。
+
+```java
+import com.yomahub.liteflow.core.NodeComponent;
+import com.yomahub.liteflow.lifecycle.PostProcessNodeExecuteLifeCycle;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyNodeExecuteLifeCycle implements PostProcessNodeExecuteLifeCycle {
+
+    @Override
+    public void postProcessBeforeNodeExecute(NodeComponent cmp) {
+        // 组件主逻辑执行前（先于组件级 beforeProcess）
+        System.out.println("[Node 前] " + cmp.getNodeId());
+    }
+
+    @Override
+    public void postProcessAfterNodeExecute(NodeComponent cmp, long timeSpent, Exception e) {
+        // 组件执行结束后在 finally 中触发（晚于组件级 afterProcess）
+        // timeSpent 为本次执行耗时（毫秒）；e 为执行异常，成功时为 null
+        System.out.println("[Node 后] " + cmp.getNodeId()
+                + ", 耗时=" + timeSpent + "ms, 异常=" + (e != null));
+    }
+}
+```
+
+- **调用点**（源码 `liteflow-core/.../core/NodeComponent.java` 的 `execute()`）：before 钩子在主逻辑执行前统一回调（`:119-127`，回调语句在 `:122`）；after 钩子在 `finally` 块中回调（`:184-188`，回调语句在 `:187`）——因此**无论成功还是异常，after 都会触发**，且能拿到配对的耗时/异常信息。
+- **钩子自身异常不影响节点执行**：before 钩子抛错只记日志、不中断流程（`NodeComponent.java:121-126`）；after 钩子在 `finally` 中执行，实现里务必自行兜底，避免覆盖业务异常。
+- **注册方式**：与其他生命周期相同——Spring/Solon 下声明为 Bean 即可被自动扫描；`LifeCycleHolder` 为其设有独立列表与分发分支（`liteflow-core/.../lifecycle/LifeCycleHolder.java:25`、`:39-41`，getter 在 `:64-66`）。非 Spring 场景用 `LifeCycleHolder.addLifeCycle(...)` 手动注册。
+- **典型实现**：liteflow-metrics 模块的 `NodeMetricsLifeCycle`（`liteflow-metrics/.../metrics/NodeMetricsLifeCycle.java:30`）就是基于它采集 node 级指标（执行次数/耗时/在途/错误），详见 [metrics.md](./metrics.md)。
 
 ---
 
 ## 四、从 `Slot` 能拿到什么
 
-执行时两类钩子的入参都是 `(String chainId, Slot slot)`。`Slot` 是 LiteFlow 运行期的"数据总线"，几乎承载了本次执行的所有元信息。常用方法（源码：`com.yomahub.liteflow.slot.Slot`）：
+执行时前两类钩子（Flow / Chain）的入参都是 `(String chainId, Slot slot)`（Node 钩子入参为 `NodeComponent`，见上节）。`Slot` 是 LiteFlow 运行期的"数据总线"，几乎承载了本次执行的所有元信息。常用方法（源码：`com.yomahub.liteflow.slot.Slot`）：
 
 | 方法 | 含义 |
 |---|---|
@@ -235,6 +266,7 @@ public class MyChainExecuteLifeCycle implements PostProcessChainExecuteLifeCycle
 | `PostProcessScriptEngineInitLifeCycle` | 启动 | 每种脚本引擎初始化后 1 次（需引入脚本插件） | `postProcessAfterScriptEngineInit(Object engine)` | 脚本引擎对象（类型随语言变，可能为 `null`） |
 | `PostProcessFlowExecuteLifeCycle` | 执行 | 每次 `FlowExecutor` 调用前后各 1 次（整次流程仅 1 组） | `postProcessBeforeFlowExecute(String, Slot)` / `postProcessAfterFlowExecute(String, Slot)` | `chainId` + 完整 `Slot`（请求/响应/步骤/异常/上下文） |
 | `PostProcessChainExecuteLifeCycle` | 执行 | 每个 `Chain` 执行前后各 1 次（含子链，主链+子链各 1 组） | `postProcessBeforeChainExecute(String, Slot)` / `postProcessAfterChainExecute(String, Slot)` | `chainId` + 当前 `Slot`（含子链异常等） |
+| `PostProcessNodeExecuteLifeCycle`（v2.16.1 新增） | 执行 | 每个组件执行前后各 1 组（每次执行都触发，after 在 `finally` 中） | `postProcessBeforeNodeExecute(NodeComponent)` / `postProcessAfterNodeExecute(NodeComponent, long, Exception)` | `NodeComponent`（nodeId、type、refNode）+ 耗时 `timeSpent` + 异常 `e` |
 
 ---
 
@@ -243,7 +275,7 @@ public class MyChainExecuteLifeCycle implements PostProcessChainExecuteLifeCycle
 | 维度 | 框架级生命周期（本文） | 组件级生命周期钩子（见 [components.md](./components.md)） |
 |---|---|---|
 | 定义位置 | `com.yomahub.liteflow.lifecycle.*` 接口 | 组件基类（如 `NodeComponent`）内部方法 |
-| 粒度 | 整条流程 / 整个 Chain / 整个 Node 构造 / 整个引擎 | 单个组件实例的一次执行 |
+| 粒度 | 整条流程 / 整个 Chain / 每个 Node 的构造与执行 / 整个引擎 | 单个组件实例的一次执行 |
 | 典型方法 | `postProcessAfterFlowExecute`、`postProcessAfterChainBuild` | `beforeProcess`、`afterProcess`、`beforeChainInvoke` 等 |
 | 能否注入业务上下文 | 通过 `Slot` 间接获取 | 直接在组件内拿 `getContextBean(...)`、`getSlot()` |
 | 适用场景 | 全局审计、链路追踪、构造期校验、引擎定制 | 单组件的前置准备、后置清理、节点级埋点 |

@@ -1,13 +1,14 @@
 ---
 name: how2useliteflow
-description: 当用户提到 LiteFlow（Java 轻量级规则引擎/业务编排框架）时启用。覆盖：组件、EL 规则（THEN/WHEN/IF/SWITCH/FOR/WHILE/ITERATOR 等）、上下文、脚本组件、规则配置源、配置项、执行器、AI Agent 编排（ReAct Agent / liteflow-react-agent）、测试与调试、源码细节。
+version: "1.0.0"
+description: 当用户提到 LiteFlow（Java 轻量级规则引擎/业务编排框架）时启用。覆盖：组件、EL 规则（THEN/WHEN/IF/SWITCH/FOR/WHILE/ITERATOR 等）、上下文、脚本组件、规则配置源、Rule-DB 统一规则数据库（v2.16.1：liteflow-rule-db-sql/redis/zk/etcd、发布 API、多节点一致性）、指标监控（v2.16.1：liteflow-metrics、Micrometer、Prometheus、/actuator/liteflow 端点）、配置项、执行器、AI Agent 编排（ReAct Agent / liteflow-react-agent）、测试与调试、源码细节。
 ---
 
 # LiteFlow 助手
 
 本 skill 帮助用户用 AI 使用 **LiteFlow（v2.16.X）**。它内置了从官方文档与源码蒸馏出的绝大部分**用法细节与代码细节**，并规定了"答不到时怎么办"的严格流程。
 
-> 版本对齐：本 skill 内容对齐 LiteFlow **v2.16.X**（约 v2.16.0）。不同小版本细节可能差异；作答时如涉及具体版本会标注。
+> 版本对齐：本 skill 内容对齐 LiteFlow **v2.16.1**（含 v2.16.1 新增的 **Rule-DB 统一规则数据库**与 **liteflow-metrics 指标模块**）。不同小版本细节可能差异；作答时如涉及具体版本会标注。
 
 ---
 
@@ -19,6 +20,8 @@ description: 当用户提到 LiteFlow（Java 轻量级规则引擎/业务编排�
 - **上下文**（数据上下文、别名、参数注入、表达式取参）。
 - **脚本组件**（Groovy/JS/Python/QLExpress/Lua/Aviator/Kotlin/Java 等）。
 - **规则配置源**（本地文件/SQL/ZK/Nacos/Etcd/Apollo/Redis/自定义）。
+- **Rule-DB 统一规则数据库**（v2.16.1 新增：`liteflow-rule-db-sql/redis/zk/etcd`、统一发布 API、规则版本与多节点一致性、有界缓存与懒加载、`liteflow.rule-db.*` 配置、降级语义）。
+- **指标监控**（v2.16.1 新增：`liteflow-metrics`、Micrometer 指标、Prometheus/Grafana 对接、`/actuator/liteflow` 结构端点）。
 - **配置项**（SpringBoot/Spring/Solon/纯代码）。
 - **执行器**（FlowExecutor 的执行方法、LiteflowResponse）。
 - **编写 / 调试测试用例**（JUnit5 + SpringBoot 测试范式、`BaseTest` 全局状态清理、各功能的官方测试模块）。
@@ -32,11 +35,13 @@ description: 当用户提到 LiteFlow（Java 轻量级规则引擎/业务编排�
 
 > 这是最重要的章节。**绝不杜撰、绝不用网络内容充当 LiteFlow 行为依据。**
 
+**先做更新自检**（每次会话首次触发本 skill 时）：必须先运行 `scripts/version-check.sh` 再处理用户问题；结果按「七、更新自检」一节处理，检查失败则静默继续，不得因该检查中断或拒绝正常回答。
+
 **第 0 步 — 先查本文件速查表**（下方第三节）：约 80% 的常见问题（EL 算子、组件类型、执行 API、核心配置）可直接作答，无需加载任何文件。
 
 **第 1 步 — 加载对应 reference**：速查表不够时，按"知识地图"（第四节）用 `Read` 打开 `references/<文件>.md`。绝大多数用法与代码细节问题在此解决。**作答时标注来源 reference 文件名**。
 
-**第 2 步 — 本地源码**：若 reference 也未覆盖（通常是更冷门或更深层的源码细节），先探测本地 LiteFlow 仓库，按优先级：环境变量 `LITEFLOW_REPO` → `~/openSource/liteFlow` → `./liteFlow`。
+**第 2 步 — 本地源码**：若 reference 也未覆盖（通常是更冷门或更深层的源码细节），先探测本地 LiteFlow 仓库，按优先级：环境变量 `LITEFLOW_REPO` → `~/openSource/liteFlow`、`~/openSource/LiteFlow-Jdk17` 等常见布局 → `./liteFlow` → 克隆缓存。
 - 用 `scripts/source-lookup.sh path` 探测（找到则打印绝对路径；找不到退出码 2）。
 - 找到后用 `scripts/source-lookup.sh grep <关键词>`（搜 `*.java`）/ `grepall` / `find <名字>` / `show <相对路径> [a-b]` 定位，**引用 `path:line` 作答**。
 
@@ -145,6 +150,15 @@ List<LiteflowResponse> rs = flowExecutor.executeRouteChain(param, OrderContext.c
 
 > ⚠️ **v2.16.X 不存在**这些配置名，勿臆造：`whenMaxWorkers`（并发由 `global-thread-pool-size` 控制）、`printExecutionResult`（应为 `print-execution-log`）、`chainCache*`。
 
+### 3.5 v2.16.1 新变化速览
+
+| 新能力 | 一句话 | 详情 |
+|---|---|---|
+| **Rule-DB 统一规则数据库** | 存储（SQL/Redis/ZK/etcd）为权威源 + JVM 有界缓存懒加载，多节点最终一致（秒级）；4 插件 classpath 四选一，与 `rule-source` **互斥**；配置 `liteflow.rule-db.*`；统一发布 API `RulePublisherFactory` | `references/rule-db.md` |
+| **liteflow-metrics 指标** | Micrometer 指标（chain/node 次数/耗时/错误/在途）+ `/actuator/liteflow` 结构端点；starter 已传递依赖；开关 `liteflow.metrics.enabled`（默认开），无 registry 无任何行为 | `references/metrics.md` |
+| **节点执行生命周期钩子** | 新增框架级钩子 `PostProcessNodeExecuteLifeCycle`（before/after 节点执行，带耗时与异常；框架级钩子至此共 6 个） | `references/lifecycle.md` |
+| **新异常 `ChainLoadException`** | Rule-DB 回源加载失败（规则存在但取不回来），区别于 `ChainNotFoundException` | `references/rule-db.md` §9 |
+
 ---
 
 ## 四、知识地图（问题类型 → reference 文件）
@@ -163,6 +177,8 @@ List<LiteflowResponse> rs = flowExecutor.executeRouteChain(param, OrderContext.c
 | 测试用例与示例（测试范式、BaseTest 清理、功能→测试模块速查、DEMO） | `references/testing.md` |
 | 脚本组件、各语言坐标、绑定变量、动态刷新/验证/卸载 | `references/scripts.md` |
 | 规则配置源（本地/SQL/ZK/Nacos/Etcd/Apollo/Redis/自定义） | `references/rule-sources.md` |
+| **Rule-DB 统一规则数据库**（v2.16.1：四后端上手、`rule-db.*` 配置、发布 API、一致性/降级/限制、手改库规范） | `references/rule-db.md` |
+| **指标监控**（v2.16.1：liteflow-metrics、Micrometer 指标目录、`/actuator/liteflow` 端点、PromQL、非 Spring 注册） | `references/metrics.md` |
 | 元数据操作器、平滑热刷新、启动不检查 | `references/metadata.md` |
 | 异步线程池（FlowExecutor 层/组件异步层/虚拟线程） | `references/thread-pools.md` |
 | 动态构造 Node/EL/Chain | `references/dynamic-build.md` |
@@ -188,7 +204,7 @@ List<LiteflowResponse> rs = flowExecutor.executeRouteChain(param, OrderContext.c
 | 子命令 | 作用 |
 |---|---|
 | `path` | 打印解析到的本地仓库路径（找不到退出码 2，**不克隆**） |
-| `clone` | **显式**克隆 gitee 仓库到缓存（默认 `v2.16.0` tag，与内置内容对齐；可用 `LITEFLOW_TAG` 指定其它 tag/分支）；仅在用户同意后调用 |
+| `clone` | **显式**克隆 gitee 仓库到缓存（默认 `v2.16.0` tag；v2.16.1 正式打 tag 后可用 `LITEFLOW_TAG=v2.16.1`；仅在用户同意后调用）。注意：内置 reference 已对齐 v2.16.1，克隆的 v2.16.0 不含 Rule-DB/metrics 源码——查 v2.16.1 新特性优先用本地 2.16.1 源码（如 `~/openSource/LiteFlow-Jdk17`）或内置 `references/rule-db.md` / `references/metrics.md` |
 | `grep <pattern>` | 在仓库 `*.java` 中检索（优先 `rg`，回落 `grep -rn`） |
 | `grepall <pattern>` | 在仓库所有文件中检索 |
 | `find <name>` | 按文件名查找 |
@@ -197,3 +213,19 @@ List<LiteflowResponse> rs = flowExecutor.executeRouteChain(param, OrderContext.c
 环境变量：`LITEFLOW_REPO`（指定本地仓库覆盖探测）、`LITEFLOW_TAG`（可选，指定 tag/分支；不设则克隆 `v2.16.0`，显式留空 `LITEFLOW_TAG=` 才回落 master）、`LITEFLOW_CACHE`（默认 `~/.cache/liteflow-skill`）。
 
 **职责边界**：脚本不做用户交互，是否克隆由本 skill 的决策流程（第 3 步）征得用户同意后决定。
+
+---
+
+## 七、更新自检
+
+本 skill 每次会话首次被触发时，先运行 `scripts/version-check.sh` 检查自身是否为最新版本：
+
+| 退出码 | 含义 | 处理方式 |
+|---|---|---|
+| 0 | 已是最新 | 继续正常工作，无需提示 |
+| 2 | 远端有更新 | 告知用户本地与远端版本号，征得同意后执行脚本输出的 `npx skills update` 命令完成更新 |
+| 1 | 检查失败（离线、网络受限等） | 静默跳过，不影响任何正常功能 |
+
+该检查只读取远端 SKILL.md 的 `version` 字段，不执行远端任何代码。结果按天缓存在 `~/.cache/how2useliteflow/`（可用 `HOW2USELITEFLOW_CACHE` 覆盖），同一天内重复运行直接回放缓存、不重复联网；`HOW2USELITEFLOW_CHECK_FORCE=1` 可强制重新检查。
+
+如需在 agent hook 中挂载本脚本，命令末尾必须追加 `|| true`——部分 hook 体系把退出码 2 解释为「阻断」，与本脚本的「有更新」含义冲突。

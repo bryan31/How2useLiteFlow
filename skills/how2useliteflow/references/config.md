@@ -15,6 +15,7 @@
 
 - LiteFlow 配置项大多**非必须**，系统都有默认值。看不懂的项**保持默认**即可。
 - `rule-source` 是唯一强依赖：只要用了规则文件就必须配置；若改为**代码动态构造规则**，则 `rule-source` 自动失效（不需要规则文件）。
+- v2.16.1 起新增 **Rule-DB 模式**（引入 `liteflow-rule-db-sql/redis/zk/etcd` 四选一 + `liteflow.rule-db.*` 配置）：规则/脚本以数据库为权威源，与 `rule-source` **互斥**（同配启动报错），详见 `references/rule-db.md`。
 - 监控相关项在 SpringBoot 下位于 `liteflow.monitor.*` 子节点；在 Spring XML / 纯代码下被**拍平**为 `enableLog / queueLimit / delay / period`。
 
 ---
@@ -53,6 +54,7 @@
 | `monitor.queue-limit` | 监控队列存储大小 | `200` | |
 | `monitor.delay` | 监控一开始延迟多少执行 | `300000` | 毫秒，即 5 分钟 |
 | `monitor.period` | 监控日志打印间隔（每过多少时间执行一次） | `300000` | 毫秒，即 5 分钟 |
+| `metrics.enabled` | 指标采集开关（v2.16.1 新增 `liteflow-metrics` 模块，基于 Micrometer） | `true` | 用 starter 即为传递依赖，无需单独引入；装配条件与指标目录见 `references/metrics.md` |
 
 > 注：原 Spring 章节 md 中 `<property name="period">` 与 `<property name="delay">` 的中文注释被互换，但**属性名本身正确**。语义以本表为准：`delay`=初始延迟，`period`=打印间隔（与 SpringBoot / 纯代码两章一致）。
 
@@ -117,6 +119,22 @@ liteflow.monitor.period=300000
 ```
 
 > 上面两段均只列出常用项；完整项见上表。各类 `*-class` 项默认即用 LiteFlow 自带实现，自定义时再覆盖。
+
+### 3. Rule-DB 模式配置（v2.16.1 新增，`liteflow.rule-db.*`）
+
+v2.16.1 新增 **Rule-DB 统一规则数据库**模式：规则/脚本以存储（SQL / Redis / zk / etcd）为权威源，JVM 只留轻量索引 + 有界缓存（LRU）。引入 `liteflow-rule-db-sql/redis/zk/etcd` 四选一后，用 `liteflow.rule-db.*` 取代 `rule-source`。通用配置（四后端共用）：
+
+| key（`liteflow.rule-db.*`） | 含义 | 默认值 | 取值 / 备注 |
+|---|---|---|---|
+| `enabled` | 是否开启 Rule-DB 模式 | `true` | 引入依赖即激活；逃生开关，`false` 退回非 Rule-DB 行为 |
+| `application-name` | 应用名（多应用共库的隔离维度） | 取 `spring.application.name`，否则 `default` | 共库时务必各应用不同 |
+| `cache.capacity` | 规则缓存容量（按 chain 条数，超出 LRU 淘汰） | `500` | |
+| `cache.preload-chain-ids` | 启动预热的 chain id 列表 | 空 | 逗号分隔 |
+| `sync.poll-seconds` | 变更序号轮询周期 | `3` | 仅 SQL / Redis 生效（zk / etcd 用 watch） |
+| `sync.reconcile-seconds` | 周期全量对账间隔 | `60` | |
+| `sync.fetch-retry-times` | 回源拉取失败重试次数 | `3` | |
+
+> ⚠️ **与 `rule-source` 互斥**：两者同配启动直接报错。进入 Rule-DB 模式后，`parse-mode`、`enable-monitor-file`、`chain-cache.*` **不再被读取**（解析时机、热重载、缓存语义均由 `rule-db.*` 接管），配置了也没有效果。各后端专属配置（`rule-db.sql.*` / `rule-db.redis.*` / `rule-db.zk.*` / `rule-db.etcd.*`）与完整语义见 `references/rule-db.md` §4。
 
 ---
 

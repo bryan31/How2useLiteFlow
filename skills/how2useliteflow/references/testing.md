@@ -127,6 +127,11 @@ public class BaseTest {
 | ZK/SQL/Nacos/Apollo/Etcd/Redis 配置源 | `liteflow-testcase-el-(zk|sql|nacos|apollo|etcd|redis)-springboot` |
 | SQL 多数据源 / sharding-jdbc / 动态 | `liteflow-testcase-el-sql-springboot-{dynamic,sharding-jdbc}` 等 |
 | ReAct Agent（JDK17+） | `liteflow-testcase-el-react-agent` |
+| Metrics 指标采集 / 装配守护 / 端点（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/metrics/`（`MetricsScenarioSpringbootTest`、`MetricsLifeCycleGuardTest`、`MetricsEndpointSpringbootTest`；资源 `resources/metrics/`、`metrics-scenario/`）；Boot4 端点见 `liteflow-testcase-el-springboot4` 的 `test/metrics/MetricsEndpointSpringboot4Test` |
+| 节点执行生命周期钩子 `PostProcessNodeExecuteLifeCycle`（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/nodeexecute/`（`NodeExecuteLifeCycleSpringbootTest` + `TestNodeExecuteLifeCycle`，资源 `resources/nodeexecute/`） |
+| Rule-DB 配置绑定（v2.16.1+） | `liteflow-testcase-el-springboot4` 的 `test/config/RuleDbConfigBindingTest` |
+
+> v2.16.1 仓库根目录另有 `scripts/verify-rule-db-sql-release.sh`：rule-db-sql 插件的发布验证脚本（非 JUnit），可作 Rule-DB 发布流程参考。
 
 ---
 

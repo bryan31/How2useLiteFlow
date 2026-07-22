@@ -52,6 +52,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 | **liteflow-el-builder** | EL 表达式构建器，用于用 Java 代码**编程式拼装编排表达式**（`ELBus.then(...)` / `when(...)` / `if(...)` 等 Wrapper，对应 `THEN`/`WHEN`/`IF`/`SWITCH`/`LOOP` 算子）。 |
 | **liteflow-script-plugin** | 脚本语言插件聚合，含 11 个子模块（见下）。 |
 | **liteflow-rule-plugin** | 规则持久化插件聚合，含 6 个子模块（见下）。 |
+| **liteflow-rule-db** | **v2.16.1 新增**：统一规则数据库聚合模块，规则/脚本以存储为权威源，含 sql / redis / zk / etcd 4 个插件与统一发布 API，与 `rule-source` 模式互斥（见 `references/rule-db.md`）。 |
 | **liteflow-spring** | 纯 Spring（非 SpringBoot）场景的集成支持。 |
 | **liteflow-spring-boot-starter** | SpringBoot 2.X / 3.X 场景的官方 starter。 |
 | **liteflow-spring-boot4-starter** | SpringBoot 4.X 场景的专用 starter（API 差异较大，**勿与上面那个混用**）。 |
@@ -59,7 +60,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 | **liteflow-react-agent** | **v2.16.0 全新特性**：把完整 ReAct Agent 封装成 LiteFlow 组件（"一个组件 = 一个 Agent"），对接主流大模型，自带多轮记忆、Skills、工作空间文件工具、流式输出。基于 agentscope-java，**运行时需 JDK 21+**。 |
 | **liteflow-testcase-el** | EL 编排相关的测试用例集合（2000+ 测试用例的覆盖来源之一）。 |
 
-> 另有 `liteflow-benchmark`（基准压测）、`liteflow-metrics`（指标）两个辅助模块，一般业务接入不直接依赖（以源码为准）。
+> 另有 `liteflow-benchmark`（基准压测）辅助模块，一般业务接入不直接依赖（以源码为准）。v2.16.1 起新增两个模块：**`liteflow-rule-db`**（统一规则数据库聚合模块，含 sql / redis / zk / etcd 4 个插件 + publisher 统一发布 API，见 `references/rule-db.md`）与 **`liteflow-metrics`**（指标监控模块，基于 Micrometer，已是 `liteflow-spring-boot-starter` / `liteflow-spring-boot4-starter` 的传递依赖，用 starter 无需单独引入，见 `references/metrics.md`）。
 
 ### liteflow-script-plugin 的 11 个子模块
 

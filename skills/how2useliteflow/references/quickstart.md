@@ -7,7 +7,7 @@
 > - `040.🍟快速开始(Hello world)/030.Solon场景安装运行.md`
 > - `040.🍟快速开始(Hello world)/040.其他场景安装运行.md`
 >
-> 版本对齐：LiteFlow **v2.16.X**（示例中以 `2.16.0` 为准，jar 包均已上传中央仓库）。
+> 版本对齐：LiteFlow **v2.16.X**（示例中以 `2.16.1` 为准）。
 
 本章帮助你在最短时间内跑通 LiteFlow。根据项目实际环境，从 SpringBoot / Spring / Solon / 非 Spring 四种场景中选择一种。建议跟着文档操作一遍。下面以 **SpringBoot 场景为主线**给出完整最小可运行示例，其余场景只列关键差异点。
 
@@ -23,7 +23,7 @@ LiteFlow 提供 `liteflow-spring-boot-starter`，带自动装配。
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring-boot-starter</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ LiteFlow 提供 `liteflow-spring-boot-starter`，带自动装配。
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring-boot4-starter</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 :::
@@ -77,6 +77,15 @@ public class CCmp extends NodeComponent {
 ```properties
 liteflow.rule-source=config/flow.xml
 ```
+
+:::tip v2.16.1 起：Rule-DB 模式（规则存数据库，推荐生产使用）
+上例 `rule-source` 是本地规则文件方式。v2.16.1 起也可改用 **Rule-DB 统一规则数据库**模式——规则/脚本以数据库为权威源，支持多实例热更新与统一发布 API，更适合生产环境：
+
+- 依赖：`liteflow-rule-db-sql` / `liteflow-rule-db-redis` / `liteflow-rule-db-zk` / `liteflow-rule-db-etcd` 四选一；
+- 配置：改用 `liteflow.rule-db.*`，此时**不再配置 `rule-source`**（两者互斥、同配启动报错）。
+
+完整接入步骤与各后端配置见 `references/rule-db.md`。
+:::
 
 ### 4. 规则文件
 
@@ -136,7 +145,7 @@ public class YourClass {
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -179,7 +188,7 @@ public class YourClass {
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-solon-plugin</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -240,7 +249,7 @@ public class YourClass {
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-core</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -299,7 +308,7 @@ LiteflowResponse response = flowExecutor.execute2Resp("chain1", "arg", DefaultCo
 | 维度 | SpringBoot | Spring | Solon | 非 Spring |
 |---|---|---|---|---|
 | **artifactId** | `liteflow-spring-boot-starter`（4.X 用 `liteflow-spring-boot4-starter`） | `liteflow-spring` | `liteflow-solon-plugin` | `liteflow-core` |
-| **groupId / version** | `com.yomahub` / `2.16.0` | 同左 | 同左 | 同左 |
+| **groupId / version** | `com.yomahub` / `2.16.1` | 同左 | 同左 | 同左 |
 | **组件注解** | `@LiteflowComponent("id")` | `@LiteflowComponent("id")` | Solon 的 `@Component("id")` | 无注解，规则文件 `<node class="...">` 注册 |
 | **配置方式** | `application.properties` 配 `liteflow.rule-source` | Spring XML 声明 `LiteflowConfig` / `FlowExecutor` 等 Bean | 同 SpringBoot（properties/yml） | 代码构造 `LiteflowConfig` + `FlowExecutorHolder.loadInstance` |
 | **获取 FlowExecutor** | `@Resource` 注入 | `@Resource` 注入 | `@Inject` 注入 | `FlowExecutorHolder.loadInstance(config)` |

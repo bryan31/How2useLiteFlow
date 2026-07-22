@@ -80,7 +80,7 @@ b/c/d 默认全部并行执行完毕后才执行 e。
 | `percentage(0.6)` | v2.15.0+ | — | 在全部任务中随机挑 N 个（向上取整），完成即继续 |
 | `maxWaitSeconds(n)` / `maxWaitMilliseconds(n)` | v2.11.0+ | — | 并行整体超时控制 |
 
-**ignoreError**：b/c/d 任一异常，e 仍会执行。
+**ignoreError**：b/c/d 任一异常，e 仍会执行。分支异常**不会向上抛**——WHEN 整体对失败分支完全吞错（仅超时场景打 warn 日志），因此只要后续环节无异常，整个流程 `LiteflowResponse.isSuccess()` 仍为 `true`、`getCause()` 为空（源码 `liteflow-core/.../flow/parallel/strategy/ParallelStrategyExecutor.java:236-252`：ignoreError=true 时跳过所有失败分支的异常抛出）。
 ```xml
 THEN(a, WHEN(b, c, d).ignoreError(true), e);
 ```

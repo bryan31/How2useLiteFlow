@@ -21,6 +21,49 @@ npx skills add bryan31/How2useLiteFlow@how2useliteflow -g -a claude-code -y
 
 The entire skill directory (including `references/` and `scripts/`) is copied into your agent's config directory — no extra setup needed.
 
+## Update
+
+Installed skills are static copies — new releases are not pushed automatically. To update:
+
+```bash
+npx skills update how2useliteflow -g -y   # global install
+npx skills update how2useliteflow -p -y   # project install
+```
+
+The skill also checks itself: once per session it compares its own `version` against the published `SKILL.md` via `scripts/version-check.sh`, and offers to run the update command when a newer release exists. Results are cached once per day, and network failures are skipped silently.
+
+### Optional: enforce the check with an agent hook
+
+The self-check above is an instruction the agent *should* follow, not a guarantee. To make it mandatory, wire the script into your agent's hook system (skills cannot modify your agent config for you). Adjust the script path to where the skill was installed, and keep the trailing `|| true` — some hook systems read exit code 2 as "block", which here means "update available".
+
+**Kimi Code CLI** (`~/.kimi-code/config.toml`) — runs when your prompt mentions LiteFlow; stdout is appended to context:
+
+```toml
+[[hooks]]
+event = "UserPromptSubmit"
+matcher = "[Ll]ite[Ff]low"
+command = "sh ~/.agents/skills/how2useliteflow/scripts/version-check.sh || true"
+```
+
+**Claude Code** (`~/.claude/settings.json`) — runs at every session start; stdout is added to context:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/skills/how2useliteflow/scripts/version-check.sh || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ## How it works
 
 **Just install this skill — nothing else to configure.** It can answer **any** LiteFlow question through a layered strategy:
@@ -41,6 +84,6 @@ The skill activates automatically when you mention anything LiteFlow-related (co
 skills/how2useliteflow/
 ├── SKILL.md          # entry: decision workflow + quick-reference + knowledge map
 ├── references/       # detailed reference docs by topic
-├── scripts/          # source-lookup.sh: local-first / controlled clone + source search
+├── scripts/          # Local-first source lookup, controlled clone helper, and version self-check
 └── assets/
 ```

@@ -79,6 +79,20 @@ JDK 8 ~ 25；SpringBoot 2.X / 3.X 用 `liteflow-spring-boot-starter`，SpringBoo
 - 区分**框架级生命周期接口**（启动/执行前后，本文件）与**组件级钩子**（`beforeProcess`/`afterProcess` 等，见 `components.md`）。
 - 执行时钩子 `PostProcessChainExecuteLifeCycle` 在**主链 + 每个子链**都会触发（多次），`PostProcessFlowExecuteLifeCycle` 整次执行只触发一次。
 
+### Rule-DB 统一规则数据库（v2.16.1 新增，`references/rule-db.md`）
+- `liteflow.rule-source` 与 `liteflow.rule-db.*` **互斥**：同时配置启动直接报错 `rule-source and rule-db mode cannot be used together, please remove one of them`，必须二选一。
+- 四个 Rule-DB 插件（`liteflow-rule-db-sql/redis/zk/etcd`）**同一时刻 classpath 只能有一个**，多个共存启动报错。
+- **Redis Cluster 不支持原子发布**：发布 Lua 触碰 4 个键且未共享 hash-tag，Cluster 下 EVAL 报 CROSSSLOT。v1 只支持单机/哨兵；需 Cluster 请改用 SQL/zk/etcd 插件。
+- **手动改库必须 `version = version + 1`**：对账主判据是 version（其次是 `content_md5` 列存量值），只改内容不改 version → 改动**永不生效**。SQL 最小正确姿势：`UPDATE lf_chain SET el_data=..., version=version+1, content_md5=MD5(el_data) WHERE application_name=? AND chain_id=?`；想 3 秒内生效还要在同一事务补一条 change_log。
+- **启动时存储不可用 = 启动失败**（manifest 拉取失败直接抛异常）；但运行期存储挂掉、缓存命中则照常执行（缓存是可用性下限）。
+- 发布顺序：**先发脚本、再发引用它的 chain**，否则收敛窗口内别的节点拉到新 chain 找不到脚本，编译瞬时失败。
+- Rule-DB 回源加载失败抛 v2.16.1 新异常 **`ChainLoadException`**（规则存在但取不回来），区别于 `ChainNotFoundException`（规则不存在）。
+- Rule-DB 模式下 `parseMode`、`enableMonitorFile`、`chainCacheEnabled`/`chainCacheCapacity` **不再被读取**（解析时机、热重载、缓存语义均由 `rule-db.*` 接管），配了也没效果。
+
+### Metrics 端点（v2.16.1，`references/metrics.md`）
+- `/actuator/liteflow`、`/actuator/prometheus` 默认 **404**：必须 `management.endpoints.web.exposure.include=liteflow,prometheus`——**采集 ≠ 暴露**。
+- 没引任何 Micrometer registry（如 `micrometer-registry-prometheus`）则**完全无指标行为**。
+
 ---
 
 ## 三、当心"想当然"

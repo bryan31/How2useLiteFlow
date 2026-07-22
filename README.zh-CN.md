@@ -21,6 +21,49 @@ npx skills add bryan31/How2useLiteFlow@how2useliteflow -g -a claude-code -y
 
 安装后整个 skill 目录（含 `references/`、`scripts/`）会被拷贝到你的 agent 配置目录，无需额外配置。
 
+## 更新
+
+安装后的 skill 是静态副本，新版本不会自动推送。手动更新：
+
+```bash
+npx skills update how2useliteflow -g -y   # 全局安装
+npx skills update how2useliteflow -p -y   # 项目安装
+```
+
+skill 也会自检：每次会话通过 `scripts/version-check.sh` 对比自身 `version` 与远端发布的 SKILL.md，发现新版本时会提示你执行更新命令。结果按天缓存，网络失败时静默跳过，不影响使用。
+
+### 可选：用 agent hook 强制执行检查
+
+上面的自检是「agent 应当遵守的指令」，不是硬保证。如需强制，可以把脚本挂进 agent 的 hook 体系（skill 无法替你修改 agent 配置）。注意把脚本路径改成实际安装位置，并保留末尾的 `|| true`——部分 hook 体系把退出码 2 解释为「阻断」，而这里它的含义是「有更新」。
+
+**Kimi Code CLI**（`~/.kimi-code/config.toml`）——当你的提问提到 LiteFlow 时运行，输出会追加进上下文：
+
+```toml
+[[hooks]]
+event = "UserPromptSubmit"
+matcher = "[Ll]ite[Ff]low"
+command = "sh ~/.agents/skills/how2useliteflow/scripts/version-check.sh || true"
+```
+
+**Claude Code**（`~/.claude/settings.json`）——每次会话启动时运行，输出会加入上下文：
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/skills/how2useliteflow/scripts/version-check.sh || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ## 工作原理
 
 **你只需要安装这个 skill，不需要任何额外配置。** 它能回答**任何** LiteFlow 问题，靠的是一套分层策略：
@@ -41,6 +84,6 @@ npx skills add bryan31/How2useLiteFlow@how2useliteflow -g -a claude-code -y
 skills/how2useliteflow/
 ├── SKILL.md          # 入口：决策流程 + 高频速查 + 知识地图
 ├── references/       # 分主题的详细参考文档
-├── scripts/          # source-lookup.sh：本地优先 / 受控克隆 + 源码检索
+├── scripts/          # 本地优先的源码定位、受控克隆与版本自检工具
 └── assets/
 ```

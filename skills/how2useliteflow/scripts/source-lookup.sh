@@ -35,7 +35,9 @@ candidate_repos() {
   if [ -n "${LITEFLOW_REPO:-}" ]; then
     printf '%s\n' "$LITEFLOW_REPO"
   fi
-  # 常见开发机布局
+  # 常见开发机布局（-Jdk17 后缀为 JDK17 主线仓，版本更新，优先探测）
+  printf '%s\n' "$HOME/openSource/LiteFlow-Jdk17"
+  printf '%s\n' "$HOME/openSource/liteFlow-Jdk17"
   printf '%s\n' "$HOME/openSource/liteFlow"
   printf '%s\n' "$HOME/openSource/liteflow"
   # 当前工作目录及上一层

@@ -2,6 +2,14 @@
 
 # 规则配置源（Rule Source）
 
+> **【v2.16.1 分界说明】** 本文档讲的是传统的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）——「启动时全量读出、拼成大 XML 解析、规则全量常驻 JVM 堆」的模式，在 v2.16.1 中**一行未改、依然有效**。
+>
+> v2.16.1 新增了**纯增量**的 **Rule-DB 统一规则数据库**模式（聚合模块 `liteflow-rule-db`，含 `liteflow-rule-db-sql/redis/zk/etcd` 4 个插件 + 统一发布 API）：存储为权威源，JVM 只留轻量索引 + 有界 LRU 缓存（懒加载），多节点靠「变更通知（SQL/Redis seq 轮询 3s；zk/etcd watch 毫秒级）+ 周期对账（60s）」达到最终一致（秒级窗口，非线性一致）。它与本文档的老插件**完全独立、互不干扰**，但 `liteflow.rule-source` 与 `liteflow.rule-db.*` **互斥**，同时配置启动直接报错。
+>
+> 生产新项目建议优先评估 Rule-DB 模式，详见 `references/rule-db.md`。
+
+---
+
 ## 一、定位与选型总览
 
 LiteFlow 通过 **rule-source** 定位规则内容；除了内置的本地文件外，其余配置源都以**独立插件包**形式提供（按需引入 Maven 依赖）。除本地文件外的所有外部配置源都**不再配置 `liteflow.rule-source`**，改用 `liteflow.rule-source-ext-data-map`（YAML）或 `liteflow.rule-source-ext-data`（JSON 字符串，properties 风格）注入插件参数。

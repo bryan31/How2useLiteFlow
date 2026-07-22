@@ -1,6 +1,6 @@
-> 本文件内容来自 LiteFlow 源码 `/Users/bryan31/openSource/liteFlow`（对齐 2.16.X，约 v2.16.0）。
+> 本文件内容来自 LiteFlow 源码 `/Users/bryan31/openSource/LiteFlow-Jdk17`（对齐 **v2.16.1**；第 11 节 Rule-DB 运行时的行号按 v2.16.1 实测，其余章节行号约 v2.16.0）。
 >
-> ⚠️ **关于行号**：下方 `path:line` 已**逐条校准至当前源码**（约 v2.16.0），但仍会随版本/commit 漂移。**类名、方法名、继承关系、调用链、算子→类映射表稳定可信，可直接依赖**；若你使用的版本不同，跳转到某行看代码前请**先用 `scripts/source-lookup.sh grep <符号名>` 按符号定位**，勿把行号当唯一锚点。
+> ⚠️ **关于行号**：下方 `path:line` 已**逐条校准至当前源码**，但仍会随版本/commit 漂移。**类名、方法名、继承关系、调用链、算子→类映射表稳定可信，可直接依赖**；若你使用的版本不同，跳转到某行看代码前请**先用 `scripts/source-lookup.sh grep <符号名>` 按符号定位**，勿把行号当唯一锚点。
 
 # LiteFlow 源码细节地图（code-internals）
 
@@ -388,6 +388,8 @@ public void execute() throws Exception {
 
 > `rollback` 是否生效取决于构造时的反射探测：`NodeComponent` 构造器尝试 `clazz.getDeclaredMethod("rollback")`，找到就 `setRollback(true)`（`NodeComponent.java:84-92`）。`FlowExecutor` 异常时只回滚标记为 rollback 的组件。
 
+> 补充（v2.16.1）：除上述组件级钩子外，框架级生命周期新增 **`PostProcessNodeExecuteLifeCycle`** 接口（`liteflow-core/.../lifecycle/PostProcessNodeExecuteLifeCycle.java`），调用点同样在 `NodeComponent.execute()` 内——before 钩子在主逻辑执行前统一回调（`NodeComponent.java:119-127`，回调语句在 `:122`，钩子自身抛错只记日志）；after 钩子在 `finally` 块中回调，携带耗时 `timeSpent` 与异常引用（成功为 `null`）（`:184-188`，回调语句在 `:187`）。`LifeCycleHolder` 为其新增独立列表与分发分支（`lifecycle/LifeCycleHolder.java:25`、`:39-41`，getter 在 `:64-66`）。接口用法详见 [lifecycle.md](./lifecycle.md)。
+
 ---
 
 ## 7. EL 算子 → Operator 实现类映射
@@ -560,6 +562,60 @@ liteflow.retry-count=0
 ```
 
 > `slotSize` 经 `DataBus.init()` 读入（`DataBus.java:66`）；`parseMode` 在构造器分支判断（`FlowExecutor.java:87`）；`whenMaxWaitTime` 等用于 `WhenCondition` 的 `maxWaitTime/maxWaitTimeUnit` 字段（`WhenCondition.java`）；`fastLoad` 决定 `FlowBus` 集合类型（`FlowBus.java:79`）；`enableMonitorFile` 决定是否启动 `MonitorFile`（`FlowExecutor.java:228`）。
+
+---
+
+## 11. Rule-DB 运行时（v2.16.1）
+
+> 本节行号对齐 **v2.16.1** 源码；`com.yomahub.liteflow.repository` 包整体为该版本新增（各类 javadoc 均标 `@since 2.16.1`）。
+
+v2.16.1 引入 **Rule-DB 模式**：规则（chain EL / 脚本源码）存放在数据库等外部存储，core 通过仓储 SPI 拉取，替代本地文件等 `rule-source` 方式。两者**互斥**——`FlowExecutor.init` 检测到 rule-db 激活（classpath 存在 `RuleRepository` 实现且未显式关闭）时，若同时配置了 `ruleSource` 直接抛 `ConfigErrorException`，否则转入 rule-db 初始化并跳过常规解析（`liteflow-core/.../core/FlowExecutor.java:124-131`）。
+
+### 11.1 包结构：`com.yomahub.liteflow.repository`
+
+| 分组 | 类 | 职责 |
+| --- | --- | --- |
+| 仓储 SPI | `RuleRepository`（`repository/RuleRepository.java:16`） | 后端中立的权威读取接口：`fetchManifest()`（全量清单，仅 id+version+md5，不含内容）/ `fetchChain` / `fetchScript` |
+| Provider | `RuleDbProvider` / `RuleDbProviderHolder` | provider 抽象（暴露 `repository()` / `changeSource()` / `type()`）与发现、持有 |
+| 运行时核心 | `RuleDbRuntime`（`repository/RuleDbRuntime.java:54`） | 常驻版本戳索引 + 懒回源；`snapshot()`（`:953`）返回运行时快照（各状态计数 / 失败目标 / 变更源健康度） |
+| 变更同步 | `RuleDbSyncManager`（`repository/RuleDbSyncManager.java:28`） | 变更投递串行化 + 周期 manifest 对账（`startReconcileScheduler` 在 `:127`，默认 60 秒见 `:131-133`） |
+| 有界缓存 | `RuleDbCache`（`repository/RuleDbCache.java:26`） | 基于 Caffeine 的有界缓存（容量按 chain 条数，默认 500）；淘汰 chain 时其引用脚本的计数 -1，归零则卸载脚本 |
+| 变更通道 | `RuleChangeSource` / `ManualPollingChangeSource` / `RuleChangeListener` / `ChangeSourceHealth` | 变更订阅 / 手动轮询抽象与回调；健康度四态 `STARTING/UP/DEGRADED/DOWN`（`ChangeSourceHealth.java:6-11`） |
+| 目标状态机 | `runtime/RuleTargetState` / `runtime/RuleTargetStatus` | 每个 chain/script 的目标态：`SHADOW/READY/STALE/LOADING/FAILED/DELETED`（`runtime/RuleTargetStatus.java:4-12`） |
+| 候选装载 | `runtime/ChainCandidateLoader` / `runtime/ScriptCandidateLoader` | 在总线之外构建候选，编译成功才安装（install），失败不污染在役版本 |
+| 值对象 | `vo/ChainRecord` / `ScriptRecord` / `ChainMeta` / `ScriptMeta` / `RuleManifest` / `ChangeRecord` / `RuleDbRuntimeSnapshot` | 规则记录 / 元数据 / 清单 / 变更记录 / 快照 |
+
+配置挂在 `LiteflowConfig.ruleDb`（字段在 `property/LiteflowConfig.java:126`，getter 在 `:536`）：`RuleDbConfig` 聚合 `RuleDbCacheConfig`（容量 / 预加载）/ `RuleDbSyncConfig`（对账间隔、`fetch-retry-times`）/ `RuleDbSqlConfig` / `RuleDbRedisConfig` / `RuleDbZkConfig` / `RuleDbEtcdConfig`。
+
+### 11.2 启动：拉 manifest + 注册影子
+
+`FlowExecutor.init` 的 rule-db 分支调用 `RuleDbRuntime.init()`（`RuleDbRuntime.java:169-218`）：
+
+1. 先 `RuleDbSyncManager.open(provider)` 打开变更源（`:181`）——拉快照期间到达的变更事件会被缓冲，等基线确定后回放；
+2. `fetchManifest()` 拉全量清单（`:183`）并校验；
+3. 按清单注册 **chain 影子**与 **script 影子**（`:188-198`）——只有元数据（id/version/md5/type/language），无 EL / 脚本正文，`isCompiled=false`；
+4. 初始化有界缓存（`:201-207`），以 manifest 的 `latestSeq` 为基线激活变更源（`:210`），启动周期对账（`:211`），按配置预加载（`:212`）；
+5. 任一步失败：`stop` + 清理运行时状态后原样抛出（`:213-217`）——**启动即报错**，不带病运行。
+
+### 11.3 执行热路径：本地命中 + 懒回源
+
+`FlowBus.getChain(chainId)` 是纯本地查找（见第 2 节），已编译的 chain 直接执行——**热路径零远程调用**。只有影子 / 失效的 chain 才回源：
+
+- `Chain.execute` 先走 `ensureCompiled()`（调用点在 `Chain.java:132`，方法体 `:213-235`）：若 `RuleDbRuntime.isChainStale(chainId)` 为 true（已被失效），或"未编译且为 rule-db 管理"（影子），直接 `buildUnCompileChain` 回源（`:214-218`）；其余情况走双检锁（`synchronized(this)` 双检在 `:224-231`），且 rule-db 的回源编译刻意放到 **monitor 之外**执行（`:232-234`），避免长时持锁阻塞并发执行。
+- 回源钩子：`LiteFlowChainELBuilder.buildUnCompileChain` 编译前调 `RuleDbRuntime.ensureChainLoaded(chainId)`（`RuleDbRuntime.java:382`）按 id 拉 EL 正文填入 chain；拉取按 `fetch-retry-times` 重试（默认 3 次，`retryTimes()` 在 `:758-762`，`fetchChainWithRetry` 在 `:702`）。
+- 脚本同理：`FlowBus` 编译脚本节点时，rule-db 管理的节点先 `RuleDbRuntime.ensureScriptLoaded(node)` 拉脚本源码（`FlowBus.java:281-282`，钩子本体在 `RuleDbRuntime.java:439`）。
+- 编译成功后写缓存并登记脚本引用计数（`recordChainCache`，`RuleDbRuntime.java:821-832`）。
+
+### 11.4 一致性：失效驱动 + copy-on-write
+
+- 变更经 `RuleChangeSource` 到达 → `RuleDbSyncManager.applyChanges`（`:196`）按 seq 排序并做连续性校验（`:228-229`）；发现 seq 缺口（gap）则放弃增量、改为触发全量 manifest 对账；
+- 变更只把对应 `RuleTargetState` 置为 `STALE`——**置失效，不就地替换**；下次执行经 `ensureCompiled` 懒回源拿新版本；
+- 进行中的执行不受影响：`Chain.execute` 执行前已把 `conditionList` 引用拷到局部变量（见 9.3 节），持旧引用跑完，即 copy-on-write；
+- 周期对账兜底（默认 60 秒，`RuleDbSyncManager.java:131-137`），并汇总变更源健康度（`changeSourceHealth()` 在 `:374`）。
+
+### 11.5 `ChainLoadException` vs `ChainNotFoundException`
+
+`ChainLoadException`（`exception/ChainLoadException.java:9`，`@since 2.16.1`）表示 **Rule-DB 模式下回源加载失败**——按 javadoc 的界定是"规则存在但取不回来"（重试耗尽、加载期间被变更 / 删除等均属此类）；rule-db 模式下"仓储中不存在或已停用"也归入它（`RuleDbRuntime.java:396-398`）。而 `ChainNotFoundException` 是常规模式下 `chainMap` 里根本没有该 chain。排查方向：前者看存储连通性与对账日志，后者看规则是否注册。
 
 ---
 
