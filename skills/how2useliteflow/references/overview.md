@@ -28,7 +28,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
                                         │  内部是一棵逻辑树
                                         ▼
                               Condition 树（THEN/WHEN/IF/
-                                  SWITCH/LOOP 等编排算子）
+                                SWITCH/FOR/WHILE 等编排算子）
                                         │  叶子节点
                                         ▼
                               NodeComponent（业务组件）
@@ -37,7 +37,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 
 - **FlowExecutor**：入口执行器，负责解析规则、注册组件、装配元信息，并触发链路执行（大部分解析装配在启动期完成）。
 - **Chain**：一条编排好的业务链，是规则在运行期的载体。
-- **Condition 树**：Chain 内部的逻辑骨架，由编排算子（`THEN` 串行 / `WHEN` 并行 / `IF` 选择 / `SWITCH` / `FOR`·`LOOP` 循环等）递归嵌套而成。
+- **Condition 树**：Chain 内部的逻辑骨架，由编排算子（`THEN` 串行 / `WHEN` 并行 / `IF` 选择 / `SWITCH` / `FOR`/`WHILE`/`ITERATOR` 循环等）递归嵌套而成。
 - **NodeComponent**：叶子节点，即一个个业务组件；运行时**上下文(Context)在组件间流转**，组件只读写上下文、互不直接依赖。
 
 > 上述类名（`FlowExecutor` / `Chain` / `Condition` / `NodeComponent`）已交叉验证存在于 `liteflow-core`。具体 API、注解、签名以源码与官方文档为准。
@@ -49,18 +49,18 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 | 模块 | 职责 |
 | --- | --- |
 | **liteflow-core** | 框架内核：规则解析、组件体系（`NodeComponent` 等）、编排引擎、上下文机制等核心能力，所有场景都依赖它。 |
-| **liteflow-el-builder** | EL 表达式构建器，用于用 Java 代码**编程式拼装编排表达式**（`ELBus.then(...)` / `when(...)` / `if(...)` 等 Wrapper，对应 `THEN`/`WHEN`/`IF`/`SWITCH`/`LOOP` 算子）。 |
+| **liteflow-el-builder** | EL 表达式构建器，用于用 Java 代码**编程式拼装编排表达式**（`ELBus.then(...)` / `when(...)` / `ifOpt(...)` / `switchOpt(...)` 等 Wrapper，循环为 `forOpt(...)` / `whileOpt(...)` / `iteratorOpt(...)`，对应 `THEN`/`WHEN`/`IF`/`SWITCH`/`FOR`/`WHILE`/`ITERATOR` 算子；全量入口见 `references/dynamic-build.md`）。 |
 | **liteflow-script-plugin** | 脚本语言插件聚合，含 11 个子模块（见下）。 |
 | **liteflow-rule-plugin** | 规则持久化插件聚合，含 6 个子模块（见下）。 |
-| **liteflow-rule-db** | **v2.16.1 新增**：统一规则数据库聚合模块，规则/脚本以存储为权威源，含 sql / redis / zk / etcd 4 个插件与统一发布 API，与 `rule-source` 模式互斥（见 `references/rule-db.md`）。 |
+| **liteflow-rule-db** | **v2.16.1 新增**：统一规则数据库聚合模块，规则/脚本以存储为权威源，含 sql / postgresql / mongodb / redis / zk / etcd / nacos 7 个插件与统一发布 API，与 `rule-source` 模式互斥（见 `references/rule-db.md`）。 |
 | **liteflow-spring** | 纯 Spring（非 SpringBoot）场景的集成支持。 |
 | **liteflow-spring-boot-starter** | SpringBoot 2.X / 3.X 场景的官方 starter。 |
 | **liteflow-spring-boot4-starter** | SpringBoot 4.X 场景的专用 starter（API 差异较大，**勿与上面那个混用**）。 |
 | **liteflow-solon-plugin** | 国产 Solon 应用框架的集成支持（非 Spring 系生态的另一选择）。 |
-| **liteflow-react-agent** | **v2.16.0 全新特性**：把完整 ReAct Agent 封装成 LiteFlow 组件（"一个组件 = 一个 Agent"），对接主流大模型，自带多轮记忆、Skills、工作空间文件工具、流式输出。基于 agentscope-java，**运行时需 JDK 21+**。 |
+| **liteflow-react-agent** | **v2.16.0 全新特性**：把完整 ReAct Agent 封装成 LiteFlow 组件（“一个组件 = 一个 Agent”），对接主流大模型，自带多轮记忆、Skills、工作空间文件工具、流式输出。当前模块以 **JDK 17** 编译。 |
 | **liteflow-testcase-el** | EL 编排相关的测试用例集合（2000+ 测试用例的覆盖来源之一）。 |
 
-> 另有 `liteflow-benchmark`（基准压测）辅助模块，一般业务接入不直接依赖（以源码为准）。v2.16.1 起新增两个模块：**`liteflow-rule-db`**（统一规则数据库聚合模块，含 sql / redis / zk / etcd 4 个插件 + publisher 统一发布 API，见 `references/rule-db.md`）与 **`liteflow-metrics`**（指标监控模块，基于 Micrometer，已是 `liteflow-spring-boot-starter` / `liteflow-spring-boot4-starter` 的传递依赖，用 starter 无需单独引入，见 `references/metrics.md`）。
+> 另有 `liteflow-benchmark`（基准压测）辅助模块，一般业务接入不直接依赖（以源码为准）。v2.16.1 起新增两个模块：**`liteflow-rule-db`**（统一规则数据库聚合模块，含 sql / postgresql / mongodb / redis / zk / etcd / nacos 7 个插件 + publisher 统一发布 API，见 `references/rule-db.md`）与 **`liteflow-metrics`**（指标监控模块，基于 Micrometer，已是 `liteflow-spring-boot-starter` / `liteflow-spring-boot4-starter` 的传递依赖，用 starter 无需单独引入，见 `references/metrics.md`）。
 
 ### liteflow-script-plugin 的 11 个子模块
 
@@ -143,7 +143,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 
 - **SpringBoot 4.X 必须用 `liteflow-spring-boot4-starter`**，两个 starter 不可混用。
 - **SpringBoot 3.X / Spring 6.X 起需 JDK 17+**（这是 Spring 自身的 JDK 要求，不是 LiteFlow 单独限制）。
-- **`liteflow-react-agent`（AI Agent）运行时需 JDK 21+**，比框架主体的 JDK 8 基线更高。
+- **`liteflow-react-agent`（AI Agent）要求 JDK 17+**；还需同时满足 agentscope-java 与具体模型 SDK 的运行要求。
 - v2.16.X（≥ v2.15.0）在 JDK 9+ 下**无需**再加 `--add-opens` JVM 参数（老版本的旧坑已解决）。
 - 脚本语言官方明确支持的是 8 种；仓库里的 `graaljs` / `javax` / `javax-pro` 子模块官方文档未单独说明，使用前以源码/官方文档为准。
 - LiteFlow **不是审批流引擎**，不要拿它做角色任务流转。

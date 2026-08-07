@@ -489,6 +489,8 @@ public class DCmp extends NodeComponent {
 
 ## 简单监控
 
+> 提示：本章简单监控只往日志里打印**组件平均耗时**。如需 QPS、错误率、在途执行数、分位耗时，并接入 Prometheus / Grafana，见 [metrics.md](./metrics.md)（v2.16.1 新增 `liteflow-metrics`，与本章 `MonitorBus` 相互独立、可同时开启）。
+
 内置轻量监控，目前只统计一个指标：**每个组件的平均耗时**。默认每 5 分钟打印一次，按耗时倒序排列。
 
 ```properties

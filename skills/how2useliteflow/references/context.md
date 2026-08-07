@@ -310,6 +310,11 @@ this.setContextValue("memberContext.member.setDesc", "xxxx");
 
 > 多上下文时 `getContextValue` / `setContextValue` 均无需关心数据来自哪个上下文，框架自动匹配；只有同名歧义时才需加前缀。
 
+> **静默失败陷阱**：这两个 API 的表达式解析失败时**不抛异常、不打日志**，需特别留意（源码 `LiteflowContextRegexMatcher` 的 `searchContext` / `searchAndSetContext` 各解析分支均为 `catch (Exception ignore){}`）：
+> - `getContextValue` 表达式写错（属性名拼错、该属性在所有上下文中都不存在、点号路径中间对象为 null）时不报错，而是**静默返回 null**，与"该字段值本身就是 null"无法区分；
+> - `setContextValue` 的 setter 路径解析不到（方法名写错、参数个数/类型不匹配、点号路径中间对象为 null）时异常被框架吞掉，**静默不生效、无任何日志**；
+> - 建议：对 `getContextValue` 返回值**判空**后再使用；`setContextValue` 设值后**立即读回验证**；排查时优先检查表达式拼写与上下文前缀（默认为类名首字母小写，用了 `@ContextBean` 则为别名）是否正确。
+
 ---
 
 ## 速查表

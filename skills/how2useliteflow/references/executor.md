@@ -111,14 +111,20 @@ LiteflowResponse response = flowExecutor.execute2Resp(
 简单表达式无需写入规则文件，可直接把 EL 字符串作为第一参数传入：
 
 ```java
+// 自定义上下文必须走四参重载：第三参 requestId 传 null，由框架自动生成
 LiteflowResponse response = flowExecutor.execute2RespWithEL(
         "THEN(a, b, c)",
         requestData,
+        null,
         CustomContext.class
 );
 ```
 
-`execute2RespWithEL` 与 `execute2Resp` 用法一致，仅第一参数由 `chainId` 换成规则 EL。
+`execute2RespWithEL` 与 `execute2Resp` 用法一致，仅第一参数由 `chainId` 换成规则 EL。无自定义上下文需求时可直接用两参形式 `execute2RespWithEL(elStr, param)`（上下文默认 `DefaultContext`）。
+
+:::warning 签名坑：三参形式不存在，照抄官方示例无法编译
+官方文档（`050.直接执行EL规则.md`）示例写作 `execute2RespWithEL("THEN(a, b, c)", requestData, CustomContext.class)`，这个**三参签名在源码中不存在**。`execute2RespWithEL` 自引入（v2.15.0，commit `0da24f4b0`）起仅有 4 个公开重载（`FlowExecutor.java:302-341`）：`(String)`、`(String, Object)`、`(String, Object, String, Class<?>...)`、`(String, Object, String, Object...)`——第三参固定为 `String requestId`，传入 `XxxContext.class`（`Class` 类型）无任何重载可匹配，Java 重载解析无候选方法，**编译报错**。自定义上下文必须走带 `requestId` 的四参重载，`requestId` 传 `null` 即由框架自动生成。
+:::
 
 :::tip 实现机制
 LiteFlow 不会每次请求都新建 chain。若多次请求的表达式 **MD5 指纹相同**，只会构建一次 chain 并由框架托管，开发者无需关心。
@@ -272,9 +278,9 @@ public class BizService {
     }
 
     public void runEl(OrderRequest req) {
-        // 直接执行一段 EL，无需规则文件（v2.15.0+）
+        // 直接执行一段 EL，无需规则文件（v2.15.0+）；requestId 传 null 由框架生成
         LiteflowResponse resp = flowExecutor.execute2RespWithEL(
-                "THEN(a, b, c)", req, OrderContext.class);
+                "THEN(a, b, c)", req, null, OrderContext.class);
         if (!resp.isSuccess()) {
             log.error("EL 执行失败", resp.getCause());
         }

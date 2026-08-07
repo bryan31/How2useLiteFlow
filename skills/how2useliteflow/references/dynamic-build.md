@@ -87,7 +87,7 @@ LiteFlowNodeBuilder.createScriptNode()
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-el-builder</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -124,8 +124,10 @@ String el2 = ELBus.then(ELBus.when("a", "b").any(true), "c")
 
 ### 在节点层挂子关键字（tag / bind / data）：`element` vs `node`
 
-- `ELBus.element("a")` → 普通 `CommonNodeELWrapper`，可挂 `tag`/`bind`/`data` 等。
-- `ELBus.node("a")` → `NodeELWrapper`，额外给节点套上 `node(...)` 包装，作用是加载时**不检查、不降级**（参见"组件名包装/组件降级"）。
+- `ELBus.element("a")` → 普通 `CommonNodeELWrapper`，可挂 `tag`/`bind`/`data` 等；生成的是裸组件名 `a`，加载时会校验节点存在、且组件名须符合命名规范。
+- `ELBus.node("a")` → `NodeELWrapper`（继承 `CommonNodeELWrapper`，可挂的子关键字与 `element` 相同），额外给节点套上 `node(...)` 包装：加载时**不校验节点是否存在、也不校验命名规范**——节点不存在时生成 `FallbackNode` 代理而非报错（见 `NodeOperator.build`）。节点存在且命名合规时，`node("a")` 与裸写 `a` 等价。它的两个真实用途：
+  1. **允许任意组件名**：数字开头、含运算符等违反命名规范的组件名（如 `node("88Cmp")`、`node("cmp-11")`）必须用 `node(...)` 包装（参见 el-rules 的"组件名包装"）。
+  2. **组件降级的前提**：开启 `liteflow.fallback-cmp-enable=true` 后，只有被 `node(...)` 包装的缺失组件才会在运行期路由到 `@FallbackCmp` 降级组件；不加 `node` 的缺失组件在加载期直接报错，**不会**降级（参见 advanced 的"组件降级"）。
 
 ```java
 // element：THEN(a.tag("t1"), b.bind("k1","v1"))
@@ -145,18 +147,22 @@ String el4 = ELBus.then(
 
 | EL | 工厂方法 | 后续方法（节选） |
 | --- | --- | --- |
-| 串行 THEN | `ELBus.then(...)` | `pre(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 并行 WHEN | `ELBus.when(...)` | `any`、`ignoreError`、`customThreadExecutor`、`must`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 选择 SWITCH | `ELBus.switchOpt(...)` | `to(...)`、`defaultOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 条件 IF | `ELBus.ifOpt(cond, trueEl[, falseEl])` | `elseOpt(...)`、`elIfOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 循环 | `ELBus.forOpt(...)`、`ELBus.whileOpt(...)`、`ELBus.iteratorOpt(...)` | `doOpt(...)`、`breakOpt(...)`（迭代器不支持 break）、`parallel`、`tag`、`id`、`maxWaitSeconds` |
-| 捕获异常 CATCH | `ELBus.catchException(...)` | `doOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 与 AND | `ELBus.and(...)` | `tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 或 OR | `ELBus.or(...)` | `tag`、`id`、`maxWaitSeconds` |
-| 非 NOT | `ELBus.not(...)` | `tag`、`id`、`maxWaitSeconds`、`data`、`bind` |
-| 单节点 | `ELBus.node(...)` / `ELBus.element(...)` | `tag`、`data`、`maxWaitSeconds`、`bind` |
+| 串行 THEN | `ELBus.then(...)` | `pre(...)`、`finallyOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
+| 并行 WHEN | `ELBus.when(...)` | `any`、`percentage(...)`、`ignoreError`、`customThreadExecutor`、`must`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
+| 选择 SWITCH | `ELBus.switchOpt(...)` | `to(...)`、`defaultOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
+| 条件 IF | `ELBus.ifOpt(cond, trueEl[, falseEl])` | `elseOpt(...)`、`elIfOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
+| 循环 | `ELBus.forOpt(...)`、`ELBus.whileOpt(...)`、`ELBus.iteratorOpt(...)` | `doOpt(...)`、`breakOpt(...)`（迭代器不支持 break）、`parallel`、`tag`、`id`、`maxWaitSeconds`、`retry(...)` |
+| 捕获异常 CATCH | `ELBus.catchException(...)` | `doOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
+| 与 AND | `ELBus.and(...)` | 仅 `tag`、`id`（另有 `and(...)` 追加子表达式） |
+| 或 OR | `ELBus.or(...)` | 仅 `tag`、`id`（另有 `or(...)` 追加子表达式） |
+| 非 NOT | `ELBus.not(...)` | 仅 `tag`、`id` |
+| 单节点 | `ELBus.node(...)` / `ELBus.element(...)` | `tag`、`data`、`maxWaitSeconds`、`bind`、`retry(...)` |
 
 > 补充（源码中存在但官方 EL 文档未列出）：`ELBus` 还提供 `ser(...)` / `par(...)` 入口，分别返回 `SerELWrapper` / `ParELWrapper`（SER、PAR 是与 THEN、WHEN 并列的独立编排关键字，均直接继承 `ELWrapper`，**并非** then/when 的别名）。
+
+> 注意（以源码为准，官方文档同名表格此处有误）：`AndELWrapper`/`OrELWrapper`/`NotELWrapper` 源码中只把 `tag`/`id` 覆写为 public；`data`/`bind`/`maxWaitSeconds`/`retry` 在父类 `ELWrapper` 上是 `protected` 且这三个子类未覆写，业务代码里对 AND/OR/NOT 链式调用这些方法会**直接编译报错**（这三个类的 Javadoc 虽写着"支持设置 id tag data maxWaitSeconds 属性"，实测并未提供对应 public 方法）。要给 AND/OR/NOT 表达式挂这些子关键字，只能手写 EL 文本。
+>
+> 版本：`retry(...)` 对应 EL 的 `.retry(3)` / `.retry(3, "异常类全限定名")`，v2.12.0+；`percentage(double)` 仅 WHEN 支持，v2.15.0+，取值 [0,1]（0 等价于 `any(true)`，1 等价于不加）。
 
 ### 树形输出便于校验
 
@@ -231,7 +237,7 @@ LiteFlowChainELBuilder.createChain()
 | 捕获异常 | `CATCH(t).DO(a)` | `ELBus.catchException("t").doOpt("a")` |
 | 节点打 tag | `a.tag("t1")` | `ELBus.element("a").tag("t1")` |
 
-> 留白：上表为最简形态；`pre`/`finally`（前/后置组件，挂在 `then` 上）、`elIfOpt`/`elseOpt`（IF 的 else-if/else）、`breakOpt`/`parallel`（循环的 break 与并行）、`must`/`ignoreError`/`customThreadExecutor`（WHEN 的高级控制）、`defaultOpt`（SWITCH 默认分支）等高级子关键字均以同名方法挂在对应 wrapper 上，组合方式与 EL 文本完全一致。
+> 留白：上表为最简形态；`pre(...)`/`finallyOpt(...)`（前/后置组件，挂在 `then`/`ser` 上）、`elIfOpt(...)`/`elseOpt(...)`（IF 的 else-if/else）、`breakOpt(...)`/`parallel(...)`（循环的 break 与并行）、`must(...)`/`ignoreError(...)`/`customThreadExecutor(...)`（WHEN 的高级控制）、`defaultOpt(...)`（SWITCH 默认分支）等高级子关键字均以同名方法挂在对应 wrapper 上，组合方式与 EL 文本完全一致。唯一例外：EL 关键字 `finally` 是 Java 保留字，对应方法名只能叫 `finallyOpt(...)`，照写 `.finally(...)` 会编译失败。
 
 ## 编程式完整示例（注册 Node + 拼 EL + 注册 Chain）
 

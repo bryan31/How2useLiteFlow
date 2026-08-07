@@ -81,7 +81,7 @@ liteflow.rule-source=config/flow.xml
 :::tip v2.16.1 起：Rule-DB 模式（规则存数据库，推荐生产使用）
 上例 `rule-source` 是本地规则文件方式。v2.16.1 起也可改用 **Rule-DB 统一规则数据库**模式——规则/脚本以数据库为权威源，支持多实例热更新与统一发布 API，更适合生产环境：
 
-- 依赖：`liteflow-rule-db-sql` / `liteflow-rule-db-redis` / `liteflow-rule-db-zk` / `liteflow-rule-db-etcd` 四选一；
+- 依赖：`liteflow-rule-db-sql` / `-postgresql` / `-mongodb` / `-redis` / `-zk` / `-etcd` / `-nacos` 七选一；
 - 配置：改用 `liteflow.rule-db.*`，此时**不再配置 `rule-source`**（两者互斥、同配启动报错）。
 
 完整接入步骤与各后端配置见 `references/rule-db.md`。
@@ -192,12 +192,12 @@ public class YourClass {
 </dependency>
 ```
 
-- **组件定义差异（重要）**：注解用 **Solon 提供的** `@Component`，而不是 LiteFlow 的 `@LiteflowComponent`。
+- **组件定义差异**：继承式组件既可用 Solon 的 `@Component("id")`，也可用 LiteFlow 的 `@LiteflowComponent("id")`；当前源码与测试均支持。优先用 `@LiteflowComponent` 可与 Spring 写法保持一致。
 
 ```java
-import org.noear.solon.annotation.Component;
+import com.yomahub.liteflow.annotation.LiteflowComponent;
 
-@Component("a")
+@LiteflowComponent("a")
 public class ACmp extends NodeComponent {
     @Override
     public void process() { /* ... */ }
@@ -309,7 +309,7 @@ LiteflowResponse response = flowExecutor.execute2Resp("chain1", "arg", DefaultCo
 |---|---|---|---|---|
 | **artifactId** | `liteflow-spring-boot-starter`（4.X 用 `liteflow-spring-boot4-starter`） | `liteflow-spring` | `liteflow-solon-plugin` | `liteflow-core` |
 | **groupId / version** | `com.yomahub` / `2.16.1` | 同左 | 同左 | 同左 |
-| **组件注解** | `@LiteflowComponent("id")` | `@LiteflowComponent("id")` | Solon 的 `@Component("id")` | 无注解，规则文件 `<node class="...">` 注册 |
+| **组件注解** | `@LiteflowComponent("id")` | `@LiteflowComponent("id")` | `@LiteflowComponent("id")` 或 Solon 的 `@Component("id")` | 无注解，规则文件 `<node class="...">` 注册 |
 | **配置方式** | `application.properties` 配 `liteflow.rule-source` | Spring XML 声明 `LiteflowConfig` / `FlowExecutor` 等 Bean | 同 SpringBoot（properties/yml） | 代码构造 `LiteflowConfig` + `FlowExecutorHolder.loadInstance` |
 | **获取 FlowExecutor** | `@Resource` 注入 | `@Resource` 注入 | `@Inject` 注入 | `FlowExecutorHolder.loadInstance(config)` |
 | **执行 API** | `flowExecutor.execute2Resp(chainId, arg, DefaultContext.class)` | 同左 | 同左 | 同左 |

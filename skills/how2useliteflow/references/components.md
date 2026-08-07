@@ -79,6 +79,11 @@ public class ACmp extends NodeSwitchComponent {
 | `"b:td"` | 选择 `targetId=b` 且标签=`td` 的节点 |
 | `"b:"` | 选择第一个 `targetId=b` 的节点 |
 | `":"` | 选择第一个节点 |
+| `"b:x"` | **报错**（反例：没有 `targetId=b` 且标签=`x` 的节点） |
+| `"x"` | **报错**（反例：没有 `targetId=x` 的节点） |
+| `"::"` | **报错**（反例：找不到标签为 `:` 的节点） |
+
+**返回值无命中时的运行期行为**（源码 `SwitchCondition.java:70-90`）：`processSwitch` 返回值未命中任何目标时，若 EL 配了 `SWITCH(x).TO(a, b, c).DEFAULT(y)`（`DEFAULT` 关键字 v2.9.5+，里面也可以是表达式）则走 `DEFAULT` 分支；连 `DEFAULT` 也没配则抛 `NoSwitchTargetNodeException`（`com.yomahub.liteflow.exception` 包，报错信息形如 `[requestId]:no target node find for the component[xxx],target str is [yyy]`）。该异常被 Chain 层捕获后整个流程失败（`response.isSuccess()=false`），因此返回值集合不确定时建议配 `DEFAULT` 兜底。
 
 - 表达式也可用 `.tag("w1")`，返回 `tag:w1` 或 `:w1` 即可命中（v2.10.2+）。
 - 链路同样支持 tag：`SWITCH(a).to(b, sub.tag("w1"))`，返回 `sub` 或 `tag:w1` 都能命中（v2.10.3+）。

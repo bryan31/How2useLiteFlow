@@ -35,7 +35,8 @@ management.endpoints.web.exposure.include=liteflow,prometheus,metrics
 
 - Actuator 两个维度独立：**enabled**（端点存在，除 shutdown 默认都启用）与 **exposed**（对 HTTP 开放，web 默认只暴露 `health`）。不配 `exposure.include`：指标照常采集，但 `/actuator/liteflow`、`/actuator/prometheus`、`/actuator/metrics` 访问 **404**。
 - 别图省事用 `include=*`（生产会把 env/heapdump 等敏感端点开出去）。
-- 端口：默认随应用主端口（`server.port`）；配了 `management.server.port` 则走独立管理端口。开关 `liteflow.metrics.enabled` 只管采集，与端口无关。
+- 端口：默认随应用主端口（`server.port`）；配了 `management.server.port` 则走独立管理端口。开关 `liteflow.metrics.enabled` 与端口无关——但它**不只管采集**，设为 `false` 会让 `/actuator/liteflow` 端点一并消失（见 §5）。
+- 若组织级配置了 `management.endpoints.enabled-by-default=false`（端点默认全部禁用），只加 `exposure.include` 仍会 404，需再显式打开：`management.endpoint.liteflow.enabled=true`（`prometheus`/`metrics` 端点同理）。
 
 三个端点定位：
 
@@ -91,7 +92,12 @@ management.endpoints.web.exposure.include=liteflow,prometheus,metrics
 | `GET /actuator/liteflow/nodes/{nodeId}` | 单 node 详情 + 指标快照 + `inChains`（包含它的 chain 列表） |
 | `GET /actuator/liteflow/ruledb` | Rule-DB 运行时快照（见 `references/rule-db.md` §12） |
 
-指标快照字段：`count` / `failed` / `errorRate`(=failed/count) / `meanMs` / `maxMs`。快照是"尽力而为"：`metrics.enabled=false` 或无 MeterRegistry 时仍返回结构信息，只是省略 `metrics` 字段。
+指标快照字段：`count` / `failed` / `errorRate`(=failed/count) / `meanMs` / `maxMs`。快照是"尽力而为"的，但要分清两种"没指标"的场景：
+
+- **`liteflow.metrics.enabled=false`：整个端点消失（404）。** Boot2/3 与 Boot4 的 `LiteflowMetricsAutoConfiguration` 类级都挂 `@ConditionalOnProperty(prefix="liteflow.metrics", name="enabled", ...)`，而 `LiteflowMetaView` 与 `LiteflowEndpoint` 只在该配置类内注册——开关一关整个类不装配，端点 Bean 不存在，`/actuator/liteflow` 直接 404，**不是"仍返回结构信息"**。
+- **enabled 未关、但容器中没有 `MeterRegistry` Bean：端点仍在。** `LiteflowMetaView` 允许 null registry，此时仍返回结构信息，只是 `metrics` 快照字段为 null/省略。
+
+也就是说，想"临时关采集、但保留结构端点"目前**没有这样的组合**——关开关会连端点一起关。
 
 ## 6. 分位 / 直方图（Micrometer 标准配置，LiteFlow 不另立配置项）
 
@@ -129,6 +135,37 @@ histogram_quantile(0.95, sum by (le) (rate(liteflow_chain_executions_seconds_buc
 liteflow_slot_occupied / liteflow_slot_size
 # 在途执行数（LongTaskTimer 后缀是 _active_count / _duration_sum，不是 _count/_sum）
 liteflow_chain_active_seconds_active_count{chain="mChain"}
+```
+
+### 告警规则示例（Prometheus alerting rules）
+
+骨架固定为 `groups → rules → alert/expr/for/labels/annotations`，`expr` 直接复用上面的错误率 / 饱和度 PromQL。官方文档收录的两条现成规则：
+
+```yaml
+groups:
+  - name: liteflow
+    rules:
+      # chain 错误率 5 分钟内超过 5%
+      - alert: LiteflowChainHighErrorRate
+        expr: |
+          sum by (chain) (rate(liteflow_chain_executions_seconds_count{status="failed"}[5m]))
+            /
+          sum by (chain) (rate(liteflow_chain_executions_seconds_count[5m]))
+            > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LiteFlow chain {{ $labels.chain }} 错误率过高"
+
+      # slot 池占用超过 80%
+      - alert: LiteflowSlotSaturated
+        expr: liteflow_slot_occupied / liteflow_slot_size > 0.8
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LiteFlow slot 池饱和，可能并发吃紧或存在 slot 泄漏"
 ```
 
 ## 8. 非 Spring / Solon 环境

@@ -23,7 +23,7 @@ STAMP="$CACHE_DIR/version-check.stamp"
 RESULT="$CACHE_DIR/version-check.result"
 
 extract_version() {
-  sed -n 's/^version:[[:space:]]*"\{0,1\}\([^"]\{1,\}\)"\{0,1\}[[:space:]]*$/\1/p' | head -n 1
+  sed -n 's/^[[:space:]]*version:[[:space:]]*"\{0,1\}\([^"]\{1,\}\)"\{0,1\}[[:space:]]*$/\1/p' | head -n 1
 }
 
 # version_gt <a> <b>: true if a is a higher dotted-numeric version than b.

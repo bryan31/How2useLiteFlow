@@ -128,6 +128,7 @@ liteflow.when-thread-pool-isolate=true
     SWITCH(x).TO(a, b, c).DEFAULT(y);
 </chain>
 ```
+> **未配 DEFAULT 时的行为**：若选择组件返回值不命中任何子项，且 EL 也未配置 DEFAULT，则抛 `NoSwitchTargetNodeException`（`com.yomahub.liteflow.exception` 包，报错信息形如 `[requestId]:no target node find for the component[xxx],target str is [yyy]`），异常上抛使整个 chain 失败（`LiteflowResponse.isSuccess()`=false）。因此当返回值集合不确定时，建议配 DEFAULT 兜底（源码 `liteflow-core/.../flow/element/condition/SwitchCondition.java:70-90`：targetExecutor 为 null 时先取 `getDefaultExecutor()`，DEFAULT 也没有则抛 `NoSwitchTargetNodeException`）。
 
 ### 4.2 选择表达式子项：id 与 tag
 
@@ -358,7 +359,7 @@ IF(
 <chain name="chain3"> WHEN(Q, THEN(P, R)).id("w01"); </chain>
 ```
 
-### 9.2 使用子变量（let 形式）
+### 9.2 使用子变量
 
 在同一个 `<chain>` 内用 `变量名 = 表达式;` 定义子变量，再在主表达式中引用。**子变量定义语句必须以分号结尾**。
 

@@ -128,7 +128,7 @@ public class MyScriptInitLifeCycle implements PostProcessScriptEngineInitLifeCyc
 
 ### 1. `PostProcessFlowExecuteLifeCycle` —— FlowExecutor 执行前后
 
-每调用一次 `FlowExecutor.execute2xxx(...)` 触发一次。粒度是**整次流程调用**（无论内部嵌套多少子链路，只触发 1 次）。适合做整次请求的链路追踪起止、耗时统计、入参/出参审计。
+每调用一次 `FlowExecutor.execute2xxx(...)` 触发一次。粒度是**整次流程调用**（无论内部嵌套多少子链路，只触发 1 次）——此"1 次"结论**仅 `execute2xxx` 场景成立**；`executeRouteChain` 路由场景会放大为 N+M 组（见下文 [§三.4](#4-决策路由场景下的触发次数-executeroutechain)）。适合做整次请求的链路追踪起止、耗时统计、入参/出参审计。
 
 ```java
 import com.yomahub.liteflow.lifecycle.PostProcessFlowExecuteLifeCycle;
@@ -230,6 +230,22 @@ public class MyNodeExecuteLifeCycle implements PostProcessNodeExecuteLifeCycle {
 - **注册方式**：与其他生命周期相同——Spring/Solon 下声明为 Bean 即可被自动扫描；`LifeCycleHolder` 为其设有独立列表与分发分支（`liteflow-core/.../lifecycle/LifeCycleHolder.java:25`、`:39-41`，getter 在 `:64-66`）。非 Spring 场景用 `LifeCycleHolder.addLifeCycle(...)` 手动注册。
 - **典型实现**：liteflow-metrics 模块的 `NodeMetricsLifeCycle`（`liteflow-metrics/.../metrics/NodeMetricsLifeCycle.java:30`）就是基于它采集 node 级指标（执行次数/耗时/在途/错误），详见 [metrics.md](./metrics.md)。
 
+### 4. 决策路由场景下的触发次数（`executeRouteChain`）
+
+调用 `FlowExecutor.executeRouteChain(...)`（决策路由入口）时，钩子触发次数与 `execute2xxx` 不同，存在**放大效应**。一次路由调用内部：先对命名空间下**所有 N 个候选 route chain** 各做一次决策评估，再对**命中的 M 条 chain** 各执行一次 body——决策评估与 body 执行是各自独立的一次 `doExecute` 调用（`executeRouteChain` → `executeWithRoute` → `doExecuteWithRoute`，源码 `liteflow-core/.../core/FlowExecutor.java:536-537`、`:695`）：对每个候选 chain 调一次 `doExecute(..., ROUTE)`（`:727-728`）、对每条命中 chain 调一次 `doExecute(..., BODY)`（`:764-765`），共 N+M 次 `doExecute`。
+
+而 `PostProcessFlowExecuteLifeCycle` 的 before/after 钩子就内嵌在 `doExecute` 中（before `:580-584` 在 ROUTE/BODY 模式分派 `:618-621` 之前、after `:666-669` 在分派之后），故三类执行时钩子在路由场景下的触发次数为：
+
+| 钩子 | 路由场景触发组数 | 说明 |
+|---|---|---|
+| `PostProcessFlowExecuteLifeCycle` | **N + M 组** | 每次 `doExecute` 都触发；N 次决策评估 + M 次 body 执行各一组 |
+| `PostProcessChainExecuteLifeCycle` | **M 组** | 仅 body 执行走 `Chain.execute()`（`Chain.java:147-176`，触发链钩子）；决策评估走 `Chain.executeRoute()`（`Chain.java:182-202`）**不含链钩子**，故不触发 |
+| `PostProcessNodeExecuteLifeCycle` | 决策布尔组件 + body 内节点，逐个触发 | 决策评估执行的路由布尔组件同样是 `Node`，按 §三.3 规则每个都触发一组 |
+
+:::warning 路由场景下"整次流程只触发 1 次"不成立
+`executeRouteChain` 单次调用会使 `PostProcessFlowExecuteLifeCycle` 触发 **N+M 组**而非 1 组。做链路追踪 / 指标采集时，务必按 `chainId` 去重或显式感知该放大效应，避免重复计数。决策评估阶段（ROUTE）虽不触发链级钩子，但其 Flow 级钩子仍会触发。
+:::
+
 ---
 
 ## 四、从 `Slot` 能拿到什么
@@ -264,7 +280,7 @@ public class MyNodeExecuteLifeCycle implements PostProcessNodeExecuteLifeCycle {
 | `PostProcessChainBuildLifeCycle` | 启动 | 每个 `Chain` 构造前后（启动/热重载各 1 次） | `postProcessBeforeChainBuild(Chain)` / `postProcessAfterChainBuild(Chain)` | `Chain`（id、编排结构） |
 | `PostProcessNodeBuildLifeCycle` | 启动 | 每个 `Node` 构造前后（启动/热重载各 1 次） | `postProcessBeforeNodeBuild(Node)` / `postProcessAfterNodeBuild(Node)` | `Node`（id、类型、关联组件） |
 | `PostProcessScriptEngineInitLifeCycle` | 启动 | 每种脚本引擎初始化后 1 次（需引入脚本插件） | `postProcessAfterScriptEngineInit(Object engine)` | 脚本引擎对象（类型随语言变，可能为 `null`） |
-| `PostProcessFlowExecuteLifeCycle` | 执行 | 每次 `FlowExecutor` 调用前后各 1 次（整次流程仅 1 组） | `postProcessBeforeFlowExecute(String, Slot)` / `postProcessAfterFlowExecute(String, Slot)` | `chainId` + 完整 `Slot`（请求/响应/步骤/异常/上下文） |
+| `PostProcessFlowExecuteLifeCycle` | 执行 | 每次 `FlowExecutor` 调用前后各 1 次（整次流程仅 1 组；决策路由 `executeRouteChain` 为 N+M 组，见 §三.4） | `postProcessBeforeFlowExecute(String, Slot)` / `postProcessAfterFlowExecute(String, Slot)` | `chainId` + 完整 `Slot`（请求/响应/步骤/异常/上下文） |
 | `PostProcessChainExecuteLifeCycle` | 执行 | 每个 `Chain` 执行前后各 1 次（含子链，主链+子链各 1 组） | `postProcessBeforeChainExecute(String, Slot)` / `postProcessAfterChainExecute(String, Slot)` | `chainId` + 当前 `Slot`（含子链异常等） |
 | `PostProcessNodeExecuteLifeCycle`（v2.16.1 新增） | 执行 | 每个组件执行前后各 1 组（每次执行都触发，after 在 `finally` 中） | `postProcessBeforeNodeExecute(NodeComponent)` / `postProcessAfterNodeExecute(NodeComponent, long, Exception)` | `NodeComponent`（nodeId、type、refNode）+ 耗时 `timeSpent` + 异常 `e` |
 

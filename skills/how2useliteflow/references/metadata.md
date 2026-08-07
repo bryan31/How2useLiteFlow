@@ -37,7 +37,37 @@ List<Chain> affected = LiteflowMetaOperator.getChainsContainsNodeId("a");
 List<Node> nodesFromAny = LiteflowMetaOperator.getNodes(someCondition);
 ```
 
-### 2. 刷新与卸载类方法
+### 2. 节点实例 ID 查询（需开启 `liteflow.enable-node-instance-id=true`）
+
+当同一个 `nodeId` 在一条 Chain 中出现多次（例如 `THEN(a, b, a)` 中的 `a`），仅靠 nodeId 无法定位到具体某一次出现。开启 `liteflow.enable-node-instance-id=true` 后，每个 Node 会带一个在 Chain 内唯一的 **节点实例 ID（nodeInstanceId）**，可用下面 5 个方法精确定位（此 API 族官方"元数据操作器"文档未展开，以源码 `LiteflowMetaOperator.java` 为准）。
+
+| 方法签名 | 作用 |
+| --- | --- |
+| `List<Node> getNodes(String chainId, String nodeId)` | 取该 nodeId 在 Chain 中 **每一次出现** 的 Node 列表 |
+| `Node getNode(String chainId, String nodeInstanceId)` | 通过 nodeInstanceId 取唯一 Node |
+| `Node getNode(String chainId, String nodeId, int index)` | 通过 nodeId + 序号取 Node（index 从 0 开始） |
+| `int getNodeIndex(String chainId, String nodeInstanceId)` | 查 nodeInstanceId 在 Chain 中的位置（从 0 开始） |
+| `List<String> getNodeInstanceIds(String chainId, String nodeId)` | 取该 nodeId 的全部 instanceId |
+
+要点：
+- **必须开启 `liteflow.enable-node-instance-id=true`**（默认 `false`）。源码 javadoc 明确：只有开启该开关，Node 对象才会携带 instanceId，上述方法才有意义；未开启时调用结果无意义。
+- **core 自带默认实现，无需插件**：`DefaultNodeInstanceIdManageSpiImpl`（`@since 2.13.0`）由 `liteflow-core` 提供，通过 Java ServiceLoader 加载，找不到第三方 SPI 时自动兜底。其持久化方式是把每个 Chain 的 instanceId 列表写入本地 `.node_instance_id/<chainId>` 文件（基于 `user.dir`）。
+- 典型场景：同一 nodeId 在一条 Chain 中出现多次时，区分并定位到具体某一次节点（例如分别排查执行结果、定向操作单次节点）。
+
+```java
+// 假设 chain1 = THEN(a, b, a)，其中 a 出现了 2 次
+// 1. 取 a 的全部 instanceId（共 2 个）
+List<String> ids = LiteflowMetaOperator.getNodeInstanceIds("chain1", "a");
+
+// 2. 用 instanceId 反查 Node 和它在 Chain 中的位置
+Node node = LiteflowMetaOperator.getNode("chain1", ids.get(0));
+int pos = LiteflowMetaOperator.getNodeIndex("chain1", ids.get(0));
+
+// 3. 也可以直接用 nodeId + index 定位（index 从 0 开始），取第 1 个 a
+Node firstA = LiteflowMetaOperator.getNode("chain1", "a", 0);
+```
+
+### 3. 刷新与卸载类方法
 
 | 方法签名 | 作用 |
 | --- | --- |

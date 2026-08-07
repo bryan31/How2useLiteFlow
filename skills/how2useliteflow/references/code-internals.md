@@ -1,4 +1,4 @@
-> 本文件内容来自 LiteFlow 源码 `/Users/bryan31/openSource/LiteFlow-Jdk17`（对齐 **v2.16.1**；第 11 节 Rule-DB 运行时的行号按 v2.16.1 实测，其余章节行号约 v2.16.0）。
+> 本文件内容来自 LiteFlow 源码 `/Users/bryan31/openSource/LiteFlow-Jdk17`（对齐 **v2.16.1 tag `cac48e201`（2026-07-27）**；仓库 HEAD 已为修复版 **2.16.1.1**，多出 javax-pro `ThreadLocal` 泄漏修复 #IK6XVN；第 11 节 Rule-DB 运行时按该 tag 核对，其余章节行号约 v2.16.0，源码移动时优先按类名检索）。
 >
 > ⚠️ **关于行号**：下方 `path:line` 已**逐条校准至当前源码**，但仍会随版本/commit 漂移。**类名、方法名、继承关系、调用链、算子→类映射表稳定可信，可直接依赖**；若你使用的版本不同，跳转到某行看代码前请**先用 `scripts/source-lookup.sh grep <符号名>` 按符号定位**，勿把行号当唯一锚点。
 
@@ -585,7 +585,7 @@ v2.16.1 引入 **Rule-DB 模式**：规则（chain EL / 脚本源码）存放在
 | 候选装载 | `runtime/ChainCandidateLoader` / `runtime/ScriptCandidateLoader` | 在总线之外构建候选，编译成功才安装（install），失败不污染在役版本 |
 | 值对象 | `vo/ChainRecord` / `ScriptRecord` / `ChainMeta` / `ScriptMeta` / `RuleManifest` / `ChangeRecord` / `RuleDbRuntimeSnapshot` | 规则记录 / 元数据 / 清单 / 变更记录 / 快照 |
 
-配置挂在 `LiteflowConfig.ruleDb`（字段在 `property/LiteflowConfig.java:126`，getter 在 `:536`）：`RuleDbConfig` 聚合 `RuleDbCacheConfig`（容量 / 预加载）/ `RuleDbSyncConfig`（对账间隔、`fetch-retry-times`）/ `RuleDbSqlConfig` / `RuleDbRedisConfig` / `RuleDbZkConfig` / `RuleDbEtcdConfig`。
+配置挂在 `LiteflowConfig.ruleDb`：`RuleDbConfig` 聚合 `RuleDbCacheConfig`（容量／预加载）、`RuleDbSyncConfig`（轮询、对账、`fetch-retry-times`）以及 `RuleDbSqlConfig` / `RuleDbPostgresqlConfig` / `RuleDbMongoConfig` / `RuleDbRedisConfig` / `RuleDbZkConfig` / `RuleDbEtcdConfig` / `RuleDbNacosConfig`。
 
 ### 11.2 启动：拉 manifest + 注册影子
 

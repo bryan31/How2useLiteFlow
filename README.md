@@ -2,7 +2,7 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-An Agent Skill that helps AI use **[LiteFlow](https://liteflow.cc) (v2.16.X)** correctly — a lightweight Java rule engine / business orchestration framework. It bundles usage and source-level details distilled from the official docs and source code (components, EL rules, context, script components, rule sources, executor, AI Agent orchestration, testing & debugging, internals), and enforces a strict "what to do when the answer isn't covered" workflow — **never fabricate, never pass web content off as LiteFlow's actual behavior**.
+An Agent Skill that helps AI use **[LiteFlow](https://liteflow.cc) (v2.16.1)** correctly — a lightweight Java rule engine / business orchestration framework. It bundles usage and source-level details distilled from the official docs and source code, including the seven Rule-DB backends (SQL, PostgreSQL, MongoDB, Redis, ZooKeeper, etcd, and Nacos), metrics, components, EL rules, scripts, execution, AI Agent orchestration, testing, and internals. It also enforces a strict "what to do when the answer isn't covered" workflow — **never fabricate, never pass web content off as LiteFlow's actual behavior**.
 
 ## Install
 

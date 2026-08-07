@@ -2,7 +2,7 @@
 
 [English](./README.md) | **中文**
 
-一个帮助 AI 正确使用 **[LiteFlow](https://liteflow.cc)（v2.16.X）** 的 Agent Skill。LiteFlow 是一款轻量级的 Java 规则引擎 / 业务编排框架。本 skill 内置了从官方文档与源码蒸馏出的用法与代码细节（组件、EL 规则、上下文、脚本组件、规则配置源、执行器、AI Agent 编排、测试调试、源码实现等），并规定了"答不到时怎么办"的严格流程——**不杜撰、不拿网络内容充当 LiteFlow 行为依据**。
+一个帮助 AI 正确使用 **[LiteFlow](https://liteflow.cc)（v2.16.1）** 的 Agent Skill。LiteFlow 是一款轻量级的 Java 规则引擎／业务编排框架。本 skill 内置了从官方文档与源码蒸馏出的用法与代码细节，包括 Rule-DB 的 SQL、PostgreSQL、MongoDB、Redis、ZooKeeper、etcd、Nacos 七后端，以及指标监控、组件、EL 规则、脚本、执行器、AI Agent 编排、测试调试和源码实现；并规定了“答不到时怎么办”的严格流程——**不杜撰、不拿网络内容充当 LiteFlow 行为依据**。
 
 ## 安装
 

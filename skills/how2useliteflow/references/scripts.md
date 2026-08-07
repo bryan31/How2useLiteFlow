@@ -1,4 +1,4 @@
-> 来源：LiteFlow 官方文档 `04.v2.16.X文档/100.🍋脚本组件/`（脚本语言介绍、各脚本引擎、脚本与 Java 交互、多语言混合、文件脚本、动态刷新、验证、卸载）。版本对齐 v2.16.X，依赖坐标示例版本为 `2.16.0`。
+> 来源：LiteFlow 官方文档 `04.v2.16.X文档/100.🍋脚本组件/`（脚本语言介绍、各脚本引擎、脚本与 Java 交互、多语言混合、文件脚本、动态刷新、验证、卸载）。版本对齐 v2.16.1（源码基线 2.16.1.1），依赖坐标示例版本为 `2.16.1`；`liteflow-script-javax-pro` 例外——≤2.16.1 存在 ThreadLocal 泄漏（bug #IK6XVN，2.16.1.1 修复），其坐标示例为 `2.16.1.1`（见第三、四节）。
 
 # 脚本组件（Script Component）
 
@@ -27,12 +27,12 @@
 
 ## 三、支持的语言与依赖坐标
 
-LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Java 有 3 个插件、JS 有 2 个引擎）。`groupId` 统一为 `com.yomahub`，版本随主版本（示例为 `2.16.0`）。
+LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Java 有 3 个插件、JS 有 2 个引擎）。`groupId` 统一为 `com.yomahub`，版本随主版本（示例为 `2.16.1`；`liteflow-script-javax-pro` 因下述泄漏修复，示例为 `2.16.1.1`）。
 
 | 语言 | Maven artifactId | 备注 / 版本要求 |
 |---|---|---|
 | Groovy | `liteflow-script-groovy` | 语法接近 Java，可在脚本内定义类 |
-| Java（推荐） | `liteflow-script-javax-pro` | v2.13.0+；基于 Liquor，**须用 JDK 不能用 JRE**；v2.15.3+ 仅推荐此插件 |
+| Java（推荐） | `liteflow-script-javax-pro` | v2.13.0+；基于 Liquor，**须用 JDK 不能用 JRE**；v2.15.3+ 仅推荐此插件；**≤2.16.1 有 ThreadLocal 泄漏（#IK6XVN），务必用 2.16.1.1+** |
 | Java（旧） | `liteflow-script-java` | 基于 Janino，v2.11.0+，**已不推荐维护** |
 | Java（旧） | `liteflow-script-javax` | 基于 Liquor，v2.12.4+，**已不推荐维护** |
 | JavaScript | `liteflow-script-javascript` | 基于 JDK 自带引擎，仅 ES5；仅 JDK8 可用 |
@@ -44,6 +44,10 @@ LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Ja
 | Kotlin | `liteflow-script-kotlin` | v2.12.1+；上下文必须通过 `bindings` 获取 |
 
 > 说明：Groovy/JS/QLExpress/Python/Lua/Aviator/Kotlin 文档均明确列出支持上述 4 种 `type`。Java（javax-pro）为类式定义，节点 `type` 仍按上表使用（如迭代场景改用 `for_script`），具体行为以源码/官方文档为准。
+
+:::warning
+**javax-pro ≤2.16.1 存在 ThreadLocal 泄漏（bug #IK6XVN，2.16.1.1 已修复）**：`liteflow-script-javax-pro` 的编译产物是跨执行共享的单例，≤2.16.1 中每次执行脚本组件时（`process`/`isAccess`/`onSuccess` 等所有执行入口）都会向 `NodeComponent` 的 `ThreadLocal<Stack<Node>> refNodeStackTL` 压入 refNode 却不清理，线程池线程上的栈随调用次数无界增长，长期运行有内存膨胀甚至 OOM 风险。2.16.1.1 起所有执行入口统一在 `finally` 中 `removeRefNode()` 清理。**使用 javax-pro（官方首推的 Java 脚本插件）请升级到 2.16.1.1 及以上**。另见 `faq-pitfalls.md` 中该问题的条目。
+:::
 
 ## 四、规则文件中定义脚本节点
 
@@ -157,13 +161,13 @@ LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Ja
 
 **Java（javax-pro）示例 —— 类式定义，与静态 Java 完全一致：**
 
-Maven 依赖：
+Maven 依赖（≤2.16.1 有 ThreadLocal 泄漏（#IK6XVN），请使用 `2.16.1.1` 及以上）：
 
 ```xml
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-script-javax-pro</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1.1</version>
 </dependency>
 ```
 
@@ -329,6 +333,43 @@ ValidationResp resp = ScriptValidator.validateWithEx(script);
 boolean isSuccess = resp.isSuccess();
 Exception e = resp.getCause();
 ```
+
+> 上面这两个**单参重载仅在 classpath 只引入一种脚本插件时可用**。当同时加载了多个脚本插件（即第七节的多语言混合共存场景）时，单参版无法推断目标语言，会直接校验失败，错误信息为 `The loaded script modules more than 1. Please specify the script language.`（源码 `ScriptValidator.java:55-58`），此时必须改用下面 10.1 的「指定语言」重载。
+
+### 10.1 多脚本插件共存：指定 `ScriptTypeEnum`
+
+当引入了多个脚本插件时，必须显式传入 `ScriptTypeEnum` 指定按哪种语言校验（源码 `ScriptValidator.java:91-104`）：
+
+```java
+// 返回布尔
+boolean isValid = ScriptValidator.validate(script, ScriptTypeEnum.GROOVY);
+
+// 带回错误信息
+ValidationResp resp = ScriptValidator.validateWithEx(script, ScriptTypeEnum.GROOVY);
+```
+
+一次校验多种语言的脚本，用批量重载 `validate(Map<ScriptTypeEnum, String>)`，Map 的 key 即该段脚本的语言（源码 `ScriptValidator.java:112-119`）：
+
+```java
+Map<ScriptTypeEnum, String> scripts = new HashMap<>();
+scripts.put(ScriptTypeEnum.GROOVY, groovyScript);
+scripts.put(ScriptTypeEnum.JS, jsScript);
+scripts.put(ScriptTypeEnum.PYTHON, pythonScript);
+boolean allValid = ScriptValidator.validate(scripts);
+```
+
+`ScriptTypeEnum` 枚举取值（源码 `ScriptTypeEnum.java`，共 8 个可用值）：
+
+| 枚举值 | displayName | 归并说明 |
+|---|---|---|
+| `GROOVY` | groovy | — |
+| `JS` | js | **JDK 原生 `liteflow-script-javascript` 与 ES6 的 `liteflow-script-graaljs` 两个引擎都归 `JS`** |
+| `PYTHON` | python | — |
+| `QLEXPRESS` | qlexpress | — |
+| `LUA` | lua | — |
+| `AVIATOR` | aviator | — |
+| `JAVA` | java | **`liteflow-script-java`/`javax`/`javax-pro` 三个 Java 插件都归 `JAVA`** |
+| `KOTLIN` | kotlin | — |
 
 ## 十一、卸载脚本（v2.12.0+）
 

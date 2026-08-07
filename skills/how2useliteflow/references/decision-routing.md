@@ -3,8 +3,10 @@
 > 来源文档（相对 `04.v2.16.X文档/`）：
 > - `140.🧮决策路由/010.概念以及介绍.md`
 > - `140.🧮决策路由/020.决策路由用法.md`
+> - `115.🏦Rule-DB模式/050.快速开始(Redis).md`（Rule-DB 发布 route/namespace 示例）
+> - `115.🏦Rule-DB模式/130.内存与性能.md`（Rule-DB 路由冷加载预警）
 >
-> 版本对齐：LiteFlow **v2.16.X**。该特性自 **v2.12.0+** 引入，namespace 维度执行自 **v2.12.1+**。
+> 版本对齐：LiteFlow **v2.16.X**。该特性自 **v2.12.0+** 引入，namespace 维度执行自 **v2.12.1+**，Rule-DB 模式（**v2.16.1** 新增）同样支持决策路由。
 
 ---
 
@@ -61,19 +63,23 @@ List<LiteflowResponse> responseList =
 
 特点：
 
-- **不用再传 chainId**——LiteFlow 会遍历所有带 `<route>` 的 chain；
+- **不用再传 chainId**——LiteFlow 会遍历所有带 `<route>` 的 chain（准确说是目标 namespace 内的，不传 namespace 时即默认 namespace，见下节）；
 - 决策判断与命中规则的执行均为**并行**；
 - 与 `execute2Resp` 一致地支持：用已初始化的上下文传入、多上下文传入等；
 - **返回 `List<LiteflowResponse>`**：每个元素对应一条命中规则的执行结果；`LiteflowResponse` 中新增了 **`chainId` 字段**，用于识别是哪条规则产生的结果。
 
 ### 错误提示
 
-- 如果规则里**没有任何带 `<route>` 的 chain**，LiteFlow 会报错；
-- 如果匹配决策路由后**没有可用规则**，LiteFlow 也会报错提示。
+- 当前 namespace 下**没有任何带 `<route>` 的 chain** 时，抛 **`com.yomahub.liteflow.exception.RouteChainNotFoundException`**，消息形如 `no route found for namespace[default]`；
+- 决策表达式求值后**没有任何命中规则**时，抛 **`com.yomahub.liteflow.exception.NoMatchedRouteChainException`**，消息为 `there is no matched route chain`。
+
+想对"无命中"做降级（而不是让异常冒出）时，可单独 catch `NoMatchedRouteChainException` 区分处理。
 
 ## 四、按 namespace 执行（v2.12.1+）
 
-默认情况下决策路由会执行**所有**带 `<route>` 的 chain。当规则很多、只想判断某一组时，可在 `<chain>` 层加 `namespace` 参数：
+不传 namespace 时，决策路由只判断**默认 namespace（`default`）**下带 `<route>` 的 chain——即所有**未声明 `namespace` 属性**的 chain（解析时会被赋予默认 namespace `default`）。当规则很多、只想判断某一组时，可在 `<chain>` 层加 `namespace` 参数：
+
+> **注意**：一旦给部分 chain 声明了 namespace，这些 chain 就**不再参与**不传 namespace 的默认调用，必须用对应 namespace 的重载；若默认 namespace 下已没有任何带 `<route>` 的 chain，默认调用会直接抛 `RouteChainNotFoundException`（`no route found for namespace[default]`）。
 
 ```xml
 <chain name="chain1" namespace="n1">
@@ -114,16 +120,37 @@ List<LiteflowResponse> responseList =
 
 ## 五、存储形式的支持范围
 
-决策路由目前支持**文件类规则**与**数据库**两种载体：
+决策路由支持的载体：
 
 - **文件类规则**：XML / JSON / YAML 均可（JSON/YAML 用 `route` key 承载决策 EL，见下节）；
-- **数据库**方式（配置见官方"支持决策路由"小节，以官方文档为准）。
+- **数据库**方式（配置见官方"支持决策路由"小节，以官方文档为准）；
+- **Rule-DB 模式**（v2.16.1 新增）：route 作为 chain 元数据随规则一同存储与发布（发布 API 的 `.route(...)` / `.namespace(...)`），SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / Etcd / Nacos 各 Rule-DB 后端均支持决策路由，详见 `rule-db.md`。
 
-**zk / nacos / etcd / apollo / redis 等非文件配置源不支持**决策路由。
+**zk / nacos / etcd / apollo / redis 等传统 rule-source 配置源插件不支持**决策路由——"不支持"仅指这些老式插件；上述 v2.16.1 Rule-DB 模式即使使用 redis / zk / etcd / nacos 后端也不在此列。
+
+> **性能预警（Rule-DB 模式）**：Rule-DB 模式下首次 `executeRouteChain` 为拿到 route 元数据，会在路由执行前把**所有还没就绪的 Rule-DB chain 逐个回源并编译**，而不是只加载最终匹配的那一条。规则清单大又用路由模式时，请把第一次路由请求当成一次**批量冷加载**：压测其延迟，并考虑用 `rule-db.cache.preload-chain-ids` 启动预热抹平，或拆分 application-name（详见 `rule-db.md`）。
 
 ## 六、JSON / YAML 格式中的写法
 
-在 JSON / YAML 中也可以写决策体：多了一个 **`route`** key 承载决策 EL；**没有 `body` key**——因为这两种格式里原来的规则体 key 本身就是 **`value`**，照旧保留。（具体 JSON/YAML 示例结构以官方文档为准。）
+在 JSON / YAML 中也可以写决策体：多了一个 **`route`** key 承载决策 EL；**没有 `body` key**——因为这两种格式里原来的规则体 key 本身就是 **`value`**，照旧保留。
+
+最小 JSON 示例：
+
+```json
+{
+  "flow": {
+    "chain": [
+      {
+        "name": "chain1",
+        "route": "AND(r1, r2)",
+        "value": "THEN(a, b);"
+      }
+    ]
+  }
+}
+```
+
+YAML 同理：chain 条目下并列 `route` 与 `value` 两个 key（另有可选 `namespace` key），无 `body` key。注意：定义了 `route` 就必须同时保留 `value`，否则解析时抛 `FlowSystemException`。
 
 ## 七、关键约束与注意点
 
@@ -148,7 +175,7 @@ List<LiteflowResponse> responseList =
 | 上下文 | 单条链路共享 | 每条命中规则**独立上下文实例** |
 | 返回类型 | `LiteflowResponse` | `List<LiteflowResponse>`（含 `chainId`） |
 | namespace | 不涉及 | 支持 `namespace` 维度筛选（v2.12.1+） |
-| 存储支持 | 全部 | 仅 XML 文件 + 数据库 |
+| 存储支持 | 全部 | 文件类（XML / JSON / YAML）+ 数据库（含 v2.16.1 Rule-DB） |
 
 ---
 

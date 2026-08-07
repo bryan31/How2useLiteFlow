@@ -8,8 +8,8 @@
 #
 # 环境变量：
 #   LITEFLOW_REPO   指定一个本地 LiteFlow 仓库路径（最高优先级，跳过探测与克隆）。
-#   LITEFLOW_TAG    可选：克隆指定的 git tag/分支；不设则克隆 v2.16.0（与 skill 内置内容对齐）。
-#                   显式设为空（LITEFLOW_TAG= ）可改克隆默认主干 master（注意可能与内置 v2.16.X 内容不一致）。
+#   LITEFLOW_TAG    可选：克隆指定的 git tag/分支；不设则克隆 dev（与 skill 的 v2.16.1 开发源码基线对齐）。
+#                   显式设为空（LITEFLOW_TAG= ）可改为克隆远端默认分支（注意可能与内置内容不一致）。
 #   LITEFLOW_CACHE  克隆缓存目录，默认 $HOME/.cache/liteflow-skill。
 #
 # 退出码：0 成功；1 一般错误；2 本地仓库未找到（提示需要 clone）。
@@ -25,8 +25,8 @@
 set -eu
 
 GITEE_URL="https://gitee.com/dromara/liteFlow.git"
-# 默认克隆 v2.16.0（与 skill 内置内容对齐）；显式 LITEFLOW_TAG= 留空则回落 master 主干
-TAG="${LITEFLOW_TAG-v2.16.0}"
+# 默认克隆 dev（与 skill 内置的 v2.16.1 dev 源码对齐）；显式 LITEFLOW_TAG= 留空则回落远端默认分支
+TAG="${LITEFLOW_TAG-dev}"
 CACHE="${LITEFLOW_CACHE:-$HOME/.cache/liteflow-skill}"
 CACHE_REPO="$CACHE/liteFlow"
 
@@ -81,7 +81,7 @@ cmd_clone() {
     echo "正在克隆 $GITEE_URL （tag/分支: $TAG）到 $CACHE_REPO ..." >&2
     git clone --depth 1 --branch "$TAG" "$GITEE_URL" "$CACHE_REPO" >&2
   else
-    echo "正在克隆 $GITEE_URL （默认主干 master）到 $CACHE_REPO ..." >&2
+    echo "正在克隆 $GITEE_URL （远端默认分支）到 $CACHE_REPO ..." >&2
     git clone --depth 1 "$GITEE_URL" "$CACHE_REPO" >&2
   fi
   printf '%s\n' "$CACHE_REPO"

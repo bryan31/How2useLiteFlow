@@ -59,17 +59,19 @@ public class MultiContextELSpringbootTest extends BaseTest {
 要点：
 - **JUnit 5**：`org.junit.jupiter.api.Test` / `Assertions`。
 - **三个注解组合**：`@SpringBootTest(classes = 当前测试类.class)` + `@EnableAutoConfiguration` + `@ComponentScan({"...组件包"})`；用 `classes` 指向自身以最小化上下文。
-- **`@TestPropertySource(value = "classpath:/<功能>/application.properties")`**：每个测试类指向**自己专属**的测试资源目录下的 `application.properties`（里面配 `liteflow.rule-source=/<功能>/flow.el|xml|json` 等），互不干扰。
+- **`@TestPropertySource(value = "classpath:/<功能>/application.properties")`**：每个测试类指向**自己专属**的测试资源目录下的 `application.properties`（里面配 `liteflow.rule-source=<功能>/flow.el.xml` 等），互不干扰。
 - **`extends BaseTest`**：见下一节的全局状态清理（**强烈建议继承**，否则多测试类间会互相污染）。
 - **断言**：`response.isSuccess()` 判成功；`response.getContextBean(XxxContext.class)` 取上下文再断字段；异常用 `Assertions.assertThrows(...)`。
 
 ### 规则文件放在哪
-测试规则文件放在 `src/test/resources/<功能>/(flow.el|flow.xml|flow.json)` 与 `application.properties` 同目录，由 `@TestPropertySource` 的路径统一指定。例：
+测试规则文件放在 `src/test/resources/<功能>/` 下、与 `application.properties` 同目录，由 `@TestPropertySource` 的路径统一指定。EL 规则文件的真实命名约定是 `flow.el.xml`（或 `flow.el.json`/`flow.el.yml`；经典格式为 `flow.xml`/`flow.json`/`flow.yml`）——**没有纯 `flow.el` 这种文件**。例（源码 `multiContext/application.properties` 原文）：
 
 ```properties
 # src/test/resources/multiContext/application.properties
-liteflow.rule-source=/multiContext/flow.el
+liteflow.rule-source=multiContext/flow.el.xml
 ```
+
+> **后缀白名单**：本地 rule-source 路径只认 `.xml`/`.json`/`.yml`/`.el.xml`/`.el.json`/`.el.yml` 六种后缀（`liteflow-core` 的 `FlowParserProvider.ConfigRegexConstant` 正则，`FlowParserProvider.java:136-148`）；写成 `flow.el` 这类不识别后缀会在启动解析时抛 `ErrorSupportPathException`（"can't support the format ..."）。
 
 ---
 
@@ -107,7 +109,39 @@ public class BaseTest {
 
 ---
 
-## 五、功能/场景 → 测试模块速查（找示例用）
+## 五、Spring 原生（springnative）与 Solon 的测试范式
+
+非 SpringBoot 环境**不要**套用 `@SpringBootTest` 范式，源码里的真实写法如下。
+
+**Spring 原生**（`liteflow-testcase-el-springnative`，例 `PreAndFinallyELSpringTest.java:21-26`）：JUnit 5 的 Spring 扩展 + XML 上下文：
+
+```java
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("classpath:/preAndFinally/application.xml")
+public class PreAndFinallyELSpringTest extends BaseTest {
+    @Resource
+    private FlowExecutor flowExecutor;
+}
+```
+
+组件扫描、`LiteflowConfig`（`ruleSource` 指向 `preAndFinally/flow.el.xml`）、`FlowExecutor` 都以 bean 形式写在该 `application.xml` 里。
+
+**Solon**（`liteflow-testcase-el-solon`，例 `PreAndFinallyELSpringbootTest.java:20-25`）：
+
+```java
+@SolonTest
+@Import(profiles="classpath:/preAndFinally/application.properties")
+public class PreAndFinallyELSpringbootTest extends BaseTest {
+    @Inject
+    private FlowExecutor flowExecutor;
+}
+```
+
+liteflow 配置写在 `@Import` 引入的 properties 里（同样是 `liteflow.rule-source=preAndFinally/flow.el.xml`），用 `@Inject` 注入 `FlowExecutor`。两种范式都同样 `extends` 各自模块的 `BaseTest` 做全局清理。
+
+---
+
+## 六、功能/场景 → 测试模块速查（找示例用）
 
 > 用 `scripts/source-lookup.sh find <关键字>` 或 `grep` 在 `liteflow-testcase-el/` 下定位真实样例。
 
@@ -116,7 +150,7 @@ public class BaseTest {
 | SpringBoot 通用功能（组件/EL/上下文/循环/选择…） | `liteflow-testcase-el-springboot` |
 | SpringBoot 4（JDK17+） | `liteflow-testcase-el-springboot4` |
 | Spring 原生（非 Boot） | `liteflow-testcase-el-springnative` |
-| Solon | `liteflow-testcase-el-solon` |
+| Solon | `liteflow-testcase-el-solon`（Solon 下 SQL 配置源示例见 `liteflow-testcase-el-sql-solon`） |
 | 非 Spring | `liteflow-testcase-el-nospring` |
 | 类级声明式组件 | `liteflow-testcase-el-declare-springboot` |
 | 方法级声明式组件 | `liteflow-testcase-el-declare-multi-springboot` |
@@ -129,13 +163,14 @@ public class BaseTest {
 | ReAct Agent（JDK17+） | `liteflow-testcase-el-react-agent` |
 | Metrics 指标采集 / 装配守护 / 端点（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/metrics/`（`MetricsScenarioSpringbootTest`、`MetricsLifeCycleGuardTest`、`MetricsEndpointSpringbootTest`；资源 `resources/metrics/`、`metrics-scenario/`）；Boot4 端点见 `liteflow-testcase-el-springboot4` 的 `test/metrics/MetricsEndpointSpringboot4Test` |
 | 节点执行生命周期钩子 `PostProcessNodeExecuteLifeCycle`（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/nodeexecute/`（`NodeExecuteLifeCycleSpringbootTest` + `TestNodeExecuteLifeCycle`，资源 `resources/nodeexecute/`） |
-| Rule-DB 配置绑定（v2.16.1+） | `liteflow-testcase-el-springboot4` 的 `test/config/RuleDbConfigBindingTest` |
+| Rule-DB 核心／发布 API／七后端 | `liteflow-testcase-el-rule-db-core`、`-publisher`、`-sql-springboot`、`-postgresql-springboot`、`-mongodb-springboot`、`-redis-springboot`、`-etcd-springboot`、`-zk-springboot`、`-nacos-springboot`；七后端均有 Boot 4 对应模块 |
+| Rule-DB 配置绑定（v2.16.1+） | `liteflow-testcase-el-springboot` 与 `liteflow-testcase-el-springboot4` 的 `test/config/RuleDbConfigBindingTest` |
 
-> v2.16.1 仓库根目录另有 `scripts/verify-rule-db-sql-release.sh`：rule-db-sql 插件的发布验证脚本（非 JUnit），可作 Rule-DB 发布流程参考。
+> v2.16.1 仓库根目录另有 `scripts/verify-rule-db-{publisher,sql,postgresql,mongodb,redis,etcd,zk}-release.sh` 发布验证脚本（非 JUnit）；Nacos 以对应 Spring Boot 2/3 与 Boot 4 测试模块覆盖。
 
 ---
 
-## 六、外部 DEMO 案例（官方提供）
+## 七、外部 DEMO 案例（官方提供）
 
 - 短信系统选供应商：`https://github.com/bryan31/message-demo`
 - 电商价格计算引擎（带界面）：`https://gitee.com/bryan31/liteflow-example`
@@ -145,7 +180,7 @@ public class BaseTest {
 
 ---
 
-## 七、给 AI 的提示
+## 八、给 AI 的提示
 
 - 当用户问"某功能怎么写/怎么测"时，**优先**指向对应的测试模块（上表）作为权威示例；必要时用 `source-lookup.sh` 在 `liteflow-testcase-el/` 检索真实代码再回答。
 - 生成测试代码时，**务必带上 `extends BaseTest`（或等价清理）** 与每个类独立的 `@TestPropertySource`，否则容易踩全局状态污染的坑。

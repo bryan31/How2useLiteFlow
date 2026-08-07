@@ -1,10 +1,10 @@
-> 来源：LiteFlow 官方文档 `04.v2.16.X文档/110.🗂规则配置源/`（本地规则文件、SQL、ZK、Nacos、Etcd、Apollo、Redis 配置源/轮询/订阅、自定义配置源）。版本对齐 v2.16.X，依赖坐标示例版本为 `2.16.0`。
+> 来源：LiteFlow 官方文档 `04.v2.16.X文档/110.🗂规则配置源/`（本地规则文件、SQL、ZK、Nacos、Etcd、Apollo、Redis 配置源/轮询/订阅、自定义配置源）。版本对齐 v2.16.1，依赖坐标示例版本为 `2.16.1`。
 
 # 规则配置源（Rule Source）
 
-> **【v2.16.1 分界说明】** 本文档讲的是传统的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）——「启动时全量读出、拼成大 XML 解析、规则全量常驻 JVM 堆」的模式，在 v2.16.1 中**一行未改、依然有效**。
+> **【v2.16.1 分界说明】** 本文档讲的是传统的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）——「启动时全量读出、拼成大 XML 解析、规则全量常驻 JVM 堆」的模式，在 v2.16.1 中**依然有效**。但同一后端迁移到 Rule-DB 时必须移除旧插件，Nacos 两代插件还使用不同客户端主版本，不能共存。
 >
-> v2.16.1 新增了**纯增量**的 **Rule-DB 统一规则数据库**模式（聚合模块 `liteflow-rule-db`，含 `liteflow-rule-db-sql/redis/zk/etcd` 4 个插件 + 统一发布 API）：存储为权威源，JVM 只留轻量索引 + 有界 LRU 缓存（懒加载），多节点靠「变更通知（SQL/Redis seq 轮询 3s；zk/etcd watch 毫秒级）+ 周期对账（60s）」达到最终一致（秒级窗口，非线性一致）。它与本文档的老插件**完全独立、互不干扰**，但 `liteflow.rule-source` 与 `liteflow.rule-db.*` **互斥**，同时配置启动直接报错。
+> v2.16.1 新增了**纯增量**的 **Rule-DB 统一规则数据库**模式（聚合模块 `liteflow-rule-db`，含 SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / etcd / Nacos 7 个插件 + 统一发布 API）：存储为权威源，JVM 只留轻量索引 + 有界 LRU 缓存（懒加载），多节点靠「变更通知（SQL/PostgreSQL/MongoDB/Redis seq 轮询；ZooKeeper/etcd/Nacos 监听）+ 周期对账」达到最终一致。它与本文档的老插件**运行模型独立**，但 `liteflow.rule-source` 与 `liteflow.rule-db.*` **互斥**，同一后端迁移时也必须移除旧插件。
 >
 > 生产新项目建议优先评估 Rule-DB 模式，详见 `references/rule-db.md`。
 
@@ -16,7 +16,7 @@ LiteFlow 通过 **rule-source** 定位规则内容；除了内置的本地文件
 
 | 配置源 | Maven artifactId | 最低版本 | 规则存放形式 | 热刷新机制 | 关键适用场景 |
 |---|---|---|---|---|---|
-| 本地文件 | （核心内置，无插件） | — | `.xml` 文件 | 启动加载，无自动热刷新 | 单机、规则不常变 |
+| 本地文件 | （核心内置，无插件） | — | `.xml` 文件 | 默认启动加载；`enable-monitor-file=true` 可监听本地磁盘文件自动热刷新（单文件 v2.10.0+，模糊路径 v2.11.1+） | 单机、规则不常变 |
 | SQL | `liteflow-rule-sql` | v2.9.0+ | chain 表 + script 表 | 轮询（可选，v2.11.1+，SHA 对比） | 已有关系库；与业务表共库；运维习惯 SQL |
 | ZooKeeper | `liteflow-rule-zk` | — | ZK 节点（chain 节点 + script 节点） | ZK 原生推送，实时 | 已有 ZK 集群；需强一致/实时 |
 | Nacos | `liteflow-rule-nacos` | v2.9.0+ | 单个 dataId 内的 XML | Nacos 推送，实时 | 已用 Nacos 做配置中心 |
@@ -77,7 +77,8 @@ liteflow.rule-source=/data/lf/**/*Rule.xml
 ```
 
 :::warning 热刷新
-本地文件配置源在**启动时加载**，不提供自动热刷新；改了文件需要重启或借助框架的热刷新接口。需要实时变更请改用外部配置源。
+本地文件配置源默认在**启动时加载**，但可配置 `liteflow.enable-monitor-file=true`（默认 `false`）开启**文件监听自动热刷新**：文件改动后自动重载整个规则，无需重启——单文件监听 **v2.10.0+**，模糊匹配路径（如 `/data/lf/**/*Rule.xml`）同样可监听，**v2.11.1+**（官方文档《高级特性 → 本地规则文件监听》；源码 `FlowExecutor.init()` 在 `enableMonitorFile` 为 true 时注册 `MonitorFile`）。
+监听仅对 `rule-source` 指向的**本地磁盘文件/模糊路径**生效（底层是 commons-io 对磁盘目录的 `FileAlterationObserver`）；classpath（尤其打包进 jar 的）资源无法被监听，此时改了文件仍需重启，或调用 `FlowExecutor.reloadRule()` / `LiteflowMetaOperator` 热刷新接口。需要配置中心级别的实时推送，请改用外部配置源。
 :::
 
 ---
@@ -92,7 +93,7 @@ liteflow.rule-source=/data/lf/**/*Rule.xml
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-sql</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -182,7 +183,7 @@ liteflow:
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-zk</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -220,7 +221,7 @@ liteflow:
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-nacos</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -278,23 +279,29 @@ Nacos 节点改动自动推送，实时平滑热刷新，无需任何操作。
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-etcd</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
 ```yaml
 liteflow:
   rule-source-ext-data-map:
-    endpoints: http://127.0.0.1:2379
+    endpoints: http://127.0.0.1:2379    # 支持逗号分隔多地址，如 http://host1:2379,http://host2:2379
     chainPath: /liteflow/chain
     scriptPath: /liteflow/script
+    # 以下三项官方文档未列出，以源码 EtcdParserVO 为准（v2.9.3+）
+    # user: root                # etcd 开启 RBAC 鉴权时配置，须与 password 同时配置才生效
+    # password: 123456
+    # namespace: my-namespace   # jetcd namespace，给所有 key 加统一前缀做隔离，可选
 ```
 
 | 配置项 | 说明 |
 |---|---|
-| `endpoints` | Etcd 连接串 |
+| `endpoints` | Etcd 连接串，支持逗号分隔多个地址（源码按 `,` split 后传入 jetcd） |
 | `chainPath` | 规则目录节点 |
 | `scriptPath` | 脚本目录节点 |
+| `user` / `password` | etcd RBAC 鉴权账号/密码（v2.9.3+），**两者须同时配置才生效**；官方文档未列出，以源码 `EtcdParserVO` 为准 |
+| `namespace` | jetcd namespace（v2.9.3+），给所有 key 加统一前缀做隔离，可选；同样以源码 `EtcdParserVO` 为准 |
 
 ### 6.2 节点约定与热刷新
 
@@ -311,7 +318,7 @@ liteflow:
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-apollo</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
@@ -349,7 +356,7 @@ Apollo 推荐把连接信息和环境信息放在服务器 `appdatas` 下的 `se
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-redis</artifactId>
-    <version>2.16.0</version>
+    <version>2.16.1</version>
 </dependency>
 ```
 
