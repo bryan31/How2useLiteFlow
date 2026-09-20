@@ -77,7 +77,7 @@ b/c/d 默认全部并行执行完毕后才执行 e。
 | `ignoreError(true)` | — | false | 任一分支异常仍继续后续节点 |
 | `any(true)` | — | false | 任一分支先执行完即忽略其他分支，继续往下 |
 | `must(b, c)` / `must(b, "t1")` | v2.11.1+ | — | 指定需等待的节点/表达式（1 个或多个）完成即继续，忽略同级其他任务 |
-| `percentage(0.6)` | v2.15.0+ | — | 在全部任务中随机挑 N 个（向上取整），完成即继续 |
+| `percentage(0.6)` | v2.15.0+ | — | 全部分支都提交执行；累计完成 N 个（向上取整）后继续 |
 | `maxWaitSeconds(n)` / `maxWaitMilliseconds(n)` | v2.11.0+ | — | 并行整体超时控制 |
 
 **ignoreError**：b/c/d 任一异常，e 仍会执行。分支异常**不会向上抛**——WHEN 整体对失败分支完全吞错（仅超时场景打 warn 日志），因此只要后续环节无异常，整个流程 `LiteflowResponse.isSuccess()` 仍为 `true`、`getCause()` 为空（源码 `liteflow-core/.../flow/parallel/strategy/ParallelStrategyExecutor.java:236-252`：ignoreError=true 时跳过所有失败分支的异常抛出）。
@@ -98,7 +98,9 @@ THEN(a, WHEN(b, c, d).must(b, c), f);
 THEN(a, WHEN(b, THEN(c, d).id("t1"), e).must(b, "t1"), f);
 ```
 
-**percentage**：入参为数值，范围 `[0, 1]`。`0` 等价于 `any(true)`；`1` 相当于不加。例：5 个组件、`percentage(0.6)` 随机挑 3 个；`0.66` 则随机挑 4 个（5×0.66=3.3，向上取整）。
+**percentage**：入参为数值，范围 `[0, 1]`。LiteFlow 会先提交全部分支，再等待最先完成的 `ceil(分支数 × percentage)` 个；它不是随机抽取部分分支执行。`0` 等价于 `any(true)`；`1` 相当于不加。例：5 个组件、`percentage(0.6)` 等前 3 个完成后继续；`0.66` 等前 4 个完成（5×0.66=3.3，向上取整）。
+
+达到阈值后，框架会对尚未完成的 `CompletableFuture` 调用 `cancel(true)`，但这不能可靠中断已经运行的底层任务。因此其余分支仍可能继续执行并写入共享 Slot／上下文。不要把 `percentage` 当作“只执行部分任务”或强中断机制；未等待分支若有副作用，应自行保证并发安全与幂等。
 ```xml
 <chain id="chain1">
     WHEN(a, b, c, d, e).percentage(0.6);
@@ -511,7 +513,7 @@ THEN(a, b.bind("k","v1"), c).bind("k", "v2", true);
 ```xml
 THEN(a, b.retry(3));
 ```
-b 抛任何异常时最多重试 3 次；任一次成功即继续；3 次都失败则中断，`LiteflowResponse.isSuccess()` 为 false 并带具体异常。
+b 首次执行失败后最多再重试 3 次，因此总计最多执行 4 次；任一次成功即继续，初始执行和 3 次重试都失败才中断，`LiteflowResponse.isSuccess()` 为 false 并带具体异常。
 
 **表达式 / 子变量**：
 ```xml
@@ -716,7 +718,7 @@ THEN(a, b, node("88Cmp"), node("cmp-11"));
 | `.ignoreError(true)` | 忽略错误 | — | WHEN 子关键字 |
 | `.any(true)` | 任一完成即继续 | — | WHEN 子关键字 |
 | `.must(...)` | 指定完成即继续 | v2.11.1+ | WHEN 子关键字，不可空，id 需引号 |
-| `.percentage(n)` | 随机 N 个完成即继续 | v2.15.0+ | WHEN 子关键字，n∈[0,1] |
+| `.percentage(n)` | 全部分支提交，前 N 个完成即继续 | v2.15.0+ | WHEN 子关键字，n∈[0,1]，N 向上取整 |
 | `SWITCH(x).to(...)` / `.TO(...)` | 选择 | — | to 大小写均可 |
 | `.DEFAULT(y)` | 选择默认 | v2.9.5+ | SWITCH 后 |
 | `IF(x, a)` / `IF(x, a, b)` | 条件 | v2.8.5+ | x 须为布尔组件 |
@@ -759,5 +761,5 @@ THEN(a, b, node("88Cmp"), node("cmp-11"));
 - **bind 多上下文同名属性**：不指定上下文时永远 bind 第一个匹配上下文；需明确时用"类名首字母小写"前缀（或 `@ContextBean("别名")` 自定义前缀）。属性名不冲突时官方建议不指定、智能匹配。
 - **链路继承占位符**：必须双花括弧 `{{x}}`；`x` 数字不能开头；占位符实现 `{{a}}=...` 必须写一行；含未实现占位符的 chain 直接执行会抛异常；子 chain 中除占位符实现外的表达式会被忽略。该特性为 **Beta**。
 - **must 引用嵌套表达式**：需先给嵌套表达式设 `.id("...")`，在 must 中用**引号**括起该 id。
-- **percentage**：值域 `[0,1]`；`0` 等价 `any(true)`，`1` 等于不加；按向上取整挑选任务数。
+- **percentage**：值域 `[0,1]`；`0` 等价 `any(true)`，`1` 等于不加；全部分支都会提交，达到向上取整的完成数后主流程继续，未完成分支仍可能在后台运行并写上下文。
 - **验证**：上线前可用 `LiteFlowChainELBuilder.validate(el)` 或 `validateWithEx(el)` 校验 EL 是否合法。

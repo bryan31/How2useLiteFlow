@@ -11,7 +11,7 @@
 让 `rule-source` 指向的本地磁盘规则文件被修改后，框架自动热刷新整个规则，无需手动调用刷新接口。
 
 - 关键配置：`liteflow.enable-monitor-file=true`（默认 `false`）
-- `rule-source` 既可指向类路径内文件，也可指向本地磁盘绝对路径；支持 `**` 模糊匹配，匹配到的所有文件都会被监听（v2.11.1+）
+- `rule-source` 可指向类路径资源或本地磁盘文件，但监听依赖真实磁盘路径：本地文件及可解析为本地文件的解包 classpath 资源可以监听，打进 jar 的 classpath 资源不能监听；`**` 模糊匹配从 v2.11.1 起支持
 
 ```properties
 # 单文件
@@ -122,11 +122,11 @@ public class ACmp extends NodeComponent {
 
 ## 组件回滚
 
-流程执行失败且存在异常时，按**已执行组件的逆序**调用各组件的 `rollback()` 方法。版本：v2.11.0+。
+流程执行失败且存在异常时，按执行步骤队列的逆序调用声明了 `rollback()` 的组件。版本：v2.11.0+。
 
-- 回滚触发前提：组件未通过 `continueOnError`、EL 未设 `ignoreError`、RL 未用 `CATCH` 捕获，且出现异常。
-- 逆序示例：执行顺序 `a -> b -> c -> d`，`d` 抛异常 → 回滚顺序 `d -> c -> b -> a`（仅回滚已执行完的组件，无法回滚未执行到的组件）。
-- 回滚过程中若再次抛异常，**不会打断**整体回滚流程。
+- 回滚触发前提：组件未通过 `continueOnError`、EL 未设 `ignoreError`、EL 未用 `CATCH` 捕获，且出现异常。
+- 组件的 `CmpStep` 在业务 `process()` 之前就入队，因此失败组件本身也可能参与回滚。示例：`a -> b -> c -> d` 中 `d` 抛异常，若四者都实现回滚，尝试顺序为 `d -> c -> b -> a`；完全未进入执行的组件不在队列中。
+- 整个逆序循环只被一层外部 `try/catch` 包裹。某个 `rollback()` 抛异常后，循环立即退出，排在它后面的组件**不会继续回滚**；框架记录该回滚异常，但主流程仍保留原执行异常。每个回滚实现应自行兜底，并保持幂等。
 
 ```java
 @LiteflowComponent("a")
@@ -189,7 +189,7 @@ liteflow.chain-cache.capacity=10000
 liteflow.parse-mode=PARSE_ONE_ON_FIRST_EXEC
 ```
 
-> 注意：`chain-cache.enabled=true` 时，`parse-mode` 必须为 `PARSE_ONE_ON_FIRST_EXEC`，否则不生效（源码 `FlowExecutor` 中有强校验）。
+> 注意：`chain-cache.enabled=true` 只在 `PARSE_ONE_ON_FIRST_EXEC` 下启用。其它解析模式下框架会打印警告并关闭 chain cache，不会因此让应用启动失败。
 
 ---
 
@@ -236,6 +236,8 @@ public class BCmp extends NodeComponent {
 ### 1. 全局切面（推荐，LiteFlow 原生）
 
 实现 `ICmpAroundAspect` 接口并注册为 Spring Bean，对**所有组件**生效。接口共 4 个方法：`beforeProcess` / `afterProcess` / `onSuccess` / `onError`。
+
+Spring 的 `CmpAroundAspectHolder` 只持有一个全局切面实例；注册多个 `ICmpAroundAspect` Bean 会发生覆盖，不能依赖叠加或顺序。需要多段逻辑时，在一个实现内部组合。
 
 ```java
 @Component
@@ -366,7 +368,7 @@ liteflow.print-execution-log=false
 
 ### 步骤链路打印
 
-执行完整条链路后会自动打印步骤顺序，形式 `组件ID<耗时毫秒>`，例如：
+`liteflow.print-execution-log=true`（默认）时，完整链路执行后会自动打印步骤顺序，形式 `组件ID<耗时毫秒>`，例如；关闭该配置后不会自动打印，但仍可从 `LiteflowResponse` 读取步骤：
 
 ```
 a<100>==>c<10>==>m<0>==>q<200>
@@ -427,18 +429,20 @@ private final LFLog logger = LFLoggerManager.getLogger(FlowExecutor.class);
 liteflow.fast-load=true
 ```
 
-代价：牺牲热更新时的平滑性。正常模式下，热更新瞬间正在执行的流程会用**老链路**跑完，下次才用新链路；开启 fast-load 后，热更新瞬间执行中的流程可能前半段走老链路、后半段读到新链路，产生不一致。普通几百条规则的场景不建议开启。
+代价：降低热更新期间的快照一致性保障。正常模式使用 CopyOnWrite 集合保护在途执行；开启 fast-load 后改用普通集合，规则更新与执行并发时不再保证同等级的平滑切换。普通几百条规则的场景不建议开启，生产使用前应专门压测并发热更新。
 
 ---
 
 ## 不同格式规则加载
 
-需要同时加载多种格式/多个文件规则源时使用（默认会解析失败）。
+只有同时加载 XML／JSON／YAML 等**不同格式**规则文件时才需要开启。加载多个同格式文件、在文件规则基础上动态构造 Chain，都不需要该开关；它也不会让多个传统配置源插件共存。
 
 ```properties
 liteflow.rule-source=multipleType/flow.xml,multipleType/flow.json
 liteflow.support-multiple-type=true
 ```
+
+混合格式会分别解析各文件。为避免解析顺序和依赖关系不清，同一主 Chain 与它引用的子 Chain 应放在同一种格式中，不要跨格式拆分依赖链。
 
 ---
 
@@ -483,7 +487,7 @@ public class DCmp extends NodeComponent {
 }
 ```
 
-> 重要：默认重试逻辑在 `DefaultNodeExecutor` 内实现。一旦使用自定义执行器，**全局重试参数与 `@LiteflowRetry` 都将失效**，重试策略需自己在执行器里实现（重试参数仍可读到，但需自行处理）。
+> 重试逻辑位于基类 `NodeExecutor.execute(...)`。自定义执行器像上例一样调用 `super.execute(instance)`，仍保留全局重试与 `@LiteflowRetry`；只有绕过 `super.execute(...)`、自行调用组件逻辑时，才需要自行实现等价的重试语义。
 
 ---
 
@@ -524,16 +528,16 @@ liteflow.monitor.period=300000
 
 ## 常见坑 / 注意
 
-- **降级组件**：规则中必须用 `node("xxx")` 包裹缺失组件才会触发降级；不加 `node` 直接报错。每种类型组件目前只允许一个 `@FallbackCmp`。`fallback-cmp-enable` 默认关闭，忘记开则降级完全不生效。
-- **回滚**：只能回滚**已执行完**的组件，未执行到的组件不会回滚；回滚自身抛异常不会中断整体回滚；回滚前提是异常没被 `continueOnError` / `ignoreError` / `CATCH` 吞掉。
-- **活跃规则保活**：`liteflow.chain-cache.enabled=true` 时，`parse-mode` **必须**为 `PARSE_ONE_ON_FIRST_EXEC`，否则策略不生效（源码有强校验）。
+- **降级组件**：规则中必须用 `node("xxx")` 包裹缺失组件才会触发降级；不加 `node` 直接报错。它只处理“目标组件不存在”，不会接管一个已存在组件在运行期抛出的异常。每种类型组件目前只允许一个 `@FallbackCmp`，且 `fallback-cmp-enable` 默认关闭。
+- **回滚**：失败组件的 step 已在执行前入队，因此自身也可能回滚；未进入执行的组件不会回滚。任一 `rollback()` 抛错会终止后续逆序回滚，实现应自行兜底、幂等。
+- **活跃规则保活**：`liteflow.chain-cache.enabled=true` 只配合 `PARSE_ONE_ON_FIRST_EXEC`；错配时框架打印警告并禁用缓存，不是启动强校验失败。
 - **fast-load**：开了之后热更新不再平滑，执行中的流程可能前后半段不一致；几百条规则不要开。
-- **自定义执行器**：一旦替换默认执行器，全局重试与 `@LiteflowRetry` 全部失效，重试要自己实现。
+- **自定义执行器**：调用 `super.execute(instance)` 可保留全局重试与 `@LiteflowRetry`；绕过基类执行才需要自己实现重试。
 - **私有投递**：参数“只能取一次”，靠队列实现；若并发取数与投递数不匹配，多出的组件可能取到 `null`，需自行防御。
 - **异常 code/message**：只有继承 `LiteFlowException` 的异常才能从 response 取到 `code`；`message` 对任何异常都是 `exception.getMessage()`（非 null，除非异常本身无 message）。
 - **`onError` 回调**：抛出的依然是主方法异常；`onError` 自身抛错只会打堆栈不会外抛；`afterProcess` 无论成败都会执行。
 - **步骤信息 Map vs Queue**：`getExecuteSteps()`（`Map<String,List<CmpStep>>`，按 nodeId 聚合、保留该 nodeId 全部步骤）与 `getExecuteStepQueue()`（按执行顺序的 Queue）**都保留全部步骤**，只是组织方式不同；按执行顺序排查用 Queue，按组件汇总用 Map。
 - **隐式子流程**：主流程与子流程共享同一上下文；子流程取参统一走 `this.getRequestData()`（v2.15.0 改版后）。
 - **请求 ID 日志**：要让组件内业务日志也带请求 ID 前缀，必须用 `LFLog`（`LFLoggerManager.getLogger(...)`），否则只有框架日志带前缀。
-- **不同格式规则**：混合加载多格式/多源规则必须开 `support-multiple-type=true`，否则解析失败。
+- **不同格式规则**：只有 XML／JSON／YAML 等多格式混装才开 `support-multiple-type=true`；同格式多文件、动态构造共存不需要，多个配置源也不会因此变为可用。
 - **本地文件监听**：仅对 `rule-source` 指向的本地磁盘文件/模糊匹配文件生效，且需 `enable-monitor-file=true`。

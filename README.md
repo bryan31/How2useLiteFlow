@@ -2,7 +2,9 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-An Agent Skill that helps AI use **[LiteFlow](https://liteflow.cc) (v2.16.1)** correctly — a lightweight Java rule engine / business orchestration framework. It bundles usage and source-level details distilled from the official docs and source code, including the seven Rule-DB backends (SQL, PostgreSQL, MongoDB, Redis, ZooKeeper, etcd, and Nacos), metrics, components, EL rules, scripts, execution, AI Agent orchestration, testing, and internals. It also enforces a strict "what to do when the answer isn't covered" workflow — **never fabricate, never pass web content off as LiteFlow's actual behavior**.
+An Agent Skill that helps AI use **[LiteFlow](https://liteflow.cc) (v2.16.2)** correctly — a lightweight Java rule engine / business orchestration framework. It bundles usage and source-level details distilled from the official docs and source code, including the seven Rule-DB backends (SQL, PostgreSQL, MongoDB, Redis, ZooKeeper, etcd, and Nacos), metrics, components, EL rules, scripts, execution, AgentScope 2 integration, testing, and internals. It also enforces a strict "what to do when the answer isn't covered" workflow — **never fabricate, never pass web content off as LiteFlow's actual behavior**.
+
+> **Baseline (2026-09-19):** LiteFlow `2.16.2`, AgentScope Java `2.0.3`. The Agent entry point is `HarnessAgentComponent` from `liteflow-agent-core`. Examples use `2.16.2`; if your Maven mirror has not synchronized it, verify the repository or install matching source locally.
 
 ## Install
 
@@ -30,7 +32,7 @@ npx skills update how2useliteflow -g -y   # global install
 npx skills update how2useliteflow -p -y   # project install
 ```
 
-The skill also checks itself: once per session it compares its own `version` against the published `SKILL.md` via `scripts/version-check.sh`, and offers to run the update command when a newer release exists. Results are cached once per day, and network failures are skipped silently.
+The skill also checks itself: once per session it compares its own `version` against the published `SKILL.md` via `scripts/version-check.sh`, and offers to run the update command when a newer release exists. Results are cached once per day. Network or parse failures print a short diagnostic and never block normal use.
 
 ### Optional: enforce the check with an agent hook
 
@@ -66,9 +68,9 @@ command = "sh ~/.agents/skills/how2useliteflow/scripts/version-check.sh || true"
 
 ## How it works
 
-**Just install this skill — nothing else to configure.** It can answer **any** LiteFlow question through a layered strategy:
+**Install the skill to use its topic references and local-source fallback.** Coverage is measured against an explicit inventory of current guide sections and core documentation pages; see the [coverage report](skills/how2useliteflow/references/coverage.md). This is documentation feature coverage, not Java test coverage or measured answer accuracy.
 
-1. **Distilled knowledge (covers ~90%)** — a built-in quick-reference plus topic-by-topic reference docs (`references/`), distilled from LiteFlow's official documentation and source code. The vast majority of questions — EL operators, component types, the execution API, config keys, internals — are answered directly from these, with no network access and no extra setup.
+1. **Distilled knowledge** — a built-in quick-reference plus topic-by-topic reference docs (`references/`), distilled from LiteFlow's 2.16.2 documentation and source code. Most questions — EL operators, component types, execution APIs, configuration, AgentScope 2, Rule-DB, troubleshooting, and internals — are answered directly, with no network access and no extra setup.
 2. **Source-code fallback** — for the rare deep or obscure question the distilled knowledge doesn't cover, the skill reads the actual LiteFlow source: it first looks for a local LiteFlow repo, and otherwise (with your consent) clones the official repo, then answers with exact `path:line` citations.
 3. **Never fabricate** — if something can't be confirmed from the references or the source, the skill says so plainly instead of guessing or passing web content off as LiteFlow's behavior.
 
@@ -76,7 +78,7 @@ Net effect: install the skill, and your AI can reliably answer LiteFlow question
 
 ## How it triggers
 
-The skill activates automatically when you mention anything LiteFlow-related (components, EL rules, context, script components, rule sources, executor, ReAct Agent orchestration, testing, source internals, etc.).
+The skill activates automatically when you mention anything LiteFlow-related (components, EL rules, context, script components, rule sources, executor, AgentScope 2 orchestration, testing, source internals, etc.).
 
 ## Repository layout
 
@@ -84,6 +86,5 @@ The skill activates automatically when you mention anything LiteFlow-related (co
 skills/how2useliteflow/
 ├── SKILL.md          # entry: decision workflow + quick-reference + knowledge map
 ├── references/       # detailed reference docs by topic
-├── scripts/          # Local-first source lookup, controlled clone helper, and version self-check
-└── assets/
+└── scripts/          # Local-first source lookup, controlled clone helper, and version self-check
 ```

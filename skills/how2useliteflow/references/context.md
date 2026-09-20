@@ -4,7 +4,7 @@
 
 ## 上下文是什么
 
-- 执行器执行流程时，会为**每个请求**分配独立的数据上下文实例，不同请求间完全隔离。
+- 执行器会为每次执行分配独立 `Slot`，这是请求隔离的基础。传上下文 Class 时框架为该次执行创建实例；传现成 Bean 时框架直接复用调用方对象，若同一个 Bean 被多次调用复用，状态也会跨请求共享。
 - 组件之间**不直接传参**，所有业务数据都放进上下文：每个组件只从上下文取自己关心的数据、把自己产生的结果写回上下文，从而在数据层面解耦、达到可编排的目的。
 - 一旦把数据放进上下文，整个链路中的任一节点都能取到。
 
@@ -36,7 +36,7 @@ public class OrderContext {
 LiteflowResponse response = flowExecutor.execute2Resp("chain1", 流程初始参数, OrderContext.class);
 ```
 
-LiteFlow 会在调用时初始化、分配唯一实例。组件内取上下文：
+LiteFlow 会在调用时通过反射实例化 Class。上下文类应可被反射创建（通常提供可访问的无参构造）；创建失败时底层 `ReflectUtil.newInstanceIfPossible` 返回 `null`，该项随后会被过滤，入口不一定立即报错，最终通常表现为组件取不到上下文。存在复杂构造参数、工厂初始化或预置数据时，应直接传 Bean 实例。组件内取上下文：
 
 ```java
 @LiteflowComponent("yourCmpId")
@@ -117,9 +117,21 @@ orderContext.setOrderNo("SO11223344");
 LiteflowResponse response = flowExecutor.execute2Resp("chain1", null, orderContext);
 ```
 
-这样上下文里已有数据，某种意义上等同于流程入参，因此可以不再传流程入参。
+这样上下文里已有数据，某种意义上等同于流程入参，因此可以不再传流程入参。框架不会复制这个对象：同一 Bean 被并发执行或跨请求复用时，读写的是同一份状态，调用方必须负责线程安全和生命周期。
 
 > **禁止混传**：框架不支持 bean 与 class 混传，要么都传 bean，要么都传 class。
+
+### `ExecuteOption` 的上下文边界（2.16.2）
+
+`ExecuteOption` 同时提供 `contextClass(...)` 与 `contextBean(...)`。不要同时设置：执行器只要发现 Class 数组非空，就优先走 Class 方式，已设置的 Bean 会被忽略。
+
+```java
+ExecuteOption option = ExecuteOption.of()
+        .contextClass(OrderContext.class);
+LiteflowResponse response = flowExecutor.execute2Resp("chain1", request, option);
+```
+
+空 `ExecuteOption` 也不会像 `execute2Resp(chainId, param)` 两参重载那样自动补 `DefaultContext.class`。如果组件需要上下文，应显式调用 `contextClass(DefaultContext.class)`、传自定义 Class，或传 Bean。
 
 ## 上下文别名
 
@@ -157,7 +169,7 @@ public class ACmp extends NodeComponent {
 }
 ```
 
-> 别名在多上下文且**两个上下文是同一个类**时特别有用——按 class 取可能取错，按别名可以规避。
+> `@ContextBean` 标在类上，同一个 Class 的所有实例拥有相同别名，因此**不能**用它区分两个同 Class 实例；按 Class 或名称查询都会取第一个匹配项。需要两份语义不同的上下文时，请定义两个不同的上下文类型（可继承同一基类）。
 
 ### 默认名称
 
@@ -216,7 +228,7 @@ public void processA(NodeComponent bindCmp,
 
 **多上下文匹配规则**：LiteFlow 会按类型在所有上下文中**智能搜索匹配**，无需指定上下文。
 
-> 注意：如果多个上下文里都有同名属性（如两个上下文都有 `user`），注入拿到的是**第一个**，在不同环境下可能不同，会产生错乱。请确保被注入的对象在多个上下文中只有一份；否则可用点操作符**显式指定上下文前缀**：
+> 注意：如果多个上下文里都有同名属性（如两个上下文都有 `user`），注入会固定取**调用时传入顺序中的第一个匹配项**。不要依赖这个隐式优先级表达业务含义；请确保被注入的对象在多个上下文中只有一份，或用点操作符**显式指定上下文前缀**：
 
 ```java
 @LiteflowFact("orderContext.id") Integer orderId
@@ -308,7 +320,7 @@ this.setContextValue("member.setDesc", "xxxx");
 this.setContextValue("memberContext.member.setDesc", "xxxx");
 ```
 
-> 多上下文时 `getContextValue` / `setContextValue` 均无需关心数据来自哪个上下文，框架自动匹配；只有同名歧义时才需加前缀。
+> 多上下文时 `getContextValue` / `setContextValue` 会按调用时的传入顺序搜索并使用第一个匹配项；只有一处匹配时可省略上下文名，同名歧义时应加前缀。
 
 > **静默失败陷阱**：这两个 API 的表达式解析失败时**不抛异常、不打日志**，需特别留意（源码 `LiteflowContextRegexMatcher` 的 `searchContext` / `searchAndSetContext` 各解析分支均为 `catch (Exception ignore){}`）：
 > - `getContextValue` 表达式写错（属性名拼错、该属性在所有上下文中都不存在、点号路径中间对象为 null）时不报错，而是**静默返回 null**，与"该字段值本身就是 null"无法区分；

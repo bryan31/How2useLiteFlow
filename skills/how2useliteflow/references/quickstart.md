@@ -7,7 +7,7 @@
 > - `040.🍟快速开始(Hello world)/030.Solon场景安装运行.md`
 > - `040.🍟快速开始(Hello world)/040.其他场景安装运行.md`
 >
-> 版本对齐：LiteFlow **v2.16.X**（示例中以 `2.16.1` 为准）。
+> 版本对齐：LiteFlow **2.16.2**。各模块版本保持一致；依赖无法解析时核对实际 Maven 仓库，或先安装匹配源码。
 
 本章帮助你在最短时间内跑通 LiteFlow。根据项目实际环境，从 SpringBoot / Spring / Solon / 非 Spring 四种场景中选择一种。建议跟着文档操作一遍。下面以 **SpringBoot 场景为主线**给出完整最小可运行示例，其余场景只列关键差异点。
 
@@ -23,11 +23,12 @@ LiteFlow 提供 `liteflow-spring-boot-starter`，带自动装配。
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring-boot-starter</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
-:::tip SpringBoot 4.X 用户
+**Spring Boot 4.X 用户：**
+
 `liteflow-spring-boot-starter` 适用于 SpringBoot **2.X ~ 3.X**。
 若使用 **SpringBoot 4.X**（要求 JDK17 及以上），改用 `liteflow-spring-boot4-starter`，其余用法完全一致：
 
@@ -35,10 +36,9 @@ LiteFlow 提供 `liteflow-spring-boot-starter`，带自动装配。
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring-boot4-starter</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
-:::
 
 ### 2. 定义组件
 
@@ -78,14 +78,14 @@ public class CCmp extends NodeComponent {
 liteflow.rule-source=config/flow.xml
 ```
 
-:::tip v2.16.1 起：Rule-DB 模式（规则存数据库，推荐生产使用）
+**v2.16.1 起的 Rule-DB 模式（规则存数据库，推荐生产使用）：**
+
 上例 `rule-source` 是本地规则文件方式。v2.16.1 起也可改用 **Rule-DB 统一规则数据库**模式——规则/脚本以数据库为权威源，支持多实例热更新与统一发布 API，更适合生产环境：
 
 - 依赖：`liteflow-rule-db-sql` / `-postgresql` / `-mongodb` / `-redis` / `-zk` / `-etcd` / `-nacos` 七选一；
 - 配置：改用 `liteflow.rule-db.*`，此时**不再配置 `rule-source`**（两者互斥、同配启动报错）。
 
 完整接入步骤与各后端配置见 `references/rule-db.md`。
-:::
 
 ### 4. 规则文件
 
@@ -145,7 +145,7 @@ public class YourClass {
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -159,12 +159,16 @@ public class YourClass {
 
 <bean class="com.yomahub.liteflow.spring.ComponentScanner"/>
 
+<!-- 使用 @LiteflowCmpDefine / @LiteflowMethod 声明式组件时必须注册；
+     只使用继承 NodeComponent 的组件也可以保留。 -->
+<bean class="com.yomahub.liteflow.spring.DeclBeanDefinition"/>
+
 <bean id="liteflowConfig" class="com.yomahub.liteflow.property.LiteflowConfig">
     <property name="ruleSource" value="config/flow.xml"/>
 </bean>
 
 <bean id="flowExecutor" class="com.yomahub.liteflow.core.FlowExecutor" depends-on="springAware">
-    <property name="liteflowConfig" ref="liteflowConfig"/>
+    <constructor-arg name="liteflowConfig" ref="liteflowConfig"/>
 </bean>
 
 <!-- 如果 enableLog 为 false，下面这段也可以省略 -->
@@ -188,7 +192,7 @@ public class YourClass {
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-solon-plugin</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -213,7 +217,7 @@ public class ACmp extends NodeComponent {
 @Import(profiles="classpath:/application.properties")
 public class LiteflowExampleApplication {
     public static void main(String[] args) {
-        Solon.start(App.class, args);
+        Solon.start(LiteflowExampleApplication.class, args);
     }
 }
 ```
@@ -241,7 +245,7 @@ public class YourClass {
 
 - `ruleSource` 的**模糊路径匹配**特性不生效。
 - `@LiteflowComponent` **无法使用**（组件需在规则文件里显式声明类）。
-- **监控功能**不可用。
+- 没有容器自动装配：传统 `MonitorBus` 不会自动创建；Micrometer 指标仍可按 `metrics.md` 手动注册生命周期和 Binder。
 
 ### 1. 依赖
 
@@ -249,7 +253,7 @@ public class YourClass {
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-core</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -308,7 +312,7 @@ LiteflowResponse response = flowExecutor.execute2Resp("chain1", "arg", DefaultCo
 | 维度 | SpringBoot | Spring | Solon | 非 Spring |
 |---|---|---|---|---|
 | **artifactId** | `liteflow-spring-boot-starter`（4.X 用 `liteflow-spring-boot4-starter`） | `liteflow-spring` | `liteflow-solon-plugin` | `liteflow-core` |
-| **groupId / version** | `com.yomahub` / `2.16.1` | 同左 | 同左 | 同左 |
+| **groupId / version** | `com.yomahub` / `2.16.2` | 同左 | 同左 | 同左 |
 | **组件注解** | `@LiteflowComponent("id")` | `@LiteflowComponent("id")` | `@LiteflowComponent("id")` 或 Solon 的 `@Component("id")` | 无注解，规则文件 `<node class="...">` 注册 |
 | **配置方式** | `application.properties` 配 `liteflow.rule-source` | Spring XML 声明 `LiteflowConfig` / `FlowExecutor` 等 Bean | 同 SpringBoot（properties/yml） | 代码构造 `LiteflowConfig` + `FlowExecutorHolder.loadInstance` |
 | **获取 FlowExecutor** | `@Resource` 注入 | `@Resource` 注入 | `@Inject` 注入 | `FlowExecutorHolder.loadInstance(config)` |

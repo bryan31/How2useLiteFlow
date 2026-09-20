@@ -1,4 +1,4 @@
-> 本文件内容来自 LiteFlow 源码 `/Users/bryan31/openSource/LiteFlow-Jdk17`（对齐 **v2.16.1 tag `cac48e201`（2026-07-27）**；仓库 HEAD 已为修复版 **2.16.1.1**，多出 javax-pro `ThreadLocal` 泄漏修复 #IK6XVN；第 11 节 Rule-DB 运行时按该 tag 核对，其余章节行号约 v2.16.0，源码移动时优先按类名检索）。
+> 本文件内容来自 LiteFlow 当前 2.16.2 源码快照。文中 `@since 2.16.1` 表示功能首次引入版本；路径和行号会随提交漂移，定位时优先按类名／符号检索。
 >
 > ⚠️ **关于行号**：下方 `path:line` 已**逐条校准至当前源码**，但仍会随版本/commit 漂移。**类名、方法名、继承关系、调用链、算子→类映射表稳定可信，可直接依赖**；若你使用的版本不同，跳转到某行看代码前请**先用 `scripts/source-lookup.sh grep <符号名>` 按符号定位**，勿把行号当唯一锚点。
 
@@ -138,7 +138,7 @@ static {
 
 ### 3.1 Slot 是什么
 
-`Slot` 是单次执行的"执行槽/上下文容器"，内部用 `ConcurrentHashMap metaDataMap` 存各类元数据（chainId、requestId、conversationId、exception、各 condition 的结果等），并用 `List<Tuple> contextBeanList` 存放业务上下文 bean（`liteflow-core/.../slot/Slot.java:93-95`，`metaDataMap` 在 `:93`、`contextBeanList` 在 `:95`）。线程隔离靠 `TransmittableThreadLocal`（`Slot.java:16` import，跨线程池传递）。
+`Slot` 是单次执行的“执行槽／上下文容器”，内部用 `ConcurrentHashMap metaDataMap` 存各类元数据（chainId、requestId、conversationId、exception、各 condition 的结果等），并用 `List<Tuple> contextBeanList` 存放业务上下文 bean（`liteflow-core/.../slot/Slot.java:93-95`，`metaDataMap` 在 `:93`、`contextBeanList` 在 `:95`）。**请求隔离来自每次执行分配独立 Slot**；`TransmittableThreadLocal` 用于把当前执行相关的线程局部信息传到线程池任务，不是上下文隔离机制。一个 Slot 内的 WHEN 分支共享同一批上下文对象，并发安全仍由业务保证。
 
 业务上下文通过 `getContextBean(Class)` / `getContextBean(String key)` 取出，按类或 `@ContextBean` 的 key 匹配（`Slot.java:537-553`）：
 
@@ -188,7 +188,7 @@ private static int offerIndex(Slot slot) {
 }
 ```
 
-> 分配失败（池满且扩容后仍无可用）返回 `-1`，由 `doExecute` 抛 `NoAvailableSlotException`（`FlowExecutor.java:549-550`）。
+> `slot-size` 只是初始数量，不是固定容量；空闲下标耗尽通常会自动扩容。`offerIndex` 只有在扩容仍未产生可用下标（例如初始值为 0）或内部出现异常时才返回 `-1`，随后由 `doExecute` 抛 `NoAvailableSlotException`（`FlowExecutor.java:549-550`）。因此不能把初始 `slot-size` 或 Metrics 的同名 Gauge 当成实时容量上限。
 
 ---
 
@@ -329,7 +329,7 @@ NodeComponent（抽象基类，core/NodeComponent.java:52，构造器在 :84）
 ├── NodeForComponent       （abstract processFor()，core/NodeForComponent.java:13）
 │   └── ScriptForComponent
 ├── NodeIteratorComponent  （abstract processIterator()，core/NodeIteratorComponent.java）
-│   └── （无 ScriptIteratorComponent——脚本组件只有 Common/Boolean/Switch/For 四类，`NodeTypeEnum` 无 `ITERATOR_SCRIPT`；迭代循环用 `for_script`）
+│   └── （无 ScriptIteratorComponent——脚本组件只有 Common/Boolean/Switch/For 四类，`NodeTypeEnum` 无 `ITERATOR_SCRIPT`；迭代循环必须使用 Java `NodeIteratorComponent`，`for_script` 不能替代）
 └── ScriptCommonComponent  （extends NodeComponent implements ScriptComponent）
 ```
 
@@ -384,11 +384,11 @@ public void execute() throws Exception {
 | `afterProcess()` | `NodeComponent.java:227` | `execute()` `:145`（finally） | 切面 `afterProcess` |
 | `rollback()` | 由子类覆写 | `doRollback()`（`NodeComponent.java:168`），由 `FlowExecutor.doExecute` 异常分支逆序调用（`FlowExecutor.java:625-632`，`descendingIterator` 在 `:625`、`rollback` 在 `:630`） | 回滚；构造器反射探测是否覆写以置 `isRollback`（`NodeComponent.java:84-92`） |
 
-脚本组件（`ScriptCommonComponent`/`ScriptBooleanComponent`/`ScriptSwitchComponent`）覆写了全部钩子，把它们转交给 `ScriptExecutor.executeXxx(wrap)` 执行（见 `ScriptBooleanComponent.java:35-84`，其余两类同构）。
+脚本组件（`ScriptCommonComponent`／`ScriptBooleanComponent`／`ScriptSwitchComponent`／`ScriptForComponent`）覆写了全部钩子，把它们转交给 `ScriptExecutor.executeXxx(wrap)` 执行（见 `ScriptBooleanComponent.java:35-84`，其余类型同构）。
 
 > `rollback` 是否生效取决于构造时的反射探测：`NodeComponent` 构造器尝试 `clazz.getDeclaredMethod("rollback")`，找到就 `setRollback(true)`（`NodeComponent.java:84-92`）。`FlowExecutor` 异常时只回滚标记为 rollback 的组件。
 
-> 补充（v2.16.1）：除上述组件级钩子外，框架级生命周期新增 **`PostProcessNodeExecuteLifeCycle`** 接口（`liteflow-core/.../lifecycle/PostProcessNodeExecuteLifeCycle.java`），调用点同样在 `NodeComponent.execute()` 内——before 钩子在主逻辑执行前统一回调（`NodeComponent.java:119-127`，回调语句在 `:122`，钩子自身抛错只记日志）；after 钩子在 `finally` 块中回调，携带耗时 `timeSpent` 与异常引用（成功为 `null`）（`:184-188`，回调语句在 `:187`）。`LifeCycleHolder` 为其新增独立列表与分发分支（`lifecycle/LifeCycleHolder.java:25`、`:39-41`，getter 在 `:64-66`）。接口用法详见 [lifecycle.md](./lifecycle.md)。
+> 补充（v2.16.1）：除上述组件级钩子外，框架级生命周期新增 **`PostProcessNodeExecuteLifeCycle`** 接口（`liteflow-core/.../lifecycle/PostProcessNodeExecuteLifeCycle.java`），调用点同样在 `NodeComponent.execute()` 内——before 钩子在主逻辑执行前统一回调（`NodeComponent.java:119-127`，回调语句在 `:122`，钩子自身抛错只记日志）；生命周期 after 位于 `finally` 后半段，携带耗时 `timeSpent` 与异常引用（成功为 `null`）（`:184-188`，回调语句在 `:187`）。业务逻辑异常本身不会跳过它，但前面的组件级 `afterProcess()` 若抛错，控制流不会到达该回调。`LifeCycleHolder` 为其新增独立列表与分发分支（`lifecycle/LifeCycleHolder.java:25`、`:39-41`，getter 在 `:64-66`）。接口用法详见 [lifecycle.md](./lifecycle.md)。
 
 ---
 
@@ -522,7 +522,7 @@ monitors.add(monitor);
 | 字段（LiteflowConfig） | 配置 key | 默认值 | 字段行号 |
 | --- | --- | --- | --- |
 | `enable` | `liteflow.enable` | `true` | `LiteflowConfig.java:32` |
-| `ruleSource` | `liteflow.rule-source` | —（无默认，必填或用 SPI） | `:35` |
+| `ruleSource` | `liteflow.rule-source` | —（文件／传统 SPI 规则源时配置；纯动态构造与 Rule-DB 模式可空） | `:35` |
 | `ruleSourceExtData` / `ruleSourceExtDataMap` | `liteflow.rule-source-ext-data{}` | — | `:38` / `:40` |
 | `slotSize` | `liteflow.slot-size` | `1024` | `:43` |
 | `whenMaxWaitSeconds` | `liteflow.when-max-wait-seconds` | — | `:47` |
@@ -639,3 +639,25 @@ FlowExecutor.execute2Resp(...)                 (FlowExecutor.java:264/506)
        ├─ (异常) 逆序 rollback                   (FlowExecutor.java:613-638)
        └─ DataBus.releaseSlot(slotIndex)        (DataBus.java:150, 在 finally)
 ```
+
+## 12. Agent 2.16.2 源码路径与运行链
+
+业务入口是 core 模块内的 `HarnessAgentComponent`。下面的路径均相对 LiteFlow 仓库，不依赖开发机器绝对路径：
+
+| 关注点 | 源码 |
+|---|---|
+| 配置及默认值 | `liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentConfig.java` 与相邻子配置 |
+| 通用执行／身份／关闭 | `liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentComponent.java` |
+| 模型／工具／MCP／技能装配 | 同模块 `agent/component/AbstractAgentScopeComponent.java` |
+| Harness 及自适应压缩装配 | 同模块 `agent/harness/component/HarnessAgentComponent.java` |
+| 身份合法性 | 同模块 `agent/context/AgentInvocationIdentity.java` |
+| 会话守卫选择 | 同模块 `agent/guard/AgentInvocationGuardResolver.java` |
+| 展示历史与删除 | 同模块 `agent/conversation/AgentConversationService.java` |
+| 事件协议 | 同模块 `agent/event/AgentEventTypeMapper.java` |
+| 执行副本与持久文件 | 同模块 `agent/harness/storage/` 和 `agent/harness/filesystem/` |
+| Docker 缓存与恢复 | 同模块 `agent/harness/sandbox/SessionSandboxRegistry.java` |
+| A2A 客户端 | `liteflow-agent/liteflow-agent-a2a/src/main/java/com/yomahub/liteflow/agent/a2a/A2aAgentComponent.java` |
+
+调用顺序：`FlowExecutor` 分配 Slot → `AbstractAgentComponent.process()` 校验配置并解析 conversationId／agentKey → 取得 Agent 与工作区租约 → 惰性构建 Runtime → 创建带执行 deadline 的 LiteFlowAgentContext → 生成输入并调用 Harness → 事件／工具／可能的审批 → `handleReply` 写 responseData → 清理上下文、释放租约。
+
+deadline 在取锁和首次构建之后建立，因此 execution-timeout 不包含它们。模型、工具和仓库大多在构建期绑定，请求内容放 userPrompt／transformSystemPrompt／RuntimeContext。相同会话跨 Agent 共享文件，因此工作区锁可能使 WHEN 中的不同 Agent 排队。历史与模型状态分别持久化，源码查询不要再寻找旧 AgentComponent、独立 harness Maven 模块或 userId 四元组。

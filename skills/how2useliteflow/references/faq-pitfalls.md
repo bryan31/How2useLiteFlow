@@ -10,7 +10,7 @@
 JDK 8 ~ 25；SpringBoot 2.X / 3.X 用 `liteflow-spring-boot-starter`，SpringBoot 4.X 用 `liteflow-spring-boot4-starter`（需 JDK17+）；也支持 Spring、Solon、纯 Java。详见 `references/overview.md`、`references/quickstart.md`。
 
 **Q2：规则写在哪？必须用规则文件吗？**
-规则写在 `flow.xml`/`flow.json`/`flow.yml`（EL 后缀形式为 `flow.el.xml`/`flow.el.json`/`flow.el.yml`）等规则文件的 `<chain>` 中——**没有纯 `.el` 后缀**，`FlowParserProvider` 只认上述 6 种。也可：①代码动态构造（`references/dynamic-build.md`，此时 `rule-source` 失效）；②直接执行一段 EL 字符串（`execute2RespWithEL`，v2.15.0+，见 `references/executor.md`）。
+规则写在 `flow.xml`/`flow.json`/`flow.yml`（EL 后缀形式为 `flow.el.xml`/`flow.el.json`/`flow.el.yml`）等规则文件的 `<chain>` 中——**没有纯 `.el` 后缀**，`FlowParserProvider` 只认上述 6 种。也可：①代码动态构造（`references/dynamic-build.md`，可与 `rule-source` 已加载的规则共存）；②直接执行一段 EL 字符串（`execute2RespWithEL`，v2.15.0+，见 `references/executor.md`）。
 
 **Q3：怎么热刷新规则？**
 三种途径：①本地规则文件监听（`enable-monitor-file=true`）；②注册中心配置源（ZK/Nacos/Etcd/Apollo/Redis 等，变更自动推送）；③代码主动刷新（`LiteflowMetaOperator.reloadOneChain(...)` 等，见 `references/metadata.md`）。机制是"平滑热刷新"——旧流程不断、新流程接管。
@@ -28,22 +28,24 @@ JDK 8 ~ 25；SpringBoot 2.X / 3.X 用 `liteflow-spring-boot-starter`，SpringBoo
 超时用 `WHEN(...).maxWaitSeconds(n)` 或全局 `when-max-wait-time`(+`-unit`)；每个 WHEN 是否独立线程池由 `when-thread-pool-isolate` 控制。并行修饰还有 `ignoreError`/`any`/`must`/`percentage`。详见 `references/el-rules.md`、`references/thread-pools.md`。
 
 **Q8：脚本组件支持哪些语言？节点类型有几种？**
-支持 Groovy/JS/Python/QLExpress/Lua/Aviator/Kotlin/Java 等多语言（各自 Maven 坐标不同）。脚本节点类型有 script/switch_script/boolean_script/for_script 四种；**没有"迭代循环"脚本节点**，迭代场景用 `for_script`。详见 `references/scripts.md`。
+支持 Groovy/JS/Python/QLExpress/Lua/Aviator/Kotlin/Java 等多语言（各自 Maven 坐标不同）。脚本节点类型有 script/switch_script/boolean_script/for_script 四种；**没有“迭代循环”脚本节点**，`for_script` 只返回固定循环次数，不能代替迭代器。`ITERATOR` 必须使用 Java `NodeIteratorComponent`（或对应声明式 Java 组件）。详见 `references/scripts.md`。
 
 **Q9：LiteFlow 支持事务吗？**
 LiteFlow 与事务没有本质关系——它只是在本地把代码组件化、可编排化，**事务仍按原方式做**（官方《问答》）：在调用 `execute2Resp` 的外层方法加 `@Transactional`，任一组件异常导致失败时抛出异常即可触发本地事务回滚：
 
 ```java
 @Transactional
-public void testIsAccess() {
+public void runFlow() {
   LiteflowResponse response = flowExecutor.execute2Resp("chain1", 101);
   if (!response.isSuccess()){
-    throw response.getCause();
+    throw new IllegalStateException("LiteFlow 执行失败", response.getCause());
   }
 }
 ```
 
-分布式事务自行选型（已脱离 LiteFlow 范畴）；**不支持"逆向执行"来实现回滚**。⚠️ 注意区分：这与组件级 `rollback()` 钩子（`references/advanced.md`，失败时按已执行组件逆序回调）不是一回事——`rollback()` 是业务补偿回调，不是数据库事务回滚。
+`response.getCause()` 的类型是 `Exception`，直接 `throw response.getCause()` 只有在方法声明 `throws Exception` 或自行处理受检异常时才编译；业务代码通常包装成运行时异常。
+
+上面的 Spring 线程绑定事务只覆盖**同步、同线程**执行的组件。`WHEN`、并行循环、`execute2Future` 等会切换线程，不会自动共享调用线程上的事务；这类场景应在各异步分支内单独建立事务，或使用适合的分布式事务／补偿方案。LiteFlow 的组件 `rollback()` 是失败后的业务补偿回调，不是数据库事务回滚。
 
 **Q10：启动时报 `NoSuchMethodError` 是什么原因？**
 大概率是 3 个传递依赖被本地其它 jar 传递依赖覆盖：`transmittable-thread-local`、`byte-buddy`、`hutool`（官方《问答》）。解法是在 `dependencyManagement` 中显式锁定为 LiteFlow 传递的版本——v2.16.1 源码 pom 实际传递版本为 hutool **5.8.39** / transmittable-thread-local **2.14.5** / byte-buddy **1.17.7**（官方问答给的最低要求为 ttl 2.12.3+ / byte-buddy 1.14.10+ / hutool 5.8.26+）。版本号随 LiteFlow 版本变化，以所对齐版本的源码 pom 为准。
@@ -61,13 +63,13 @@ EL 解析本质是递归调用，链路嵌套层数很深时栈空间随之增�
 ### 执行器 / Response（`references/executor.md`）
 - ❌ `response.getException()` → ✅ **`response.getCause()`**（方法名以源码为准）。
 - ❌ `getExecuteStepInfoList()` 不存在 → ✅ `getExecuteSteps()`，且返回 **`Map<String, List<CmpStep>>`**（文档曾写作 `Map<String, CmpStep>`）。
-- `LiteflowResponse` **没有顶层"总耗时" getter**；总耗时需自行遍历 `getExecuteStepQueue()` 累加 `CmpStep.getTimeSpent()`。
+- `LiteflowResponse` **没有顶层“总耗时” getter**；不要累加 `CmpStep.getTimeSpent()` 充当流程墙钟耗时，并行节点会造成重复累计。需要总耗时时在调用 `execute2Resp` 的外层计时，或使用 Metrics／链路追踪。
 - `LiteflowResponse` 不宜直接序列化返回前端，应用层自建 DTO。
 - **流程入参 ≠ 上下文**：把上下文实例当 `param` 传入，组件里从同类上下文读不到值；`param` 只能 `this.getRequestData()` 取。
 
 ### 配置（`references/config.md`）
 - v2.16.X **不存在**这些配置名，勿臆造：`whenMaxWorkers`（并发由 `global-thread-pool-size` 控制）、`printExecutionResult`（应为 `print-execution-log`）。⚠️ 注意：`chain-cache.enabled` / `chain-cache.capacity` 是**真实存在**的配置（只是未写在官方 050 文档里），勿将其误当臆造而避开——详见 `references/config.md`。
-- 改用"代码动态构造规则"后，`rule-source` **自动失效**（不必也不能再配规则文件）。
+- 代码动态构造与 `rule-source` 可以共存；只有 Rule-DB 模式与 `rule-source` 互斥。
 - 监控项在 SpringBoot 下是 `liteflow.monitor.*` 子节点；在 Spring XML / 纯代码下被**拍平**为 `enableLog/queueLimit/delay/period`。
 - 纯代码场景类型为强类型：`setWhenMaxWaitTimeUnit(TimeUnit.MILLISECONDS)`、`setParseMode(ParseModeEnum.X)`、`setDelay/setPeriod(long)`。
 
@@ -80,7 +82,7 @@ EL 解析本质是递归调用，链路嵌套层数很深时栈空间随之增�
 - **WHEN 并行分支并发读写同一上下文字段会产生数据竞争**：框架只保证 Slot/上下文实例在多请求间不串（上下文"本身"的线程安全），**上下文内字段的并发安全由用户自行保证**（官方《问答》、专题解释 01）——例如上下文里一个 `int` 被多个异步节点并发累加就会出错，应改用 `AtomicInteger`/并发容器，或避免共享可变状态。
 
 ### EL（`references/el-rules.md`）
-- 算子**大小写敏感**，统一大写（`THEN`/`WHEN`...）。
+- EL 主关键字（`THEN`/`WHEN`/`IF` 等）大写，方法式副关键字（`.tag`/`.data`/`.retry` 等）小写；`node`/`NODE` 与 `to`/`TO` 两种大小写均已注册，不能简单概括为“全部大写”。
 - `maxWaitSeconds`/`maxWaitMilliseconds` 是**节点或编排上的修饰**，注意书写位置。
 - `CATCH(a).DO(b)` 中 b 处理异常，**不要**让它再抛出而"吞掉"了原异常信息。
 - 链路继承 `extends` 需要被继承的 chain 已定义（占位/解析顺序），注意循环依赖。
@@ -115,18 +117,19 @@ EL 解析本质是递归调用，链路嵌套层数很深时栈空间随之增�
 - **手动改库必须 `version = version + 1`**：对账主判据是 version（其次是 `content_md5` 列存量值），只改内容不改 version → 改动**永不生效**。SQL 最小正确姿势：`UPDATE lf_chain SET el_data=..., version=version+1, content_md5=MD5(el_data) WHERE application_name=? AND chain_id=?`；想 3 秒内生效还要在同一事务补一条 change_log。
 - **启动时存储不可用 = 启动失败**（manifest 拉取失败直接抛异常）；但运行期存储挂掉、缓存命中则照常执行（缓存是可用性下限）。
 - 发布顺序：**先发脚本、再发引用它的 chain**，否则收敛窗口内别的节点拉到新 chain 找不到脚本，编译瞬时失败。
-- Rule-DB 回源加载失败抛 v2.16.1 新异常 **`ChainLoadException`**（规则存在但取不回来），区别于 `ChainNotFoundException`（规则不存在）。
+- Rule-DB 回源或编译失败时，有激活版本就继续使用 last-good；只有冷加载且没有任何可用版本时才抛 v2.16.1 新异常 **`ChainLoadException`**。它区别于规则不存在时的 `ChainNotFoundException`。
 - Rule-DB 模式下 `parseMode`、`enableMonitorFile`、`chainCacheEnabled`/`chainCacheCapacity` **不再被读取**（解析时机、热重载、缓存语义均由 `rule-db.*` 接管），配了也没效果。
 
 ### Metrics 端点（v2.16.1，`references/metrics.md`）
 - `/actuator/liteflow`、`/actuator/prometheus` 默认 **404**：必须 `management.endpoints.web.exposure.include=liteflow,prometheus`——**采集 ≠ 暴露**。
 - 没引任何 Micrometer registry（如 `micrometer-registry-prometheus`）则**完全无指标行为**。
 
-### 版本与已知修复（v2.16.X 源码 commit 核实）
-- **#IDB16L：WHEN 并行执行子 chain 抛 `ConcurrentModificationException`（≤2.16.0 存在，2.16.0.1 起修复，v2.16.1 已含）**：旧版 `Slot` 用 `ArrayList` 存放 chain 实例，WHEN 并行分支执行子 chain（写）与构建线程池读取 chain 实例（读）之间并发冲突所致；修复改为按 chainId 为 key 的 `ConcurrentHashMap`（`Slot.java`，commit `e27d7eb9a`）。在 2.16.0 及更早版本遇到该异常 → 升级到 ≥2.16.0.1。
-- **#IK6XVN：javax-pro 脚本 `ThreadLocal` 内存泄漏（≤2.16.1 存在，2.16.1.1 修复，v2.16.1 tag 不含）**：`liteflow-script-javax-pro` 的 `JavaxProExecutor` 每次脚本组件调用（`process`/`isAccess` 等所有入口）都向 `ThreadLocal<Stack<Node>>` 压栈而不清理，线程池线程上随调用次数无界增长，长期运行服务内存膨胀；2.16.1.1 改为 `finally` 中 `cmp.removeRefNode()` 成对清理（commit `5e1e9dab2`）。使用 Java 脚本插件（`references/scripts.md` 中 v2.15.3+ 推荐的 javax-pro）的用户 → 升级到 ≥2.16.1.1。
+### 版本与构建边界
 
----
+- 2.16.2 当前源码根 POM 使用 AgentScope 2.0.3，Agent 统一为 HarnessAgentComponent；旧开发分支示例需按 `react-agent.md` 迁移。
+- Spring 6.1+ 参数化 Actuator 端点检查制品是否保留 `-parameters` 信息。
+- 当前源码关闭 `liteflow.enable` 时同步关闭 `liteflow.metrics.enabled`；Metrics 装配没有 FlowExecutor Bean 前置条件，详见 `metrics.md`。
+- javax-pro 脚本的 ThreadLocal 泄漏修复始于 2.16.1.1；升级时核对实际制品与源码，不能把“版本号更高”作为修复已包含的唯一证据。
 
 ## 三、当心"想当然"
 

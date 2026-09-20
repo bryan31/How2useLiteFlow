@@ -1,0 +1,4308 @@
+{
+  "reviewed_at": "2026-09-19",
+  "source_commit": "8623451380ee32e2d9eefd3e5f2e721a68482a28",
+  "homepage_commit": "e50a2e15cc9641c4444a04faed97742349b43113",
+  "snapshots": {
+    "homepage:docs/04.v2.16.X文档/010.LiteFlow简介.md": "6adfd392dbd763b7e2651e3be317a6907509ae7ff5be090d2b48383fddee2186",
+    "homepage:docs/04.v2.16.X文档/020.项目特性.md": "92aefcd312473e752959fdb4c62d4dfe69660a8fd8a6db7b3b235ff2f5c4c09f",
+    "homepage:docs/04.v2.16.X文档/030.🧁环境支持/010.JDK支持度.md": "6e63e503a38120e566a0381a301261c8980a104869d14e19459bd42e19325284",
+    "homepage:docs/04.v2.16.X文档/030.🧁环境支持/020.Springboot支持度.md": "6aa7e3178144b5b77a5717b6662fdf732b28c708c74cd7be627270e287c295fc",
+    "homepage:docs/04.v2.16.X文档/030.🧁环境支持/030.Spring的支持度.md": "a7c59f3ec41e7727a1b154a3540e5e24735ce00ddf50e5ce9c888b1a16b5a0af",
+    "homepage:docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/005.说明.md": "28a9b3007c8a480d64a0e55bcf3319d7d4b526ed0e963702d815848cb6eb61b5",
+    "homepage:docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/010.Springboot场景安装运行.md": "1031a331bcf12cb65c57386dadf04d776f7182465ae31822366087ac66edc3d3",
+    "homepage:docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/020.Spring场景安装运行.md": "d06baf35befb1fb8a380666b9fa74aae2c1730e8eb144b8a580bb5cb2b4b7094",
+    "homepage:docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/030.Solon场景安装运行.md": "06b4931c7b243b1c84779476b497e442fa8e76aa7e35a5e40dfc87a10bd9cd92",
+    "homepage:docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/040.其他场景安装运行.md": "ca215a6eec2e6bef1e3f4fc92603f4ce8303bcf9af3c1e1611cb9cbe46af9b99",
+    "homepage:docs/04.v2.16.X文档/050.🍢配置项/010.说明.md": "a4d491f1f2a6e7561dd126cb484efd81246d6d6f218197e3b1678fd5c9082d82",
+    "homepage:docs/04.v2.16.X文档/050.🍢配置项/020.Springboot下的配置项.md": "af243c0bbdd6a57e1f8c35d078d30bd4811b58621a1fdbd778e74131813afc2e",
+    "homepage:docs/04.v2.16.X文档/050.🍢配置项/030.Spring下的配置项.md": "f596a0b5787b4ad8d1695b843f9e060f55e6c28cdad1b7441c0a320cb55e6e69",
+    "homepage:docs/04.v2.16.X文档/050.🍢配置项/035.Solon下的配置项.md": "b1c8d86d7b0ea5e42841e3c16a17d804b28980cff4658305ce68139ad063d83c",
+    "homepage:docs/04.v2.16.X文档/050.🍢配置项/040.其他场景代码设置配置项.md": "0dfb5d35a2beabc2729d1a02baaf6ba0226ba19dc9ea63b7e67640fdddff4378",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/010.普通组件.md": "9b2e028bcaa999053ffdfbd008082583297da7b1dd3c9ece2ad5c608de2c2224",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/020.选择组件.md": "c483e1c480efc0043602057fefd90b1bc04d8f0d998d0b3a285725ea58258d30",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/030.布尔组件.md": "c668199317b873613a3a4f87d2dbc7aa3761820ba645da3f69e9d07a89a4ef36",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/040.次数循环组件.md": "bb7c62e3ea94c25d3e8c15bcbdb0d7277cd53f076a85ca0d32d6062455761c9f",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/055.迭代循环组件.md": "e5f4d82033274a02ce2d90832655be115f7f66b1db0a1ce8e3a16d302281ad96",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/060.LiteflowComponent.md": "316e43a40d0651f25cdd908e299ad8344085883a21521e7692a91d4b6c14fe10",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/070.组件内方法覆盖和调用.md": "ba8824084451267c45e1a8e0d651971d75bef25172c62a627aad0ac2de41fdb6",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/020.🎁声明式组件/010.什么叫声明式组件.md": "39165fe3d85079153e0559119b8ef489833401f601926f0e4035a6b08df638f0",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/020.🎁声明式组件/020.类级别式声明.md": "f98c39e39ddef315eae18b13fe59e6774a89deed1368871a22c8534dfb272158",
+    "homepage:docs/04.v2.16.X文档/060.🔗组件/020.🎁声明式组件/030.方法级别式声明.md": "2edfad4e8c71f2a686887b4e45071b48f5f001a85e7a92d2acee5dcf1ab8bd40",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/010.说明.md": "27bd7d6c3742743f41fcdc87a8b65dd7a795b5dd332d90ca3ca9445bea8721af",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/020.串行编排.md": "61a567a4a4f949d679b9e5b8e80f15b5c96af1a4042b2700aa98ff5d415de2be",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/030.并行编排.md": "02914490f4a1f9cad003f5c9c1a15cd59920b31eb174de66f8e9b54e232ca1f5",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/040.选择编排.md": "6a5c1f154a65920d3aaf8d69c345098b25de520788078a720963efe4826084d5",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/050.条件编排.md": "7e376384d1c21d41fcef9e57c8178888bb43cd5f1cff20250e9fc11bb8b3523c",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/060.循环编排.md": "5e9cc5aabcc93ec6026f9412d602b6084d1900fe27b103ef04183d3eaa9e4d00",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/070.异步循环模式.md": "8751b9299db881faf824e742f418a3227169bd434a1e5c8e3d6b1665d77f2edf",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/080.捕获异常表达式.md": "a12e59addf64616cde6ae939063df6d0a0a30c63136b4716c066988252aa09af",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/090.与或非表达式.md": "03ff2670c976ebf266230ac3e7eb309badf3dac7153f726f10c9ff7c019e6c1c",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/100.使用子流程.md": "84fb6b6609189f05c1989c78d64d2302ea53090d6b07b6c0f7e535270e22bff4",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/110.使用子变量.md": "b776c919ac4e5c2db4d4c63ef8bd35fed7528c815e833d976329a7eb36d10d6d",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/120.复杂编排例子.md": "c39d4bf82047a7269c9795a7ad12677c978a809cbbcd374bdc4bbdf5bf64a33f",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/130.前置和后置编排.md": "09045a79e14a4f6f46e4284ca51199dbde0a4c445c5152c4e5935635759765d5",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/000.说明.md": "74f80aaf293b6ce8baa91b792e6e96d11c571386ee21be089085e10e26c6ba9d",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/010.tag语法.md": "8c6dd4c0d78c1f3a5fcd6bca48a6271dda5760df018a7a29e548f26f40ab4718",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/020.data语法.md": "8415325657433ac2f3400fd0cf8af9bbb53f31cdad0897a4d3b1e9feec5e4948",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/030.bind语法.md": "eb4445f699209f2c6078805770644bfa7ee770e8a3153697b7406a5fec5bec83",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/150.重试语法.md": "2b3e435e399ae8cb5d68d02433a08b3e6f835aaa5513148f94a40165fb32579b",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/160.超时控制语法.md": "cc2e4ca2b0ddd4ec862b0ac91be53db08aa0434aa86386ff44daa3de8e6b92a2",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/170.链路继承.md": "5b031b08c7a0f50a6a524722edf0d5803b2e9ec190f000fdf19ccaf9f3e30989",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/180.验证规则.md": "125ece1d1408713eed3ff1115e6c11acf065fe1d91bb6126c18d2d2cde9214a7",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/190.关于注释.md": "063ad725d034bd47806d9a7ba6ff9c6c1050fd6c53a47cd8cc5cc3c14ca79b6d",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/200.关于分号.md": "78138a71ed190a977dd78510660eaa09e7d43cc3776d66cdcd17aeb376fffd8b",
+    "homepage:docs/04.v2.16.X文档/070.🧩EL规则/210.组件名包装.md": "4cc939eacfd93c9b512c3a87b7ddcbbcb6dabaa9fa23870892ebdc3ed2531170",
+    "homepage:docs/04.v2.16.X文档/080.🌮上下文/010.说明.md": "a78fbabbd51ff5b110ca0755ef74b3a0943500901ebc1f63f6a2b72c23768a34",
+    "homepage:docs/04.v2.16.X文档/080.🌮上下文/020.数据上下文的定义和使用.md": "d89809de34d4438568ce8c03df3810b6fbabc40993cc8e4389b8ddc3385f71ee",
+    "homepage:docs/04.v2.16.X文档/080.🌮上下文/030.用初始化好的上下文传入.md": "86f07d8278d3e7afeec6c618f9e71df1fb1957a6a4ba1c589ee6e1aeb454637c",
+    "homepage:docs/04.v2.16.X文档/080.🌮上下文/040.给上下文设置别名.md": "1a13bf5cdf7a7aa14b5de8d74deb660a5058bc75b8d6409167b686f3b3f06060",
+    "homepage:docs/04.v2.16.X文档/080.🌮上下文/050.上下文参数注入.md": "8f402d05b22658ae6dffc186a0b3d10d6602d8fd6d4e7fc7dfd75203dd93275b",
+    "homepage:docs/04.v2.16.X文档/080.🌮上下文/060.用表达式获取上下文参数.md": "e0ed5c4d59384c2fb7c61b4460b855ade22d8c8e88d35acbb95e725be4ee0939",
+    "homepage:docs/04.v2.16.X文档/090.🛩执行器/010.说明.md": "fee7c34b9934527508161e334fe45a56aa9e4c4e4a5a4efdc923e8ae7ad98eb5",
+    "homepage:docs/04.v2.16.X文档/090.🛩执行器/020.执行方法.md": "13ae463a130c9c5ac1a98629e767d99a7d57449419525401322fcf91db283b86",
+    "homepage:docs/04.v2.16.X文档/090.🛩执行器/030.流程入参.md": "dab5a76e32c1ad4e490c41ffcd052e8dce2078745fcdfa51d223bfa0ac63e476",
+    "homepage:docs/04.v2.16.X文档/090.🛩执行器/040.LiteflowResponse对象.md": "d174b45b6130a4bc51049d8842c3d3e466d1e2544e1e7a86e6389364f0fc630f",
+    "homepage:docs/04.v2.16.X文档/090.🛩执行器/050.直接执行EL规则.md": "fde1a770708fe02a0efda47b79dd68886dd1b617528904dba1e41c987789b916",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/005.脚本语言介绍.md": "d7b395e06015ecc6ce405464b8c350e8fd334abf90ee3a0562c432cfe4386078",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/005.Java脚本引擎.md": "a6cad8df73e8bf0190f4bb54763b756bd0127b3630839ea2d6570d98cfba231f",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/010.Groovy脚本引擎.md": "50cebed09702385a14a85d96c21b5a0b6423b10f9dee59fc6394f6ed3365d442",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/020.Javascript脚本引擎.md": "a1e04ef3f435e0f98ab123b34508611c4c8373c84de536b2d960226069eb8349",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/040.QLExpress脚本引擎.md": "99207940a320b423b0fd9b382dcc330692044965b1f24c6f84d29e6de2ff8e8e",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/050.Python脚本引擎.md": "fb3e452a3c97f91702b5d442a64441eb8cc0d42f6341fb7a13406daaea3d16d0",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/060.Lua脚本引擎.md": "e2140f2e71713760b520a53143504cf13e092cf0ead12606833576a605f0656a",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/070.Aviator脚本引擎.md": "1ae8393024d6d1ed60678545c2bedc8c789edf5b5d280cc700b38e4d25cc2f26",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/080.Kotlin脚本引擎.md": "be39fa269b86a898ec26d460174dbabfecda5510278ad3ad6effbe1400ca6e55",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/015.脚本与Java进行交互.md": "b4c8d3ec799c8878f33b9de72f8766125bd04de9ac9424edefb94542f4fd4403",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/020.多脚本语言混合共存.md": "8c2c234f6b9d958721ee8d480aa9ef6ad2a261aeec7776202505ccc2887c2b3e",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/030.文件脚本的定义.md": "c53cc592e4c1f82690bcbfa4096c979e9df1de53803589db9a95671fdc6c2abf",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/050.动态刷新脚本.md": "36ddaf4f15f5ad6df9bdbe15a0b367283abf22b9d73b7250f3b6e02897ac8a44",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/060.验证脚本.md": "137bdb3dd474b4b85e055f6af9f8fab490a17c1eb9c137df92425e971394cdb8",
+    "homepage:docs/04.v2.16.X文档/100.🍋脚本组件/070.卸载脚本.md": "95b011e24874d6a7f2cc72ea092bfc1d0a3fab6121a7e5f25624070ec78f5e03",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/020.本地规则文件配置.md": "03e170e772ac30c898993a72527dbc353ecc747281973eba02409cc788e32cad",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/030.SQL数据库配置源.md": "d6999cdd4ded29a57bb317a31fca9d3b32ac15d487a77e67845e54f60916f892",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/040.ZK规则文件配置源.md": "1ae0d698a12055fdca0896fa0a5b9738efd42d39b8f209a9ed9524623d9feeea",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/050.Nacos配置源.md": "fd56a203b98bc1555450205c5b826ef4a25b13b869af3bcfee5245d29938cab0",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/060.Etcd配置源.md": "63d5e465e77cb57b8bb01348128d921d6db10f0adc17beb7f7d61f345e7d740e",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/065.Apollo配置源.md": "2deac0dba30873dfd071a457c3e176527f91653fd7f095324ed40f7fceaeb4f0",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/066.📑Redis配置源（旧）/010.配置说明.md": "2511fc5ad288f65440ca29a499eb37ed3d6417353c6108195fec608340f014db",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/066.📑Redis配置源（旧）/020.轮询模式配置.md": "e88365b0745666edab3278189634f334d5ce8f704f1aff6357beacbc1610b012",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/066.📑Redis配置源（旧）/030.订阅模式配置.md": "f233d09c71d9351a392be52a1f64d23b14b17d650904264201aa981eda7798c7",
+    "homepage:docs/04.v2.16.X文档/110.🗂规则配置源/070.自定义配置源.md": "65301618a98939d502ae11caff50cb8f0644240ea2f53406595255971134e1fc",
+    "homepage:docs/04.v2.16.X文档/120.🍼元数据管理/010. 元数据操作器.md": "61dafac2709fe8fb638abf368f85da4b66ea0f9c8e4dfcf5eaba50705ec595ab",
+    "homepage:docs/04.v2.16.X文档/120.🍼元数据管理/020.平滑热刷新.md": "6443d845126edc80e5c0d2ab4eca3bb0adbbc70483402ce1594525a60f1c321f",
+    "homepage:docs/04.v2.16.X文档/120.🍼元数据管理/030.启动不检查规则.md": "b50481ec9a5a7eec8e080e55eae692f2962b00bf0321e939445db8f641fb20a6",
+    "homepage:docs/04.v2.16.X文档/120.🍼元数据管理/040.启动不检查脚本.md": "4e15e5139bd3de020ff7d76f131cdfcee11b35b0c20d5c56f5fd588424aab33e",
+    "homepage:docs/04.v2.16.X文档/125.🌌异步中的线程池/010.说明.md": "68ae8bf346623dbbb8a48f70c512ee6ab441a22f4645c819e441b3a898abe6aa",
+    "homepage:docs/04.v2.16.X文档/125.🌌异步中的线程池/020.FlowExecutor层面的线程池.md": "083eccb42fed3fffa090351e031a1449639d7d31ff79214d95e1e862c3d142c9",
+    "homepage:docs/04.v2.16.X文档/125.🌌异步中的线程池/030.组件异步层面的线程池.md": "efed2f7066d1fdef06ae47086a645109bed66d93abeb115507961f7652c32784",
+    "homepage:docs/04.v2.16.X文档/125.🌌异步中的线程池/040.虚拟线程.md": "2d7e448a1889bb38e3567252e1ff1690ccc432c7cb928c8c43173459ccba0eb7",
+    "homepage:docs/04.v2.16.X文档/130.🎲动态构造/010.说明.md": "0a336d0287f45ca46d9bd7714c55c4d152521bd807524ef4299dfadcea6ce283",
+    "homepage:docs/04.v2.16.X文档/130.🎲动态构造/020.构造Node.md": "50d1668bd7c38efe8c34578cb8c5e7baa84368059cec514bf48fbdd619a2b6e7",
+    "homepage:docs/04.v2.16.X文档/130.🎲动态构造/030.构造EL.md": "716686260350ebdf7dfd7ee4ee99201763c4491f0340c793ce69e8fb463a973b",
+    "homepage:docs/04.v2.16.X文档/130.🎲动态构造/040.构造Chain.md": "443ec8111e573251cc7846eeaa151641608f35e78907d8441fff36729c32e04a",
+    "homepage:docs/04.v2.16.X文档/140.🧮决策路由/010.概念以及介绍.md": "71e98839d7c7c02043ff450151e691446eb11a66fd160ca012690fb3a7946958",
+    "homepage:docs/04.v2.16.X文档/140.🧮决策路由/020.决策路由用法.md": "9d7e1688f4d636979ddec8fbd8df6824358b79c2a5c7a9a8d2c86157521223fa",
+    "homepage:docs/04.v2.16.X文档/150.😸生命周期/010.启动时生命周期.md": "a72ce9cfb016a0b7b669e08aa48577fde5b93fa3cb1cba10753efec12ac2c5df",
+    "homepage:docs/04.v2.16.X文档/150.😸生命周期/020.执行时生命周期.md": "3420435297475986e43a33979e308b808c53accd8488c28fbb179996f35e5099",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/031.本地规则文件监听.md": "8b2836aca4089cc3ef9f4f556e55620c09d25342fb000f24d6801dcb15820bc2",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/035.组件降级.md": "fe66f675d3ccb37fbcacaa593cb2afd2d7e0f5c2586aeaaa5383cd07b343ab5d",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/040.组件别名.md": "bf66be46d9bb620df1ff0ee413b6bf013ef72d3c987b516fbc4d12cc12faca39",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/060.组件事件回调.md": "251b47c5892b7f1244f104b91f9a591cd23eabf114aca7bd720b512f57d3b0cf",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/061.组件回滚.md": "03715a4e1c5987cc0db29986f835a4cfc1488a5102024fc6d8e0148b91c92c98",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/070.隐式子流程.md": "8338d2d1178590fe57f9b40022d6f06d601267db032f5bc1db5aae469703a37f",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/075.活跃规则保活策略.md": "20f425497c366c1bbc66f112b89a884d8c8f61df6f8ad9451648627d55e61578",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/080.私有投递.md": "b5732bd5f3b3421ea7cc37bef67fb8fa32ad2ca412e1f27ad772d6c109c28cb5",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/110.组件切面.md": "13ea9b809a035b9e3c9fc738017bff5dfc2ff3d5765c30daac9d23a6d8cfa013",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/120.步骤信息.md": "ed403c7bc61ddb7c4d423edbe8ee1f44ae3cfffff0fb82ee1a2e725f0912848f",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/125.异常.md": "1e646b4c3fc724d03e23e2203ca98b0565dccb9a236cee6993c8a576aa5da892",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/130.打印信息详解.md": "22a500a9e6e1d4c930c93fa26d44f7c2e4e5b38895ed692172458e3baf6751fb",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/140.自定义请求Id.md": "f48b5168315673aef7a19f00dc3da38a8c1bd4d2aa68ab23343a34de266c6a71",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/145.快速解析模式.md": "88ddf566190e43a4bc19cfad47679a6f02d40c30658aacee7efa68ba92392bdb",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/150.不同格式规则加载.md": "e3c1d1dee7ea31a3d2c0d796094c26f1b2ac740f4d712d7e6866e60e6dfa79bd",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/170.自定义组件执行器.md": "fb6da4759069ad1f504c25a6b92a28a46927d97eb431b42207114513f97a26fa",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/180.简单监控.md": "2f26ab7736e137b159fc9ebb6c7bb1a4d2c43b5ec01314ae3bd77c078c2991b4",
+    "homepage:docs/04.v2.16.X文档/160.🎨高级特性/190.XML的DTD.md": "e26c63d31962fb2b52880846548ec1e6d0cb5eab9fd6ea33309fbc60fb26206f",
+    "homepage:docs/04.v2.16.X文档/170.⛱测试用例以及示例/010.测试用例.md": "a362d13878c64ae4ea17e959b48888d1d554cd7d67bb5570fd6d8cd6996ec947",
+    "homepage:docs/04.v2.16.X文档/170.⛱测试用例以及示例/020.DEMO案例.md": "2e802180cb5c5367c4b54cacd740ddda6677ad6b3a72cf7fde5ccfd4ea6aa800",
+    "homepage:docs/04.v2.16.X文档/180.性能表现.md": "affbf85025a98812fd1111c370081887eaa23107af9e0552dc629210ba524b82",
+    "skill:references/advanced.md": "24380caf23b745476d0f353c0cbe9a5b29a2950ca889897d6a36c36941de1fb7",
+    "skill:references/agent-a2a.md": "799b114a54aeb9ea2017a0cf8326a1e58ca057abb38117fb06221c07dce8027d",
+    "skill:references/agent-config.md": "ddd9ffae270ed9de018775fc6e030f89a0807164ef1dbbed7fb71fa3c3a0c07d",
+    "skill:references/agent-harness.md": "6379662e22a0180648048436f7cdf08a8cc5305f28da0cf38aee0a8a7c51688b",
+    "skill:references/agent-models-tools.md": "92cfb4cbbfa4d8394722159fd3bab1ac810a26267d7a72e71a4385ce2d1d989e",
+    "skill:references/agent-state-events-hitl.md": "347c3009b7ac4d389773a65da4c13fc3b6d6bf805239fc6d381d82c44a1b9ed1",
+    "skill:references/agent.md": "c479a0f51a44b37f0fa2c380adfd3963fb869243edbcdc60069aa1a637109fe4",
+    "skill:references/components.md": "ed4b06a90674dfe2a1edbeb1db3a7c08750bd834bd7d5afed1104feb2459f45a",
+    "skill:references/config.md": "cf5cd9e00cf704292160b6856b73e2842344f91137fae72c02c86fc979860f1c",
+    "skill:references/context.md": "6648e6ef587fc20c782eb4299cd48151f8f3a1ce96f2ca06a48d033dd7ee85c7",
+    "skill:references/decision-routing.md": "814e6794f8bf3a9c9f65b3c66d8a64f50df35424918464e192877bba622b86dd",
+    "skill:references/dynamic-build.md": "866eb01b8d6ea8fd7219debd4c6e379cf12480b5cf06b6a97558777e031bb668",
+    "skill:references/el-rules.md": "efa9cf7624bde7e7e1c5de60e68ce33987131536ee5472979a0376320225c410",
+    "skill:references/executor.md": "2bf00422e28207b9621fa789cb394d67bd602f2a69c8e236064a15402177d37a",
+    "skill:references/lifecycle.md": "6fb251c227df50dd9b85ef115d4cc663fb3c6c6744bb8b3df36f400e2a7689d9",
+    "skill:references/metadata.md": "80bbd1cd7d1d955382d8b24b71adbd95bea2490ea6cf5c8ee237ca3b1a251c35",
+    "skill:references/metrics.md": "c44892c7dfb35eab929d1e757ea3db6be9e95453bd37ea32e318d56efeef024d",
+    "skill:references/overview.md": "3ed13068190ff6e0624535357014c0ae733b5c724768cb97ec018abef4ba1d7b",
+    "skill:references/quickstart.md": "fdcc1b3c637168239ee0167a07bb19516256dae3a040fd2376a69b5bc2f1893d",
+    "skill:references/rule-db.md": "71e4fe82d7a899e0dd30167fc0620d89d92b72e69ecbcbf3fb70e1161ba77763",
+    "skill:references/rule-sources.md": "0ec55b69bc79def38fd4efafd3563d82394e48118982e20e6e8f857386983d85",
+    "skill:references/scripts.md": "436a2e7ddf0e5f094e3c56b11faaa7b750182d2f32c338784b96856277c2a387",
+    "skill:references/testing.md": "dc30ce4665a60fc0254cf75112020d3985c767779ac2e57e770af9ada322c224",
+    "skill:references/thread-pools.md": "cf2fd2db65a9faf73c75e1aee4f6ceff08b6bb64b4f99a87bf34099db71df338",
+    "source:docs/liteflow-agent-guide.md": "6ee2581739ec1638894a474afda72ba0b63aef82da0efa57b0f73bf4f45a8d29",
+    "source:docs/liteflow-metrics-guide.md": "dc516f18765a1437acfa9387690dc36deed386086e93eaa0c0dd1f621d1f9908",
+    "source:docs/liteflow-rule-db-guide.md": "37ea9ebd6338efd7d60ec48fdbb4e836e77d62d93c0e87c32d40fc2fe8e6c7bd",
+    "source:liteflow-agent/liteflow-agent-a2a/src/main/java/com/yomahub/liteflow/agent/a2a/A2aAgentComponent.java": "bb67c00ebc4e87d282ecbd64ea13913652b127fe4a9e8790c03f92e28cf0c922",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentComponent.java": "4792ae75d4e8a4e3470da161f828fd8c0d91856fb6e37d6fe02d90186049299a",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentScopeComponent.java": "7e609bcbdcd7038f62231e746a149cc3ebdfea81983927eec71fdfe91912cc23",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/context/AgentInvocationIdentity.java": "bc71c4c0bb5d643e4ceba92e0d49d5126c9a450c994350b6e37de6abaf80bd92",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/conversation/AgentConversationService.java": "a07c7dce3d2ef9be7347ef36be136b6cf82b52ce5d11956553ee80851744432a",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/event/AgentEventTypeMapper.java": "675235fc0652ed3745417797b6d2c89780d7a37ce2a2b1f465cfd5fbedc26750",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/guard/AgentInvocationGuardResolver.java": "66905b244b29a6fc9da0cd352ea767f68da0024fb65532f6a86248c21306d570",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java": "db802ad3b316aa2dcffc6ac8b29046bce52a6bc3900fe42ad52e3f840936246f",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessMemoryConfigResolver.java": "4265e4393837ef1af70fcc664b9a0700a03770eb4501992e580405642d96700f",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/filesystem/GuardedLocalFilesystemConfigurer.java": "0ed45ed05d2a8530efa21c9efde34a6d4c71d7ea80fe2fbd34282624a2de42ac",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/sandbox/DockerSandboxConfigurer.java": "7becdca9af1562439b99575567948d5b29887d40f87a6dac46248ea3b814082a",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/sandbox/SessionSandboxRegistry.java": "4d512a419ab5dc0a51e57ea6264902e1c021e953078d0f85145a5da05c127d2e",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/skill/SessionSkillWorkspaceMiddleware.java": "86250aa5fa937f85a91c81a0af1986a1e99a76b4f6a1323ff42b5ee1d60d7503",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/hitl/AgentConfirmationHandler.java": "1ae32d242b1395887e6280f0ba16ebf04c90cdfcd3e9f194edd5a738d62c0b35",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/model/ModelSpec.java": "250e27346c8fc6612618f117718e7fbb8009c49a4450abbf99590cb62d8c9675",
+    "source:liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/state/DefaultAgentStateStoreResolver.java": "e5dfb8070a23ddf5c851917cfec70c7a951ecb19872bedcad7d9c1b988098442",
+    "source:liteflow-agent/liteflow-agent-mysql/src/main/java/com/yomahub/liteflow/agent/mysql/MysqlAgentStateStoreProvider.java": "b369ba2c34b56ca39a1316c10917d179d8be8ed4c312adfb5e7ae96db65ba667",
+    "source:liteflow-agent/liteflow-agent-openai/src/main/java/com/yomahub/liteflow/agent/openai/OpenAICompatibleSpec.java": "350fe54c242e0df999a7d4b84cef235d376ee43de4bd18bf3a574d2cbdd7cf29",
+    "source:liteflow-agent/liteflow-agent-redis/src/main/java/com/yomahub/liteflow/agent/redis/RedisAgentStateStoreProvider.java": "50008c572734cf2fdb0a6d5d9ab3580015d0c9b0a23269b7d1acf01f8fc292b9",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java": "e9fbbfaa5b4c9e15e284b15b1f97ced4eba529af714090f20eeb9b69e07b8a82",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java": "0c85286c19316dd96290359c88be830a6dc972fb81936313b6c14bd9b9df07ed",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/core/ExecuteOption.java": "f1342c863c6781cddd15596073d71637e161d08065b92e34b71a45484853b6a5",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java": "8a6c015f93310cd294ee61e799ddb1d2030070847a6d5b69b8fa1f13252ac655",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java": "e54de017fe078f2c9c00219b7fc0fd398109d541971b10f9d10e42fcd53f754a",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/lifecycle/LifeCycleHolder.java": "cb085cb2a469521ba01d8b107b4426a9a2d9a3862935c6aeb4b7702f0c393dec",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/meta/LiteflowMetaOperator.java": "6d853772b0d6a3c97c80f10e7ac50dcea79d6a8dde74269cb60c53da7f6634cc",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/LiteflowConfig.java": "05d59f489591d04c35eac1b457c3423b95d7c01e9668a2d10a5f7da94003f6bd",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java": "6f0b3d25a5e7a0b4a638cf0b75897902aff52e9e6fabddba5e1de9e79eccef37",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentConfig.java": "fdd51ae828fb1a0c2976b9e91388d5375d58cb34b8bd676f26d4c0ac75692d84",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentInvocationGuardConfig.java": "2e7d14a609b1bb145d8ed31e341d1d7785e70839b418ff7cc548d3127b0d924c",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentSessionStoreConfig.java": "b4eccbba8bbb7268683190e5261a385458d3ecf72d3424cec0081d9d7c796c83",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/HarnessConfig.java": "b87306afdf4eed73777865beeb5fd5a4ae59c330126f74b147e8db0d1d5a4bfe",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/ShellConfig.java": "8ad759e1bfe96a6752a31bb66a432660f7d62f1a917663a48c7ecfbcd60797ca",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java": "62d7e94166c79b5bc26a32ee48aab9cb545be0978eb600ac0c5a75713d462998",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbSyncManager.java": "2432bf673a364da1aaf38d7cc90146df0b81f3e090f739f12a4e7253f784d4da",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/repository/vo/RuleDbRuntimeSnapshot.java": "997f3f775b2fce5da49312e465e86104b4d6d8b444d9ed607fffa3c11c50481f",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/slot/DataBus.java": "de572ad46608915fdfab8197556c5e950ef227e816a1e2ab2c9ba0165dffc471",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java": "9a0e5475e74254fa85eddfb9b3bd5af6a03b005af25b9662abda6c9e2dc68f0a",
+    "source:liteflow-core/src/main/java/com/yomahub/liteflow/thread/ExecutorHelper.java": "ea308f8d4026f6bab117cc82a68418301cf4b479b1e1e151de3d1294b3a9c1a0",
+    "source:liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java": "91b45ac04ac7c9b5c81a7e240caab20b2971cca0e006bee69ab6bede7a2da9ed",
+    "source:liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMetaView.java": "98dda75ac4c6effcdcb2878c28d324dd3e7e1c3c69600df4a85e7301ace9c6f3",
+    "source:liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java": "6e68f71218497d152d3f48083510cb83d5f529838fbbccf224af529a6af8e46d",
+    "source:liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/NodeMetricsLifeCycle.java": "33ac261d440f1cd230dd83c6905ec4fe5426888609fcb082b59baead0a0a0883",
+    "source:liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java": "7079181962392a978f37eedb9685757c6f283302fccaf00829d330b53b194f92",
+    "source:liteflow-spring-boot-starter/src/main/java/com/yomahub/liteflow/springboot/metrics/LiteflowMetricsAutoConfiguration.java": "e56d398fe6412dd12e62205d5f3defface728b7fe988f2fe14d9aca74f5a0ce7",
+    "source:pom.xml": "696501c3cdbecfc581e30bdbf473f7c71b3427493fc0c7059aa052c76c46359d"
+  },
+  "units": [
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "1. 快速开始 / 1.1 添加依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "2.1 依赖"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "1. 快速开始 / 1.2 添加配置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "2.2 最小配置"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "1. 快速开始 / 1.3 编写 Agent 组件",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "2.3 组件"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "1. 快速开始 / 1.4 编写流程",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "2.4 EL"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "1. 快速开始 / 1.5 接收流式输出并获取最终结果",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "9. 启动验证与结果流"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/event/AgentEventTypeMapper.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "1. 快速开始 / 1.6 启动与验证",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "9. 启动验证与结果流"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.1 延续同一段对话",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "1. 会话身份与续聊"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/context/AgentInvocationIdentity.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.2 选择存储方式",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "2. Session 存储"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentSessionStoreConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.3 JSON：不需要额外依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "JSON"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/state/DefaultAgentStateStoreResolver.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.4 Redis：添加依赖和连接配置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "Redis"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-redis/src/main/java/com/yomahub/liteflow/agent/redis/RedisAgentStateStoreProvider.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.5 MySQL：添加依赖和连接配置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "MySQL"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-mysql/src/main/java/com/yomahub/liteflow/agent/mysql/MysqlAgentStateStoreProvider.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.6 查询和删除聊天记录",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "3. 聊天历史 API"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/conversation/AgentConversationService.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "2. 会话与存储 / 2.7 部署时保持这几个设置一致",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "7. 会话与工作区并发"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/guard/AgentInvocationGuardResolver.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "3. 本地与 Docker / 3.1 开启命令工具",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "1. 默认能力与权限"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentScopeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "3. 本地与 Docker / 3.2 本地模式",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "GUARDED_LOCAL"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/filesystem/GuardedLocalFilesystemConfigurer.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "3. 本地与 Docker / 3.3 Docker 模式",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "DOCKER"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/sandbox/DockerSandboxConfigurer.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "3. 本地与 Docker / 3.4 Docker 常用调整",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "容器生命周期"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/sandbox/SessionSandboxRegistry.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "3. 本地与 Docker / 3.5 命令白名单与超时",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "3. 命令白名单与超时"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/ShellConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "3. 本地与 Docker / 3.6 给 Agent 提供文件",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "4. 输入文件与附件交付"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "4. 工具与 Skills / 4.1 添加 Java 业务工具",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-models-tools.md",
+          "heading": "3. Java 工具"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentScopeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "4. 工具与 Skills / 4.2 接入 MCP 工具服务",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-models-tools.md",
+          "heading": "5. MCP 工具"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentScopeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "4. 工具与 Skills / 4.3 添加 Skill",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-models-tools.md",
+          "heading": "7. Skills"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/skill/SessionSkillWorkspaceMiddleware.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "4. 工具与 Skills / 4.4 限制可用技能",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-models-tools.md",
+          "heading": "7. Skills"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentScopeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "5. 模型与输出 / 5.1 更换模型平台",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-models-tools.md",
+          "heading": "1. 模型平台"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/model/ModelSpec.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "5. 模型与输出 / 5.2 接入自建模型服务",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-models-tools.md",
+          "heading": "2. ModelSpec 参数"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-openai/src/main/java/com/yomahub/liteflow/agent/openai/OpenAICompatibleSpec.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "5. 模型与输出 / 5.3 返回结构化结果",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "5. 结构化输出"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "5. 模型与输出 / 5.4 展示工具状态和流式内容",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "4. 事件与 Token 用量"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/event/AgentEventTypeMapper.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "6. 按需添加能力 / 6.1 编排多个 Agent",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "3. 多 Agent 编排"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "6. 按需添加能力 / 6.2 长对话与长期记忆",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "6. 长期记忆与工具结果"
+        },
+        {
+          "file": "agent-harness.md",
+          "heading": "5. 自动压缩与模型容量"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessMemoryConfigResolver.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "6. 按需添加能力 / 6.3 工具调用前人工确认",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "6. 人工确认（HITL）"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/hitl/AgentConfirmationHandler.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "6. 按需添加能力 / 6.4 让主 Agent 自行分派子任务",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-harness.md",
+          "heading": "7. 子代理、计划和任务"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "6. 按需添加能力 / 6.5 调用其他服务中的 Agent",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-a2a.md",
+          "heading": "2. 最小组件"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-a2a/src/main/java/com/yomahub/liteflow/agent/a2a/A2aAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "7. 配置速查 / 7.1 常用设置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-config.md",
+          "heading": "1. 常用设置"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "7. 配置速查 / 7.2 存储设置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-config.md",
+          "heading": "2. 存储设置"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentSessionStoreConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "7. 配置速查 / 7.3 执行环境设置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-config.md",
+          "heading": "3. 执行环境设置"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/HarnessConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "7. 配置速查 / 7.4 Skills、记忆与调用协调",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-config.md",
+          "heading": "4. Skills、记忆与调用协调"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/AgentInvocationGuardConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "7. 配置速查 / 7.5 模型参数与组件扩展",
+      "status": "partial",
+      "references": [
+        {
+          "file": "agent.md",
+          "heading": "8. 常用扩展点"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/harness/component/HarnessAgentComponent.java"
+      ],
+      "note": "扩展入口已列出，但 ArtifactDeliveryTarget 自定义交付及所有平台原生参数没有完整实现配方；需按源码扩展。"
+    },
+    {
+      "group": "agent",
+      "document": "docs/liteflow-agent-guide.md",
+      "section": "8. 常见问题",
+      "status": "covered",
+      "references": [
+        {
+          "file": "agent-state-events-hitl.md",
+          "heading": "8. 排错入口"
+        },
+        {
+          "file": "agent-harness.md",
+          "heading": "8. 故障定位"
+        },
+        {
+          "file": "agent-models-tools.md",
+          "heading": "8. 常见排查"
+        }
+      ],
+      "evidence": [
+        "liteflow-agent/liteflow-agent-core/src/main/java/com/yomahub/liteflow/agent/component/AbstractAgentComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "1. 它解决什么",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "1. 它是什么、解决什么"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "2. 快速上手（SQL） / Step 1：引入依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.1 依赖"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "2. 快速上手（SQL） / Step 2：写配置（三种姿势，按需选最省事的）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "2. 快速上手（SQL） / Step 3：发布第一条规则",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "2. 快速上手（SQL） / Step 4：执行",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.4 执行"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "3. 快速上手（Redis） / Step 1：引入依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.1 依赖"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "3. 快速上手（Redis） / Step 2：写配置（一行起步）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "3. 快速上手（Redis） / Step 3：发布第一条规则",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "3. 快速上手（Redis） / Step 4：执行",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.4 执行"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "4. 快速上手（ZooKeeper） / Step 1：引入依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.1 依赖"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "4. 快速上手（ZooKeeper） / Step 2：写配置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "4. 快速上手（ZooKeeper） / Step 3：发布第一条规则",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "4. 快速上手（ZooKeeper） / Step 4：执行",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.4 执行"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5. 快速上手（etcd） / Step 1：引入依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.1 依赖"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5. 快速上手（etcd） / Step 2：写配置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5. 快速上手（etcd） / Step 3：发布第一条规则",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5. 快速上手（etcd） / Step 4：执行",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.4 执行"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5.1 快速上手（PostgreSQL）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5.2 快速上手（MongoDB）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5.3 快速上手（Nacos） / Step 1：引入依赖",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.1 依赖"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5.3 快速上手（Nacos） / Step 2：写配置",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.2 配置（各后端最省姿势）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5.3 快速上手（Nacos） / Step 3：发布第一条规则",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "5.3 快速上手（Nacos） / Step 4：执行",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.4 执行"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / 通用配置（七个后端共用）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "通用（七后端共用）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / SQL 专属配置（`liteflow-rule-db-sql`）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "SQL 专属（`rule-db.sql.*`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / PostgreSQL 专属配置（`liteflow-rule-db-postgresql`）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "PostgreSQL / MongoDB 专属"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / MongoDB 专属配置（`liteflow-rule-db-mongodb`）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "PostgreSQL / MongoDB 专属"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / Redis 专属配置（`liteflow-rule-db-redis`）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "Redis 专属（`rule-db.redis.*`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / ZooKeeper 专属配置（`liteflow-rule-db-zk`）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "ZooKeeper（`rule-db.zk.*`）与 etcd（`rule-db.etcd.*`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / etcd 专属配置（`liteflow-rule-db-etcd`）",
+      "status": "partial",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "ZooKeeper（`rule-db.zk.*`）与 etcd（`rule-db.etcd.*`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": "已覆盖 TLS 入口和校验原则，未逐项展开 keepalive／连接参数默认值及完整 mTLS 配方。"
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / Nacos 专属配置（`liteflow-rule-db-nacos`）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "Nacos 专属（`rule-db.nacos.*`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "6. 配置参考 / 与旧配置的关系",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "与旧配置的关系（重要）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/RuleDbConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.1 SQL 四张表",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "SQL 四张表（前缀默认 `lf_`，DDL 在 `liteflow-rule-db-sql/src/main/resources/sql/ddl-mysql.sql`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.2 Redis 键结构",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "Redis 键结构（前缀默认 `lf`，无过期时间）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.3 ZooKeeper 路径结构",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "zk / etcd 结构（同构）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.4 etcd 键结构",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "zk / etcd 结构（同构）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.5 PostgreSQL 四张表",
+      "status": "partial",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "PostgreSQL / MongoDB / Nacos"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": "已列四表结构与 DDL 位置，未内置 PostgreSQL 全字段 DDL。"
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.6 MongoDB Collection",
+      "status": "partial",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "PostgreSQL / MongoDB / Nacos"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": "已说明四个 Collection、事务与索引要求，未内置全部文档字段和索引定义。"
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "7. 存储结构参考 / 7.7 Nacos Catalog",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "PostgreSQL / MongoDB / Nacos"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "8. 发布协议与写入规范 / 8.1 推荐：统一发布 API",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "8. 发布协议与写入规范 / 8.2 SQL 兼容门面（不推荐新代码使用）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.3 发布第一条规则"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "8. 发布协议与写入规范 / 8.3 停用（enable=0）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "5. 发布 API（统一，推荐）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "8. 发布协议与写入规范 / 8.4 绕过 API 直接写存储的规范（不推荐，但可做）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "11. 常见坑（手改库必看）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "8. 发布协议与写入规范 / 8.5 content_md5 对账双保险",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "11. 常见坑（手改库必看）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "8. 发布协议与写入规范 / 8.6 发布校验与依赖顺序",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "3.3 发布第一条规则"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "9. 一致性与收敛模型 / 9.1 两条腿",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "7. 一致性与收敛模型"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbSyncManager.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "9. 一致性与收敛模型 / 9.2 收敛窗口",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "7. 一致性与收敛模型"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbSyncManager.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "9. 一致性与收敛模型 / 9.3 一致性语义（务必读）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "7. 一致性与收敛模型"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbSyncManager.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "10. 内存与性能 / 10.1 内存模型",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "8. 内存模型与执行热路径"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "10. 内存与性能 / 10.2 执行热路径",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "8. 内存模型与执行热路径"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "10. 内存与性能 / 10.3 调优建议",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "8. 内存模型与执行热路径"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "10. 内存与性能 / 10.4 v1 实现注记：惰性刷新与 last-good",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "8. 内存模型与执行热路径"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "11. 可观测性 / Spring Boot：actuator 端点",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "12. 可观测性"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/vo/RuleDbRuntimeSnapshot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "11. 可观测性 / 非 Spring / 无 actuator 环境",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "12. 可观测性"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/vo/RuleDbRuntimeSnapshot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "12. 降级语义",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "9. 降级语义"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "13. 限制与已知边界 / 13.1 发布参数与后端限制矩阵",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "10. 限制与已知边界（v1）"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "14. 迁移、备份与权限 / 14.1 从旧规则插件迁移",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "14. 从老规则插件迁移（liteflow-rule-sql 等 → Rule-DB）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbRuntime.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "14. 迁移、备份与权限 / 14.2 备份恢复",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "备份恢复"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/repository/RuleDbSyncManager.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "rule-db",
+      "document": "docs/liteflow-rule-db-guide.md",
+      "section": "14. 迁移、备份与权限 / 14.3 执行账号与发布账号",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-db.md",
+          "heading": "执行账号与发布账号"
+        }
+      ],
+      "evidence": [
+        "liteflow-rule-db/liteflow-rule-db-publisher/src/main/java/com/yomahub/liteflow/publisher/RulePublisherFactory.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "0. 先搞懂这套东西",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "1. 定位与依赖关系"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "1. 五分钟跑通：从零到看见曲线 / Step 1：让应用产出指标（加 3 个依赖）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "1. 定位与依赖关系"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "1. 五分钟跑通：从零到看见曲线 / Step 2：打开端点，确认指标已经在吐",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "3. 端点暴露（采集 ≠ 暴露）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMetaView.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "1. 五分钟跑通：从零到看见曲线 / Step 3：一键起 Prometheus + Grafana",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "11. 从指标到 Grafana 曲线"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "1. 五分钟跑通：从零到看见曲线 / Step 4：确认 Prometheus 抓到了你的应用",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "11. 从指标到 Grafana 曲线"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "1. 五分钟跑通：从零到看见曲线 / Step 5：打开 Grafana 看板",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "11. 从指标到 Grafana 曲线"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "1. 五分钟跑通：从零到看见曲线 / Step 6：打点流量，看曲线动起来",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "11. 从指标到 Grafana 曲线"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "2. 引入依赖（细节） / Spring Boot 2 / 3 项目",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "1. 定位与依赖关系"
+        }
+      ],
+      "evidence": [
+        "liteflow-spring-boot-starter/src/main/java/com/yomahub/liteflow/springboot/metrics/LiteflowMetricsAutoConfiguration.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "2. 引入依赖（细节） / Spring Boot 4 项目（JDK 17+）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "1. 定位与依赖关系"
+        }
+      ],
+      "evidence": [
+        "liteflow-spring-boot-starter/src/main/java/com/yomahub/liteflow/springboot/metrics/LiteflowMetricsAutoConfiguration.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "2. 引入依赖（细节） / 非 Spring / Solon 项目",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "8. Solon / 非 Spring 环境"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/lifecycle/LifeCycleHolder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "3. 开关与端点暴露 / LiteFlow 自有开关（仅一个）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "2. 开关与装配条件"
+        }
+      ],
+      "evidence": [
+        "liteflow-spring-boot-starter/src/main/java/com/yomahub/liteflow/springboot/metrics/LiteflowMetricsAutoConfiguration.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "3. 开关与端点暴露 / 暴露 Actuator 端点",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "3. 端点暴露（采集 ≠ 暴露）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMetaView.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "4. 指标目录 / 4.1 Chain 级指标（按 `chainId` 聚合）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "Chain 级（按 chainId 聚合）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "4. 指标目录 / 4.2 Node 级指标（按 `nodeId` 聚合）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "Node 级（按 nodeId 聚合）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/NodeMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "4. 指标目录 / 4.3 全局 / 注册表 Gauge（`LiteflowMeterBinder` 一次性绑定）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "全局 Gauge（`LiteflowMeterBinder` 一次性绑定）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "5. 三个端点分别返回什么 / 5.1 结构端点 `/actuator/liteflow`",
+      "status": "partial",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "5. 结构端点 `/actuator/liteflow`（只读，`LiteflowMetaView` 提供，`@Endpoint(id=\"liteflow\")`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMetaView.java"
+      ],
+      "note": "端点、字段和空值语义已覆盖，未复刻 guide 的全部 JSON 响应样例。"
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "6. 分位 / 直方图 / 客户端分位（进程内计算，默认发布到所有 registry）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "6. 分位 / 直方图（Micrometer 标准配置，LiteFlow 不另立配置项）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "6. 分位 / 直方图 / 直方图（发布 bucket，交 Prometheus 用 histogram_quantile 计算）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "6. 分位 / 直方图（Micrometer 标准配置，LiteFlow 不另立配置项）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "6. 分位 / 直方图 / 过滤 / 裁剪指标",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "6. 分位 / 直方图（Micrometer 标准配置，LiteFlow 不另立配置项）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / QPS（每秒执行次数）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "7. 常用 PromQL（Prometheus 命名转换：`.`→`_`，Timer 带 `_seconds`，Counter 带 `_total`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / 平均耗时（秒）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "7. 常用 PromQL（Prometheus 命名转换：`.`→`_`，Timer 带 `_seconds`，Counter 带 `_total`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / 错误率",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "7. 常用 PromQL（Prometheus 命名转换：`.`→`_`，Timer 带 `_seconds`，Counter 带 `_total`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / P95 耗时（需开启 [§6](#6-分位--直方图) 的直方图）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "7. 常用 PromQL（Prometheus 命名转换：`.`→`_`，Timer 带 `_seconds`，Counter 带 `_total`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / slot 池饱和度",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "全局 Gauge（`LiteflowMeterBinder` 一次性绑定）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/DataBus.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / 在途执行数（LongTaskTimer 的 active 数）",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "7. 常用 PromQL（Prometheus 命名转换：`.`→`_`，Timer 带 `_seconds`，Counter 带 `_total`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "7. 常用 PromQL 与告警 / 常用告警规则示例",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "告警规则示例（Prometheus alerting rules）"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/ChainMetricsLifeCycle.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "8. 职责归属与性能 / 8.1 谁算 QPS / 平均 / 分位",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "1. 定位与依赖关系"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "8. 职责归属与性能 / 8.2 性能影响与基数控制",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "9. 性能与基数"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "附录 A：快速核对清单",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "10. 快速核对清单与集成资产"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "metrics",
+      "document": "docs/liteflow-metrics-guide.md",
+      "section": "附录 B：集成资产清单",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metrics.md",
+          "heading": "10. 快速核对清单与集成资产"
+        }
+      ],
+      "evidence": [
+        "liteflow-metrics/src/main/java/com/yomahub/liteflow/metrics/LiteflowMeterBinder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/010.LiteFlow简介.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "overview.md",
+          "heading": "一句话定位"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/020.项目特性.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "overview.md",
+          "heading": "适用 / 不适用场景"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/030.🧁环境支持/010.JDK支持度.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "overview.md",
+          "heading": "JDK"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/030.🧁环境支持/020.Springboot支持度.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "overview.md",
+          "heading": "SpringBoot"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/030.🧁环境支持/030.Spring的支持度.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "overview.md",
+          "heading": "Spring（非 SpringBoot）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/005.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "quickstart.md",
+          "heading": "一、SpringBoot 场景（主线，完整最小示例）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/010.Springboot场景安装运行.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "quickstart.md",
+          "heading": "一、SpringBoot 场景（主线，完整最小示例）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/020.Spring场景安装运行.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "quickstart.md",
+          "heading": "二、Spring 场景（关键差异点）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/030.Solon场景安装运行.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "quickstart.md",
+          "heading": "三、Solon 场景（关键差异点）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/040.🍟快速开始(Hello world)/040.其他场景安装运行.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "quickstart.md",
+          "heading": "四、其他场景（非 Spring 体系）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/050.🍢配置项/010.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "config.md",
+          "heading": "一、总则"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/LiteflowConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/050.🍢配置项/020.Springboot下的配置项.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "config.md",
+          "heading": "二、SpringBoot 配置项完整表（主体）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/LiteflowConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/050.🍢配置项/030.Spring下的配置项.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "config.md",
+          "heading": "三、Spring（非 Boot）场景差异"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/LiteflowConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/050.🍢配置项/035.Solon下的配置项.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "config.md",
+          "heading": "四、Solon 场景差异"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/LiteflowConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/050.🍢配置项/040.其他场景代码设置配置项.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "config.md",
+          "heading": "五、纯代码场景差异（`LiteflowConfig` setter）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/property/LiteflowConfig.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/010.普通组件.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "1. 普通组件 `NodeComponent`"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/020.选择组件.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "2. 选择组件 `NodeSwitchComponent`"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/030.布尔组件.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "3. 布尔组件 `NodeBooleanComponent`（v2.12.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/040.次数循环组件.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "4. 次数循环组件 `NodeForComponent`（v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/055.迭代循环组件.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "5. 迭代循环组件 `NodeIteratorComponent`（v2.9.7+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/060.LiteflowComponent.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "二、`@LiteflowComponent` 与 nodeId 规则"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/010.🛍继承式组件/070.组件内方法覆盖和调用.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "三、组件内可覆盖的方法（生命周期钩子）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/020.🎁声明式组件/010.什么叫声明式组件.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "四、声明式组件"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/020.🎁声明式组件/020.类级别式声明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "1. 类级别式声明"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/060.🔗组件/020.🎁声明式组件/030.方法级别式声明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "components.md",
+          "heading": "2. 方法级别式声明（v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/010.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "1. EL 总述"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/020.串行编排.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "2. 串行编排 THEN"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/030.并行编排.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "3. 并行编排 WHEN"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/040.选择编排.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "4. 选择编排 SWITCH"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/050.条件编排.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "5. 条件编排 IF（v2.8.5+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/060.循环编排.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "6. 循环编排（v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/070.异步循环模式.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "6.7 异步循环模式（v2.11.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/080.捕获异常表达式.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "7. 捕获异常表达式 CATCH（v2.10.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/090.与或非表达式.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "8. 与或非表达式 AND / OR / NOT（v2.10.2+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/100.使用子流程.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "9.1 使用子流程"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/110.使用子变量.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "9.2 使用子变量"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/120.复杂编排例子.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "17. 复杂编排例子（综合）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/130.前置和后置编排.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "10. 前置 PRE / 后置 FINALLY"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/000.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "11. 组件参数语法（tag / data / bind）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/010.tag语法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "11.1 tag"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/020.data语法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "11.2 data（v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/140.🍉组件参数语法/030.bind语法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "11.3 bind（v2.13.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/150.重试语法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "12. 重试 retry（v2.12.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/160.超时控制语法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "13. 超时控制（v2.11.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/170.链路继承.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "14. 链路继承（v2.12.0+，Beta 实验性）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/180.验证规则.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "15. 验证规则（v2.9.4+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/190.关于注释.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "1. EL 总述"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/200.关于分号.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "1. EL 总述"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/070.🧩EL规则/210.组件名包装.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "el-rules.md",
+          "heading": "16. 组件名包装 node"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/080.🌮上下文/010.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "context.md",
+          "heading": "上下文是什么"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/080.🌮上下文/020.数据上下文的定义和使用.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "context.md",
+          "heading": "定义与使用"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/080.🌮上下文/030.用初始化好的上下文传入.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "context.md",
+          "heading": "传入已初始化的上下文实例（v2.8.4+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/080.🌮上下文/040.给上下文设置别名.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "context.md",
+          "heading": "上下文别名"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/080.🌮上下文/050.上下文参数注入.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "context.md",
+          "heading": "上下文参数注入（v2.12.1+，仅声明式组件）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/080.🌮上下文/060.用表达式获取上下文参数.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "context.md",
+          "heading": "用 EL 表达式取/设上下文参数（v2.13.1+，通用）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/slot/Slot.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/090.🛩执行器/010.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "executor.md",
+          "heading": "执行方法总览"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/ExecuteOption.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/090.🛩执行器/020.执行方法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "executor.md",
+          "heading": "执行方法总览"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/ExecuteOption.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/090.🛩执行器/030.流程入参.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "executor.md",
+          "heading": "流程入参（param）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/ExecuteOption.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/090.🛩执行器/040.LiteflowResponse对象.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "executor.md",
+          "heading": "LiteflowResponse 对象"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/ExecuteOption.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/090.🛩执行器/050.直接执行EL规则.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "executor.md",
+          "heading": "直接执行 EL 规则（不经规则文件）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/ExecuteOption.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/005.脚本语言介绍.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "一、概念与定位"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/005.Java脚本引擎.md",
+      "section": "",
+      "status": "partial",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": "提供依赖、共同接口和部分示例，未内置该引擎全部专用语法／选型说明。"
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/010.Groovy脚本引擎.md",
+      "section": "",
+      "status": "partial",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": "提供依赖、共同接口和部分示例，未内置该引擎全部专用语法／选型说明。"
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/020.Javascript脚本引擎.md",
+      "section": "",
+      "status": "partial",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": "提供依赖、共同接口和部分示例，未内置该引擎全部专用语法／选型说明。"
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/040.QLExpress脚本引擎.md",
+      "section": "",
+      "status": "partial",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": "提供依赖、共同接口和部分示例，未内置该引擎全部专用语法／选型说明。"
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/050.Python脚本引擎.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/060.Lua脚本引擎.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/070.Aviator脚本引擎.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/010.🍫脚本语言种类/080.Kotlin脚本引擎.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "三、支持的语言与依赖坐标"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "四、规则文件中定义脚本节点"
+        },
+        {
+          "file": "scripts.md",
+          "heading": "5.3 各语言差异要点"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/015.脚本与Java进行交互.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "六、脚本与 Java 交互"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/020.多脚本语言混合共存.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "七、多脚本语言混合共存（v2.10.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/030.文件脚本的定义.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "八、文件脚本（外部脚本文件）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/050.动态刷新脚本.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "九、动态刷新 / 热更新脚本（v2.12.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/060.验证脚本.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "十、验证脚本"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/100.🍋脚本组件/070.卸载脚本.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "scripts.md",
+          "heading": "十一、卸载脚本（v2.12.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/020.本地规则文件配置.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "二、本地规则文件配置"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/030.SQL数据库配置源.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "三、SQL 数据库配置源（`liteflow-rule-sql`，v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/040.ZK规则文件配置源.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "四、ZooKeeper 配置源（`liteflow-rule-zk`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/050.Nacos配置源.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "五、Nacos 配置源（`liteflow-rule-nacos`，v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/060.Etcd配置源.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "六、Etcd 配置源（`liteflow-rule-etcd`，v2.9.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/065.Apollo配置源.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "七、Apollo 配置源（`liteflow-rule-apollo`，v2.9.5+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/066.📑Redis配置源（旧）/010.配置说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "八、Redis 配置源（`liteflow-rule-redis`，v2.11.0+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/066.📑Redis配置源（旧）/020.轮询模式配置.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "8.4 轮询模式额外参数与配置示例"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/066.📑Redis配置源（旧）/030.订阅模式配置.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "8.5 订阅模式配置示例与约束"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/110.🗂规则配置源/070.自定义配置源.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "rule-sources.md",
+          "heading": "九、自定义配置源（继承 `ClassXmlFlowELParser`）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/120.🍼元数据管理/010. 元数据操作器.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metadata.md",
+          "heading": "一、元数据操作器 LiteflowMetaOperator"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/meta/LiteflowMetaOperator.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/120.🍼元数据管理/020.平滑热刷新.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metadata.md",
+          "heading": "二、平滑热刷新"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/meta/LiteflowMetaOperator.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/120.🍼元数据管理/030.启动不检查规则.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metadata.md",
+          "heading": "三、启动不检查规则 / 不检查脚本"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/meta/LiteflowMetaOperator.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/120.🍼元数据管理/040.启动不检查脚本.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "metadata.md",
+          "heading": "三、启动不检查规则 / 不检查脚本"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/meta/LiteflowMetaOperator.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/125.🌌异步中的线程池/010.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "thread-pools.md",
+          "heading": "两层线程池总览"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/thread/ExecutorHelper.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/125.🌌异步中的线程池/020.FlowExecutor层面的线程池.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "thread-pools.md",
+          "heading": "FlowExecutor 层：主执行器线程池"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/thread/ExecutorHelper.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/125.🌌异步中的线程池/030.组件异步层面的线程池.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "thread-pools.md",
+          "heading": "组件异步层：编排内并行线程池"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/thread/ExecutorHelper.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/125.🌌异步中的线程池/040.虚拟线程.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "thread-pools.md",
+          "heading": "虚拟线程（JDK 21+）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/thread/ExecutorHelper.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/130.🎲动态构造/010.说明.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "dynamic-build.md",
+          "heading": "何时用动态构造"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/130.🎲动态构造/020.构造Node.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "dynamic-build.md",
+          "heading": "用 `LiteFlowNodeBuilder` 动态构造 Node"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/130.🎲动态构造/030.构造EL.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "dynamic-build.md",
+          "heading": "用 `ELBus` 在代码里拼 EL（不写 EL 字符串）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/130.🎲动态构造/040.构造Chain.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "dynamic-build.md",
+          "heading": "用 `LiteFlowChainELBuilder` 动态构造并注册 Chain"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/el/LiteFlowChainELBuilder.java",
+        "liteflow-core/src/main/java/com/yomahub/liteflow/builder/LiteFlowNodeBuilder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/140.🧮决策路由/010.概念以及介绍.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "decision-routing.md",
+          "heading": "一、决策路由解决什么问题"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/140.🧮决策路由/020.决策路由用法.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "decision-routing.md",
+          "heading": "九、最小可运行示例"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/150.😸生命周期/010.启动时生命周期.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "lifecycle.md",
+          "heading": "二、启动时生命周期（构造阶段）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/lifecycle/LifeCycleHolder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/150.😸生命周期/020.执行时生命周期.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "lifecycle.md",
+          "heading": "三、执行时生命周期（运行阶段）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/lifecycle/LifeCycleHolder.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/031.本地规则文件监听.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "本地规则文件监听"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/035.组件降级.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "组件降级"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/040.组件别名.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "组件别名"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/060.组件事件回调.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "组件事件回调"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/061.组件回滚.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "组件回滚"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/070.隐式子流程.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "隐式子流程"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/075.活跃规则保活策略.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "活跃规则保活策略"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/080.私有投递.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "私有投递"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/110.组件切面.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "组件切面"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/120.步骤信息.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "步骤信息"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/125.异常.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "异常"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/130.打印信息详解.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "打印信息详解"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/140.自定义请求Id.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "自定义请求 Id"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/145.快速解析模式.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "快速解析模式"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/150.不同格式规则加载.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "不同格式规则加载"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/170.自定义组件执行器.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "自定义组件执行器"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/180.简单监控.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "简单监控"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/160.🎨高级特性/190.XML的DTD.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "advanced.md",
+          "heading": "XML 的 DTD"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/NodeComponent.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/170.⛱测试用例以及示例/010.测试用例.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "testing.md",
+          "heading": "二、SpringBoot 下的标准测试范式（最高频）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/170.⛱测试用例以及示例/020.DEMO案例.md",
+      "section": "",
+      "status": "covered",
+      "references": [
+        {
+          "file": "testing.md",
+          "heading": "七、外部 DEMO 案例（官方提供）"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": ""
+    },
+    {
+      "group": "core",
+      "document": "docs/04.v2.16.X文档/180.性能表现.md",
+      "section": "",
+      "status": "partial",
+      "references": [
+        {
+          "file": "overview.md",
+          "heading": "性能表现"
+        }
+      ],
+      "evidence": [
+        "liteflow-core/src/main/java/com/yomahub/liteflow/core/FlowExecutor.java"
+      ],
+      "note": "保留历史性能资料与调优原则，未复现实测基准，不将历史吞吐量作为当前保证。"
+    }
+  ],
+  "validation": [
+    "skill-creator 的 quick_validate.py 通过，Shell 脚本语法检查通过。",
+    "65 项相关离线测试通过：默认值、Spring Boot 2/3 与 Boot 4 绑定、ExecuteOption 链路、身份、历史、工作区锁、压缩、Skills、最小接入；Shell 测试在允许本地进程执行的环境复跑通过。",
+    "从 reference 提取 ChatAgentCmp 与 A2A 组件／鉴权覆写，使用当前 reactor 类路径和 javac --release 17 编译通过。",
+    "覆盖审计的负例验证包括遗漏单元、新增章节、失效标题、源码变化、重复条目和低于 90% 的分组，全部拒绝；代码块伪标题不进入分母。",
+    "没有调用真实模型、启动 Docker／数据库集成测试或重新执行全仓库测试；本报告不据此承诺平台连通性或全仓库测试结果。"
+  ]
+}

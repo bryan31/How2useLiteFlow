@@ -17,9 +17,11 @@
 LiteFlow 节点（组件）是编排的最小执行单元。每种组件由一个基类 + 一个必须实现的 `process*` 方法定义，并在 EL 中对应特定的编排关键字。本文覆盖两大写法：
 
 - **继承式**：自定义类继承 `NodeComponent` 等基类（源码包 `com.yomahub.liteflow.core`）。
-- **声明式**：普通 Spring Bean + 注解，不继承任何基类（SpringBoot 与 Solon 环境可用）。
+- **声明式**：普通容器 Bean + 注解，不继承任何基类（SpringBoot、Solon，以及显式注册处理器的纯 Spring 环境可用）。
 
-所有组件均为 Spring Bean，可用 `@Autowired` / `@Resource` 注入其它 Bean。
+在 Spring 体系中，容器管理的组件可用 `@Autowired` / `@Resource` 注入其它 Bean；Solon 和非容器场景使用各自的依赖获取方式。
+
+组件实例通常由 Spring／Solon 以单例管理，LiteFlow 克隆 `Node` 时仍共享其 `NodeComponent` 引用。组件应保持无状态：不要把请求数据、循环中间值或结果放在成员字段；这些状态必须放入本次执行的 Context／Slot。多个请求以及同一请求中的 WHEN 分支都可能并发调用同一组件实例。
 
 ---
 
@@ -107,17 +109,23 @@ public class XCmp extends NodeBooleanComponent {
 
 ```xml
 <!-- 条件 -->
-<chain name="c1">
+<chain name="ifSimple">
     IF(x, THEN(a, b));
+</chain>
+<chain name="ifElse">
     IF(x, a).ELIF(y, b).ELSE(c);
 </chain>
 
 <!-- 循环条件 / 中断 -->
-<chain name="c2">
+<chain name="whileLoop">
     WHILE(x).DO(a);
+</chain>
+<chain name="forBreak">
     FOR(f).DO(a).BREAK(x);
 </chain>
 ```
+
+一条 chain 只能有一个最外层 EL 结果；多个流程片段要么像上面这样拆成独立 chain，要么用 `THEN(...)` 包成一个最外层表达式。
 
 ### 4. 次数循环组件 `NodeForComponent`（v2.9.0+）
 
@@ -238,7 +246,12 @@ public class XCmp extends NodeIteratorComponent {
 
 ## 四、声明式组件
 
-让普通 Java Bean 不继承任何基类、仅靠注解成为 LiteFlow 组件。**SpringBoot 与 Solon 环境可用**（v2.16.X 下 Solon 已支持，见 `SolonDeclComponentParser` 与测试模块 `liteflow-testcase-el-declare-multi-solon`；纯 Spring XML / 非 Spring 环境不支持）。
+让普通 Java Bean 不继承任何基类、仅靠注解成为 LiteFlow 组件。SpringBoot 与 Solon 会自动装配所需处理器；纯 Spring 也支持，但要显式注册 `com.yomahub.liteflow.spring.DeclBeanDefinition`（它是 `BeanDefinitionRegistryPostProcessor`）。非 Spring、非 Solon 的纯 Java 环境不支持声明式扫描。
+
+```xml
+<!-- 纯 Spring XML：除 LiteFlow 常规 Bean 外，补上声明式组件定义处理器 -->
+<bean class="com.yomahub.liteflow.spring.DeclBeanDefinition"/>
+```
 
 ### 1. 类级别式声明
 
@@ -325,17 +338,17 @@ public class CmpConfig {
     public void processA(NodeComponent bindCmp) { /* ... */ }
 
     @LiteflowMethod(value = LiteFlowMethodEnum.IS_ACCESS, nodeId = "a", nodeType = NodeTypeEnum.COMMON)
-    public boolean isAccessA(NodeComponent bindCmp) { /* ... */ }
+    public boolean isAccessA(NodeComponent bindCmp) { return true; }
 
     @LiteflowMethod(value = LiteFlowMethodEnum.ON_SUCCESS, nodeId = "a", nodeType = NodeTypeEnum.COMMON)
     public void onSuccessA(NodeComponent bindCmp) { /* ... */ }
 
     // 布尔组件 f
     @LiteflowMethod(value = LiteFlowMethodEnum.PROCESS_BOOLEAN, nodeId = "f", nodeType = NodeTypeEnum.BOOLEAN)
-    public boolean processF(NodeComponent bindCmp) { /* ... */ }
+    public boolean processF(NodeComponent bindCmp) { return true; }
 
     @LiteflowMethod(value = LiteFlowMethodEnum.IS_ACCESS, nodeId = "f", nodeType = NodeTypeEnum.BOOLEAN)
-    public boolean isAccessF(NodeComponent bindCmp) { /* ... */ }
+    public boolean isAccessF(NodeComponent bindCmp) { return true; }
 }
 ```
 
@@ -366,7 +379,8 @@ public class CmpConfig {
 ## 六、常见坑 / 注意
 
 - **nodeId 非法命名**：不能以数字开头，中间不能有运算符号（`88Cmp`、`cmp-11`、`user=123` 均会编译不过）。打破限制需用「组件名包装」（以源码/官方文档为准）。
-- **声明式组件**在 SpringBoot 与 Solon 环境可用；纯 Spring XML / 非 Spring 环境不支持（早期文档称"仅 SpringBoot"，v2.16.X 起 Solon 也支持）。
+- **组件成员变量会共享**：容器组件通常是单例，Node 克隆不会复制 `NodeComponent`；请求级可变状态必须放 Context／Slot，成员字段需只读或线程安全。
+- **声明式组件**在 SpringBoot、Solon 可直接使用；纯 Spring 需显式注册 `DeclBeanDefinition`；非容器纯 Java 不支持自动扫描。
 - **声明式方法的返回值类型必须与继承式严格一致**（布尔返 `boolean`、选择返 `String`、次数循环返 `int`、迭代循环返 `Iterator<?>`），不一致会排查很久。
 - **声明式方法的第一个参数必须是 `NodeComponent bindCmp`**；原本带参的钩子（如 `onError`）把额外参数放在 `bindCmp` 之后。
 - **`isContinueOnError` 默认 `false`**——不覆盖时出错会中断后续组件。

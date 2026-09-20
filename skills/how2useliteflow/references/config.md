@@ -14,7 +14,7 @@
 ## 一、总则
 
 - LiteFlow 配置项大多**非必须**，系统都有默认值。看不懂的项**保持默认**即可。
-- `rule-source` 是唯一强依赖：只要用了规则文件就必须配置；若改为**代码动态构造规则**，则 `rule-source` 自动失效（不需要规则文件）。
+- `rule-source` 只在加载规则文件时需要。纯代码动态构造可以不配置它，也可以在已加载规则文件的基础上继续动态注册 Chain／Node；动态构造不会让已有 `rule-source` 自动失效。
 - v2.16.1 起新增 **Rule-DB 模式**（`liteflow-rule-db-sql/postgresql/mongodb/redis/zk/etcd/nacos` 七选一 + `liteflow.rule-db.*` 配置）：规则/脚本以外部存储为权威源，与 `rule-source` **互斥**（同配启动报错），详见 `references/rule-db.md`。
 - 监控相关项在 SpringBoot 下位于 `liteflow.monitor.*` 子节点；在 Spring XML / 纯代码下被**拍平**为 `enableLog / queueLimit / delay / period`。
 
@@ -24,8 +24,10 @@
 
 | key（`liteflow.*`） | 含义 | 默认值 | 取值 / 备注 |
 |---|---|---|---|
-| `rule-source` | 规则文件路径 | 无 | **必填**（用代码动态构造规则时自动失效） |
-| `enable` | liteflow 是否开启 | `true` | |
+| `rule-source` | 规则文件路径 | 无 | 使用规则文件时必填；可与代码动态构造共存 |
+| `rule-source-ext-data` | 规则源扩展参数（单字符串） | 无 | 由自定义／插件规则源读取，具体格式由对应实现约定 |
+| `rule-source-ext-data-map` | 规则源扩展参数 Map | 无 | YAML 下写子键；与单字符串形式按插件约定选用 |
+| `enable` | liteflow 是否开启 | `true` | 当前 2.16.2 源码关闭它时，还应同时设 `metrics.enabled=false`，避免 Metrics 自动配置提前访问未初始化的 FlowBus；以当前自动配置条件为准 |
 | `print-banner` | banner 打印是否开启 | `true` | |
 | `slot-size` | 上下文的初始数量槽 | `1024` | 会自动扩容，不用刻意配置 |
 | `main-executor-works` | `FlowExecutor.execute2Future` 的线程数 | `64` | |
@@ -36,10 +38,11 @@
 | `global-thread-pool-executor-class` | 全局异步节点线程池自定义 Builder | `com.yomahub.liteflow.thread.LiteFlowDefaultGlobalExecutorBuilder` | LiteFlow 提供默认 Builder |
 | `when-max-wait-time` | 异步线程最长等待时间（只用于 `when`） | `15000` | 数值，配合单位项 |
 | `when-max-wait-time-unit` | `when-max-wait-time` 的单位 | `MILLISECONDS`（毫秒） | |
+| `when-max-wait-seconds` | 旧版 WHEN 超时配置（秒） | 无 | 已废弃；非空且非 0 时优先于 `when-max-wait-time`，新项目用后者 |
 | `when-thread-pool-isolate` | 每个 `WHEN` 是否用单独的线程池 | `false` | |
 | `parse-mode` | 解析模式 | `PARSE_ALL_ON_START` | 三选一：`PARSE_ALL_ON_START`（启动全解析）/ `PARSE_ALL_ON_FIRST_EXEC`（首次执行全解析）/ `PARSE_ONE_ON_FIRST_EXEC`（首次执行单条解析） |
 | `retry-count` | 全局重试次数 | `0` | 源码中字段与 getter 已 `@Deprecated`，建议改用 EL 的 `.retry(n)` |
-| `support-multiple-type` | 是否支持不同类型的加载方式混用 | `false` | |
+| `support-multiple-type` | 是否允许 XML／JSON／YAML 等多种规则文件格式混装 | `false` | 只控制解析器类型，不表示多个配置源或动态规则开关 |
 | `node-executor-class` | 全局默认节点执行器 | `com.yomahub.liteflow.flow.executor.DefaultNodeExecutor` | |
 | `print-execution-log` | 是否打印执行过程中的日志 | `true` | |
 | `enable-monitor-file` | 是否开启本地文件监听 | `false` | 改文件自动重载规则 |
@@ -47,14 +50,15 @@
 | `enable-node-instance-id` | 是否开启 Node 节点实例 ID 持久化 | `false` | |
 | `enable-virtual-thread` | 是否开启虚拟线程 | `true` | **只在 JDK21+ 环境有效** |
 | `fallback-cmp-enable` | 是否启用组件降级（`@FallbackCmp`） | `false` | 见 `references/advanced.md` |
-| `check-node-exists` | 是否校验规则里引用的节点是否存在 | `true` | **仅 SpringBoot 场景**（属 `LiteflowProperty`，非 `LiteflowConfig` 字段；Spring XML / 纯代码无法设置）。⚠️ 2.16.1 源码中该键**仅被绑定、未发现任何读取点**（全仓库无 `isCheckNodeExists` 调用方，装配类 `LiteflowPropertyAutoConfiguration` 也未传递）；实际「启动是否校验节点存在」由 `parse-mode` 控制（`PARSE_ONE_ON_FIRST_EXEC` 可跳过启动期校验，见 `references/metadata.md`），不要依赖本项改变校验行为 |
-| `chain-cache.enabled` | 是否开启 chain 缓存 | `false` | |
+| `check-node-exists` | 历史保留配置 | `true` | **仅 SpringBoot 绑定类存在**；2.16.2 仍未传入 `LiteflowConfig`、没有消费点，不要依赖它改变校验行为 |
+| `script-setting` | 脚本插件设置 Map | 空 Map | SpringBoot 可绑定；键值语义由具体脚本插件读取 |
+| `chain-cache.enabled` | 是否开启 chain 缓存 | `false` | 仅 `PARSE_ONE_ON_FIRST_EXEC` 模式真正启用 |
 | `chain-cache.capacity` | chain 缓存容量 | `10000` | |
 | `monitor.enable-log` | 监控是否开启 | `false` | 默认不开启 |
 | `monitor.queue-limit` | 监控队列存储大小 | `200` | |
 | `monitor.delay` | 监控一开始延迟多少执行 | `300000` | 毫秒，即 5 分钟 |
 | `monitor.period` | 监控日志打印间隔（每过多少时间执行一次） | `300000` | 毫秒，即 5 分钟 |
-| `metrics.enabled` | 指标采集开关（v2.16.1 新增 `liteflow-metrics` 模块，基于 Micrometer） | `true` | 用 starter 即为传递依赖，无需单独引入；装配条件与指标目录见 `references/metrics.md` |
+| `metrics.enabled` | 指标采集及 `/actuator/liteflow` 结构端点开关（v2.16.1 新增） | `true` | 用 starter 即为传递依赖；当前 2.16.2 源码的装配边界与规避方案见 `references/metrics.md` |
 
 > 注：原 Spring 章节 md 中 `<property name="period">` 与 `<property name="delay">` 的中文注释被互换，但**属性名本身正确**。语义以本表为准：`delay`=初始延迟，`period`=打印间隔（与 SpringBoot / 纯代码两章一致）。
 
@@ -122,13 +126,13 @@ liteflow.monitor.period=300000
 
 ### 3. Rule-DB 模式配置（v2.16.1 新增，`liteflow.rule-db.*`）
 
-v2.16.1 新增 **Rule-DB 统一规则数据库**模式：规则/脚本以 SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / etcd / Nacos 为权威源，JVM 只留轻量索引 + 有界缓存（LRU）。引入对应 `liteflow-rule-db-*` 插件（七选一）后，用 `liteflow.rule-db.*` 取代 `rule-source`。通用配置（七后端共用）：
+v2.16.1 新增 **Rule-DB 统一规则数据库**模式：规则/脚本以 SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / etcd / Nacos 为权威源，JVM 只留轻量索引 + Caffeine 有界缓存。引入对应 `liteflow-rule-db-*` 插件（七选一）后，用 `liteflow.rule-db.*` 取代 `rule-source`。通用配置（七后端共用）：
 
 | key（`liteflow.rule-db.*`） | 含义 | 默认值 | 取值 / 备注 |
 |---|---|---|---|
 | `enabled` | 是否开启 Rule-DB 模式 | `true` | 引入依赖即激活；逃生开关，`false` 退回非 Rule-DB 行为 |
 | `application-name` | 应用名（多应用共库的隔离维度） | **仅两个 SpringBoot starter** 在为空时回落到 `spring.application.name`；**Solon / 纯代码无此回落，必须显式配置**；都没有值时落 `default` | 共库时务必各应用不同，否则会互相读写对方规则 |
-| `cache.capacity` | 规则缓存容量（按 chain 条数，超出 LRU 淘汰） | `500` | |
+| `cache.capacity` | 规则缓存容量（按 chain 条数，超出后由 Caffeine 淘汰） | `500` | 不承诺严格 LRU 顺序 |
 | `cache.preload-chain-ids` | 启动预热的 chain id 列表 | 空 | 逗号分隔 |
 | `sync.poll-seconds` | 变更序号轮询周期 | `3` | 仅 SQL / PostgreSQL / MongoDB / Redis 生效；ZooKeeper / etcd / Nacos 使用监听 |
 | `sync.reconcile-seconds` | 周期全量对账间隔 | `60` | |
@@ -142,7 +146,7 @@ v2.16.1 新增 **Rule-DB 统一规则数据库**模式：规则/脚本以 SQL / 
 
 通过 XML bean 注册 `com.yomahub.liteflow.property.LiteflowConfig`，用 `<property>` 注入。差异点：
 
-- **属性名改为驼峰**（Java 字段名），不是 kebab-case：`ruleSource`、`printBanner`、`slotSize`、`mainExecutorWorks`、`mainExecutorClass`、`requestIdGeneratorClass`、`globalThreadPoolSize`、`globalThreadPoolQueueSize`、`globalThreadPoolExecutorClass`、`whenMaxWaitTime`、`whenMaxWaitTimeUnit`、`whenThreadPoolIsolate`、`parseMode`、`retryCount`、`supportMultipleType`、`nodeExecutorClass`、`printExecutionLog`、`enableMonitorFile`、`fastLoad`、`enableNodeInstanceId`、`enableVirtualThread`、`chainCacheEnabled`、`chainCacheCapacity`（对应主表 `chain-cache.*`）、`fallbackCmpEnable`（对应 `fallback-cmp-enable`）、`ruleSourceExtData`、`ruleSourceExtDataMap`、`instanceIdGeneratorClass`。
+- **属性名改为驼峰**（Java 字段名），不是 kebab-case：`ruleSource`、`enable`、`printBanner`、`slotSize`、`mainExecutorWorks`、`mainExecutorClass`、`requestIdGeneratorClass`、`globalThreadPoolSize`、`globalThreadPoolQueueSize`、`globalThreadPoolExecutorClass`、`whenMaxWaitTime`、`whenMaxWaitTimeUnit`、`whenThreadPoolIsolate`、`parseMode`、`retryCount`、`supportMultipleType`、`nodeExecutorClass`、`printExecutionLog`、`enableMonitorFile`、`fastLoad`、`enableNodeInstanceId`、`enableVirtualThread`、`chainCacheEnabled`、`chainCacheCapacity`（对应主表 `chain-cache.*`）、`fallbackCmpEnable`（对应 `fallback-cmp-enable`）、`ruleSourceExtData`、`ruleSourceExtDataMap`、`scriptSetting`、`instanceIdGeneratorClass`。Rule-DB 与 Agent 分别通过嵌套对象 `ruleDb`、`agent` 注入。
 - `instanceIdGeneratorClass` **没有对应的 `liteflow.*` key**（SpringBoot starter 未绑定），仅 Spring XML / 纯代码场景可直接设置，getter 兜底为 `DefaultRequestIdGenerator`（见 `references/code-internals.md`）。
 - **监控项被拍平**（不再有 `monitor.` 前缀）：`enableLog`、`queueLimit`、`delay`、`period`，全部直接挂在同一个 bean 上。
 - `whenMaxWaitTimeUnit` / `parseMode` 以**字符串**形式注入（如 `"MILLISECONDS"`、`"PARSE_ALL_ON_START"`）。
@@ -202,16 +206,17 @@ v2.16.1 新增 **Rule-DB 统一规则数据库**模式：规则/脚本以 SQL / 
 
 适用于非 Spring/非 Solon 的纯 Java 场景。`new LiteflowConfig()` 后逐项 `setXxx`。差异点：
 
-- 属性名同 Spring XML（驼峰），通过 setter 注入：`setRuleSource`、`setEnable`、`setPrintBanner`、`setSlotSize`、`setMainExecutorWorks`、`setMainExecutorClass`、`setRequestIdGeneratorClass`、`setGlobalThreadPoolSize`、`setGlobalThreadPoolQueueSize`、`setGlobalThreadPoolExecutorClass`、`setWhenMaxWaitTime`、`setWhenMaxWaitTimeUnit`、`setWhenThreadPoolIsolate`、`setParseMode`、`setRetryCount`、`setSupportMultipleType`、`setNodeExecutorClass`、`setPrintExecutionLog`、`setEnableMonitorFile`、`setFastLoad`、`setEnableNodeInstanceId`、`setEnableVirtualThread`、`setEnableLog`、`setQueueLimit`、`setDelay`、`setPeriod`、`setChainCacheEnabled`、`setChainCacheCapacity`、`setFallbackCmpEnable`、`setRuleSourceExtData`、`setRuleSourceExtDataMap`、`setInstanceIdGeneratorClass`（无对应 `liteflow.*` key，仅 XML / 纯代码可设，见 `references/code-internals.md`）。
+- 属性名同 Spring XML（驼峰），通过 setter 注入：`setRuleSource`、`setEnable`、`setPrintBanner`、`setSlotSize`、`setMainExecutorWorks`、`setMainExecutorClass`、`setRequestIdGeneratorClass`、`setGlobalThreadPoolSize`、`setGlobalThreadPoolQueueSize`、`setGlobalThreadPoolExecutorClass`、`setWhenMaxWaitTime`、`setWhenMaxWaitTimeUnit`、`setWhenThreadPoolIsolate`、`setParseMode`、`setRetryCount`、`setSupportMultipleType`、`setNodeExecutorClass`、`setPrintExecutionLog`、`setEnableMonitorFile`、`setFastLoad`、`setEnableNodeInstanceId`、`setEnableVirtualThread`、`setEnableLog`、`setQueueLimit`、`setDelay`、`setPeriod`、`setChainCacheEnabled`、`setChainCacheCapacity`、`setFallbackCmpEnable`、`setRuleSourceExtData`、`setRuleSourceExtDataMap`、`setScriptSetting`、`setRuleDb`、`setAgent`、`setInstanceIdGeneratorClass`（最后一项无对应 `liteflow.*` key，仅 XML / 纯代码可设，见 `references/code-internals.md`）。
 - **类型为强类型枚举/对象**，不再是字符串：
   - `setWhenMaxWaitTimeUnit(TimeUnit.MILLISECONDS)` —— `java.util.concurrent.TimeUnit`
   - `setParseMode(ParseModeEnum.PARSE_ALL_ON_START)` —— `ParseModeEnum`
   - `setDelay(300000L)` / `setPeriod(300000L)` —— `long`
+  - `setScriptSetting(Map<String, String>)`、`setRuleDb(RuleDbConfig)`、`setAgent(AgentConfig)` —— 对象直接注入
 - 监控项同样拍平：`setEnableLog` / `setQueueLimit` / `setDelay` / `setPeriod`。
 
 ```java
 LiteflowConfig config = new LiteflowConfig();
-// 规则文件路径（必填，代码动态构造规则时自动失效）
+// 使用规则文件时配置；也可在此基础上继续用代码动态注册规则
 config.setRuleSource("config/flow.xml");
 // ---------- 以下非必须 ----------
 config.setEnable(true);
@@ -249,7 +254,7 @@ config.setPeriod(300000L);
 | `parse-mode` | `PARSE_ALL_ON_START` | 想懒加载规则时改 `PARSE_ONE_ON_FIRST_EXEC` / `PARSE_ALL_ON_FIRST_EXEC` |
 | `slot-size` | `1024` | 一般不动，会自动扩容 |
 | `enable-monitor-file` | `false` | 需要本地规则文件变更自动重载时设 `true` |
-| `support-multiple-type` | `false` | 需要「规则文件 + 代码 / 多种来源」混装时设 `true` |
+| `support-multiple-type` | `false` | 同一 `rule-source` 中需要混装 XML／JSON／YAML 等多种文件格式时设 `true` |
 | `when-max-wait-time` (+unit) | `15000` ms | `when` 并发整体超时阈值，按业务最长分支调整 |
 | `global-thread-pool-size` | `64` | 全局异步节点并发上限（v2.16.X 的并发线程数由它控制） |
 | `fast-load` | `false` | 开启快速解析模式 |
@@ -262,6 +267,8 @@ config.setPeriod(300000L);
 ## 七、不存在 / 不生效的命名（避免臆造）
 
 > ⚠️ 修正：早期版本曾把 `chainCache*` 列为"不存在的配置项"，这是**错误**的。`chain-cache.enabled`(默认 `false`) 与 `chain-cache.capacity`(默认 `10000`) 是**真实存在**的配置（见上表与源码 `liteflow-default.properties`、`LiteflowConfig.chainCacheEnabled/chainCacheCapacity`），只是未出现在官方「050.配置项」章节里。请勿因此避开该特性。
+
+> `chain-cache` 是 `PARSE_ONE_ON_FIRST_EXEC` 懒解析模式的配套缓存。`FlowExecutor.initChainCache()` 会校验解析模式，不能把它当作所有模式都适用的通用缓存开关。
 
 下列名称在 v2.16.X 中**不存在或配置了也不生效**（均不在 050 文档，也不在任何 `liteflow-default.properties` 默认值中），易与真实项混淆，请勿使用：
 

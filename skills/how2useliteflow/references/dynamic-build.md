@@ -3,6 +3,7 @@
 
 # 动态构造（Node / EL / Chain）
 
+
 ## 何时用动态构造
 
 规则文件（xml/json/yaml）适合在项目启动时就确定的流程；而**动态构造**让你用 Java 代码在运行期新增/替换一条链路。典型场景：规则依赖运行时数据、规则按租户/灰度动态生成、脚本节点或代理类节点无法用静态 `@LiteflowComponent` 注册。
@@ -32,7 +33,7 @@
 | `createScriptBooleanNode()` | 脚本布尔组件 |
 | `createScriptForNode()` | 脚本次数循环组件 |
 
-链式 setter（均返回 `LiteFlowNodeBuilder`）：`setId(String)`、`setName(String)`、`setClazz(String)` 或 `setClazz(Class<?>)`、`setType(NodeTypeEnum)`、`setScript(String)`、`setFile(String)`（从文件载入脚本，并自动加入文件监听）、`setLanguage(String)`（脚本语言）。最后调 `build()` 注册到 `FlowBus`（普通节点走 `FlowBus.addNode`，脚本节点走 `FlowBus.addScriptNode`）。
+链式 setter（均返回 `LiteFlowNodeBuilder`）：`setId(String)`、`setName(String)`、`setClazz(String)` 或 `setClazz(Class<?>)`、`setType(NodeTypeEnum)`、`setScript(String)`、`setFile(String)`（从文件载入脚本，并登记其监听路径）、`setLanguage(String)`（脚本语言）。最后调 `build()` 注册到 `FlowBus`（普通节点走 `FlowBus.addNode`，脚本节点走 `FlowBus.addScriptNode`）。
 
 `build()` 前会校验 `id` 非空、`type` 非空，不满足抛 `NodeBuildException`。
 
@@ -57,6 +58,7 @@ LiteFlowNodeBuilder.createSwitchNode()
 LiteFlowNodeBuilder.createScriptNode()
         .setId("s1")
         .setName("脚本A")
+        .setLanguage("groovy")
         .setScript("你的脚本内容")
         .build();
 
@@ -64,17 +66,21 @@ LiteFlowNodeBuilder.createScriptNode()
 LiteFlowNodeBuilder.createScriptSwitchNode()
         .setId("ss1")
         .setName("脚本选择")
+        .setLanguage("groovy")
         .setScript("你的脚本内容")
         .build();
 
-// 从文件载入脚本（setFile 会自动注册文件监听，文件改动可热刷新）
+// 从文件载入脚本；热刷新还要求启用文件监听，且 MonitorFile 已完成初始化
 LiteFlowNodeBuilder.createScriptNode()
         .setId("s2")
         .setName("文件脚本")
+        .setLanguage("groovy")
         .setFile("xml-script-file/s1.groovy")
         .build();
 ```
 
+> `setFile` 本身只读取文件并把路径登记到 `MonitorFile`，并不负责创建 watcher。要让后续文件改动触发热刷新，还需设置 `liteflow.enable-monitor-file=true`，并确保文件监听器已经在 `FlowExecutor` 初始化阶段创建；若运行期才动态登记文件，应先确认 watcher 已初始化。
+>
 > 说明：手动构造的节点类**不需要**打 `@LiteflowComponent`/`@Component`；在 Spring 体系下，框架会把节点类注入 Spring 上下文，所以节点内部仍可用 `@Autowired`/`@Resource` 等 Spring 注解。
 
 ## 用 `ELBus` 在代码里拼 EL（不写 EL 字符串）
@@ -87,7 +93,7 @@ LiteFlowNodeBuilder.createScriptNode()
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-el-builder</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -113,7 +119,7 @@ System.out.println(el.toEL());
 ```java
 // SWITCH(x).TO(WHEN(a,b).id("x1"), c)
 String el1 = ELBus.switchOpt("x")
-        .to(ELBus.when("a,b").id("x1"), "c")
+        .to(ELBus.when("a", "b").id("x1"), "c")
         .toEL();
 
 // THEN(WHEN(a,b).any(true), c).bind("k1","v1")
@@ -151,14 +157,14 @@ String el4 = ELBus.then(
 | 并行 WHEN | `ELBus.when(...)` | `any`、`percentage(...)`、`ignoreError`、`customThreadExecutor`、`must`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
 | 选择 SWITCH | `ELBus.switchOpt(...)` | `to(...)`、`defaultOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
 | 条件 IF | `ELBus.ifOpt(cond, trueEl[, falseEl])` | `elseOpt(...)`、`elIfOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
-| 循环 | `ELBus.forOpt(...)`、`ELBus.whileOpt(...)`、`ELBus.iteratorOpt(...)` | `doOpt(...)`、`breakOpt(...)`（迭代器不支持 break）、`parallel`、`tag`、`id`、`maxWaitSeconds`、`retry(...)` |
+| 循环 | `ELBus.forOpt(...)`、`ELBus.whileOpt(...)`、`ELBus.iteratorOpt(...)` | `doOpt(...)`、`breakOpt(...)`、`parallel`、`tag`、`id`、`maxWaitSeconds`、`retry(...)` |
 | 捕获异常 CATCH | `ELBus.catchException(...)` | `doOpt(...)`、`tag`、`id`、`maxWaitSeconds`、`data`、`bind`、`retry(...)` |
 | 与 AND | `ELBus.and(...)` | 仅 `tag`、`id`（另有 `and(...)` 追加子表达式） |
 | 或 OR | `ELBus.or(...)` | 仅 `tag`、`id`（另有 `or(...)` 追加子表达式） |
 | 非 NOT | `ELBus.not(...)` | 仅 `tag`、`id` |
 | 单节点 | `ELBus.node(...)` / `ELBus.element(...)` | `tag`、`data`、`maxWaitSeconds`、`bind`、`retry(...)` |
 
-> 补充（源码中存在但官方 EL 文档未列出）：`ELBus` 还提供 `ser(...)` / `par(...)` 入口，分别返回 `SerELWrapper` / `ParELWrapper`（SER、PAR 是与 THEN、WHEN 并列的独立编排关键字，均直接继承 `ELWrapper`，**并非** then/when 的别名）。
+> 补充：`ELBus` 还提供 `ser(...)` / `par(...)` 入口，分别生成 `SER(...)` / `PAR(...)`。它们在语法和 wrapper 类型上独立，但运行语义分别等同于 `THEN(...)` / `WHEN(...)`，可视为串行与并行的语义别名。
 
 > 注意（以源码为准，官方文档同名表格此处有误）：`AndELWrapper`/`OrELWrapper`/`NotELWrapper` 源码中只把 `tag`/`id` 覆写为 public；`data`/`bind`/`maxWaitSeconds`/`retry` 在父类 `ELWrapper` 上是 `protected` 且这三个子类未覆写，业务代码里对 AND/OR/NOT 链式调用这些方法会**直接编译报错**（这三个类的 Javadoc 虽写着"支持设置 id tag data maxWaitSeconds 属性"，实测并未提供对应 public 方法）。要给 AND/OR/NOT 表达式挂这些子关键字，只能手写 EL 文本。
 >
@@ -198,7 +204,7 @@ System.out.println(el.toEL(true));
 
 ```java
 LiteFlowChainELBuilder.createChain()
-        .setChainName("chain2")
+        .setChainId("chain2")
         .setEL("THEN(a, b, WHEN(c, d))")
         .build();
 ```
@@ -207,7 +213,7 @@ LiteFlowChainELBuilder.createChain()
 
 ### 子流程依赖顺序
 
-构造模式是**一条一条**添加 chain 的。如果 `chain1` 依赖（引用）`chain2`，必须**先构造 `chain2`**，否则解析时会因找不到被引用的 chain 而报错。不过通常一个 EL 已足以表达复杂流程，必要时可用子变量拆分。
+构造模式是**一条一条**添加 chain 的。在默认的立即解析模式下，如果 `chain1` 依赖（引用）`chain2`，必须**先构造 `chain2`**，否则解析时会因找不到被引用的 chain 而报错。`PARSE_ONE_ON_FIRST_EXEC` 会把解析推迟到首次执行，此时可以先注册主 chain，但仍须在第一次执行前注册完所有依赖。为兼容不同解析模式，通常都建议按“被依赖 chain 在前”的顺序构造；复杂局部逻辑也可用子变量拆分。
 
 ### 用 `ELBus` 动态拼 EL 再注册 Chain（推荐）
 
@@ -219,7 +225,7 @@ ELWrapper el = ELBus.then("a", "b", ELBus.when("c", "d"));
 
 // 2. 用拼好的 EL 注册一个 chain
 LiteFlowChainELBuilder.createChain()
-        .setChainName("chain2")
+        .setChainId("chain2")
         .setEL(el.toEL())
         .build();
 ```
@@ -248,7 +254,11 @@ LiteFlowNodeBuilder.createCommonNode()
 LiteFlowNodeBuilder.createCommonNode()
         .setId("b").setName("B").setClazz("com.example.cmp.BCmp").build();
 LiteFlowNodeBuilder.createScriptNode()
-        .setId("sc").setName("脚本C").setScript("def process(){ ... }").build();
+        .setId("sc")
+        .setName("脚本C")
+        .setLanguage("groovy")
+        .setScript("println('script node sc')")
+        .build();
 
 // 2. 用 ELBus 拼出等价 THEN(a, WHEN(b, sc)) 的表达式
 String el = ELBus.then("a", ELBus.when("b", "sc")).toEL();
@@ -259,7 +269,7 @@ LiteFlowChainELBuilder.createChain()
         .setEL(el)
         .build();
 
-// 之后即可正常执行：flowExecutor.invoke2Resp("dynamicChain", ...);
+// 之后即可正常执行：flowExecutor.execute2Resp("dynamicChain", ...);
 ```
 
 ## 附：EL 表达式静态校验

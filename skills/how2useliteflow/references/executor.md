@@ -5,7 +5,7 @@
 > - `090.🛩执行器/040.LiteflowResponse对象.md`
 > - `090.🛩执行器/050.直接执行EL规则.md`
 >
-> 对齐版本：LiteFlow **v2.16.X**。下方方法签名除官方文档外，已用 `liteflow-core` 源码（`FlowExecutor.java` / `LiteflowResponse.java` / `CmpStep.java`）核对；与文档不一致处以源码为准并标注。
+> 对齐版本：LiteFlow **2.16.2**。下方方法签名除官方文档外，已用 `liteflow-core` 源码（`FlowExecutor.java` / `ExecuteOption.java` / `FlowEvent.java` / `LiteflowResponse.java` / `CmpStep.java`）核对；与文档不一致处以源码为准并标注。
 
 # 执行器 FlowExecutor
 
@@ -33,7 +33,7 @@ public class OrderService {
 | `LiteflowResponse execute2Resp(String chainId, Object param, Object... contextBeanArray)` | 按 **Bean 实例** 传入多个上下文 |
 | `LiteflowResponse execute2RespWithRid(String chainId, Object param, String requestId, Class<?>... contextBeanClazzArray)` | 额外指定 `requestId`（Class 方式） |
 | `LiteflowResponse execute2RespWithRid(String chainId, Object param, String requestId, Object... contextBeanArray)` | 额外指定 `requestId`（Bean 方式） |
-| `LiteflowResponse execute2Resp(String chainId, Object param, ExecuteOption option)` | **源码新增**（以源码为准）：用 `ExecuteOption` 统一组合 `requestId` / `conversationId` / 上下文等，避免 overload 命名爆炸，新代码推荐入口 |
+| `LiteflowResponse execute2Resp(String chainId, Object param, ExecuteOption option)` | 用 `ExecuteOption` 统一组合 `requestId` / `conversationId` / 上下文 / 事件监听器，避免 overload 命名爆炸，新代码推荐入口 |
 | `LiteflowResponse execute2RespWithEL(String elStr)` | 直接执行一段 EL，v2.15.0+；上下文默认 `DefaultContext`，入参 `null` |
 | `LiteflowResponse execute2RespWithEL(String elStr, Object param)` | 同上，带初始入参 |
 | `LiteflowResponse execute2RespWithEL(String elStr, Object param, String requestId, Class<?>... contextBeanClazzArray)` | 带 `requestId`，按 Class 传上下文 |
@@ -68,6 +68,38 @@ public class OrderService {
 | `List<LiteflowResponse> executeRouteChainWithRid(Object param, String requestId, Object... contextBeanArray)` |
 | `List<LiteflowResponse> executeRouteChainWithRid(String namespace, Object param, String requestId, Object... contextBeanArray)` |
 
+## ExecuteOption：组合执行维度
+
+需要同时传 requestId、Agent 会话、上下文或事件监听器时，优先使用这个参数对象：
+
+```java
+ExecuteOption option = ExecuteOption.of()
+        .requestId("req-001")
+        .conversationId("conversation-001")
+        .contextClass(OrderContext.class)
+        .eventListener(event -> {
+            if ("agent.text.delta".equals(event.getType())) {
+                System.out.print(event.getText());
+            }
+        });
+
+LiteflowResponse response =
+        flowExecutor.execute2Resp("chain1", request, option);
+```
+
+| Builder | 语义 |
+|---|---|
+| `requestId(String)` | 指定请求追踪 ID；null/空白按未设置处理，由框架生成 |
+| `conversationId(String)` | 指定业务会话 ID，并取消 `autoConversationId()` |
+| `autoConversationId()` | 提前生成会话 ID，并取消显式 conversationId；执行后从 response 取回 |
+| `contextClass(Class<?>...)` | 传上下文类型，由框架实例化 |
+| `contextBean(Object...)` | 传已有上下文实例 |
+| `eventListener(FlowEventListener)` | 挂载本次执行的通用事件监听器 |
+
+所有字段都可选，`option == null` 等价于 `ExecuteOption.of()`。两者都**不会**像 `execute2Resp(chainId, param)` 两参重载那样自动补 `DefaultContext.class`；组件需要上下文时必须显式设置 `contextClass(...)` 或 `contextBean(...)`。没有显式或自动 conversationId 时，FlowExecutor 不主动写入 Slot；Agent 组件仍可按自身规则在首次执行时生成。
+
+`execute2Future(..., ExecuteOption)` 会在提交 worker 前读取 conversationId、requestId、上下文数组和监听器字段到局部变量，但这不是深拷贝：提交后再调用 option 的 setter 替换字段不会改变本次任务，而数组元素、上下文 Bean 等可变对象仍由调用方与 worker 共享。事件监听器运行在事件发布所在的执行线程中，不应执行长时间阻塞操作。
+
 ### 已废弃
 
 - `@Deprecated DefaultContext execute(String chainId, Object param) throws Exception`：返回默认上下文，失败时直接抛异常。建议改用 `execute2Resp`。
@@ -77,9 +109,7 @@ public class OrderService {
 
 `execute2Resp` / `execute2RespWithEL` 的第二参数 `param` 是**流程初始入参**（如订单号、用户 ID 等），可以是任意对象，生产中常传入自封装的 Bean。
 
-:::warning 重要区分
-**流程入参** ≠ **上下文**。把一个上下文实例当 `param` 传入，并不等于组件里能从同类型上下文中读到值——它们是两个独立实例。流程入参**只能**在组件中通过 `this.getRequestData()` 取出。
-:::
+> **重要区分：**流程入参不等于上下文。把一个上下文实例当 `param` 传入，并不等于组件里能从同类型上下文中读到值——它们是两个独立实例。流程入参**只能**在组件中通过 `this.getRequestData()` 取出。
 
 ```java
 @LiteflowComponent("a")
@@ -122,22 +152,18 @@ LiteflowResponse response = flowExecutor.execute2RespWithEL(
 
 `execute2RespWithEL` 与 `execute2Resp` 用法一致，仅第一参数由 `chainId` 换成规则 EL。无自定义上下文需求时可直接用两参形式 `execute2RespWithEL(elStr, param)`（上下文默认 `DefaultContext`）。
 
-:::warning 签名坑：三参形式不存在，照抄官方示例无法编译
-官方文档（`050.直接执行EL规则.md`）示例写作 `execute2RespWithEL("THEN(a, b, c)", requestData, CustomContext.class)`，这个**三参签名在源码中不存在**。`execute2RespWithEL` 自引入（v2.15.0，commit `0da24f4b0`）起仅有 4 个公开重载（`FlowExecutor.java:302-341`）：`(String)`、`(String, Object)`、`(String, Object, String, Class<?>...)`、`(String, Object, String, Object...)`——第三参固定为 `String requestId`，传入 `XxxContext.class`（`Class` 类型）无任何重载可匹配，Java 重载解析无候选方法，**编译报错**。自定义上下文必须走带 `requestId` 的四参重载，`requestId` 传 `null` 即由框架自动生成。
-:::
+> **签名坑：三参形式不存在，照抄官方示例无法编译。**官方文档（`050.直接执行EL规则.md`）示例写作 `execute2RespWithEL("THEN(a, b, c)", requestData, CustomContext.class)`，这个**三参签名在源码中不存在**。`execute2RespWithEL` 自引入（v2.15.0，commit `0da24f4b0`）起仅有 4 个公开重载（`FlowExecutor.java:302-341`）：`(String)`、`(String, Object)`、`(String, Object, String, Class<?>...)`、`(String, Object, String, Object...)`——第三参固定为 `String requestId`，传入 `XxxContext.class`（`Class` 类型）无任何重载可匹配，Java 重载解析无候选方法，**编译报错**。自定义上下文必须走带 `requestId` 的四参重载，`requestId` 传 `null` 即由框架自动生成。
 
-:::tip 实现机制
+**实现机制：**
+
 LiteFlow 不会每次请求都新建 chain。若多次请求的表达式 **MD5 指纹相同**，只会构建一次 chain 并由框架托管，开发者无需关心。
 但若每次传入表达式都不同，会导致托管 chain 数量暴增——应避免，或结合"活跃规则保活策略"使用。
-:::
 
 ## LiteflowResponse 对象
 
 执行返回最多的就是 `LiteflowResponse`，封装了结果数据与过程数据。
 
-:::warning 不适合序列化
-该对象不适宜直接序列化返回前端/外部。应用层应自行构建 DTO 返回。
-:::
+> **不适合序列化：**该对象不适宜直接序列化返回前端／外部。应用层应自行构建 DTO 返回。
 
 ### 是否成功 / 异常 / 编码
 
@@ -185,8 +211,8 @@ UserContext  userCtx  = response.getContextBean(UserContext.class);
 
 ### 执行步骤信息
 
-| Getter | 返回 | 说明 |
-|---|---|---|
+| Getter | 说明 |
+|---|---|
 | `Map<String, List<CmpStep>> getExecuteSteps()` | 按 nodeId 聚合的步骤（**注意：源码返回 `Map<String, List<CmpStep>>`**，文档写作 `Map<String, CmpStep>`，以源码为准） |
 | `Queue<CmpStep> getExecuteStepQueue()` | 执行步骤队列（按执行顺序） |
 | `String getExecuteStepStrWithTime()` | 带耗时的步骤字符串，如 `a[组件A]<201>==>b[组件B]<300>` |
@@ -196,9 +222,7 @@ UserContext  userCtx  = response.getContextBean(UserContext.class);
 
 步骤字符串格式：`组件ID[组件别名]<耗时毫秒>`，组件别名见官方"组件别名"章节。
 
-:::tip 自动打印
-每个流程执行结束后，框架会**自动打印**该步骤字符串，无需手动获取；如需持久化再自行调用。
-:::
+> **自动打印：**每个流程执行结束后，框架会**自动打印**该步骤字符串，无需手动获取；如需持久化再自行调用。
 
 ```java
 LiteflowResponse response = flowExecutor.execute2Resp("chain1", param, CustomContext.class);
@@ -219,7 +243,7 @@ Queue<CmpStep> stepQueue = response.getExecuteStepQueue();
 1. **单步耗时**：`CmpStep.getTimeSpent()`，单位毫秒；回滚耗时 `CmpStep.getRollbackTimeSpent()`。
 2. **步骤字符串**：`getExecuteStepStrWithTime()` 已把每步耗时拼入。
 
-如需流程总耗时，需自行遍历 `getExecuteStepQueue()` 累加 `getTimeSpent()`（以源码/官方文档为准）。
+不要把 `getExecuteStepQueue()` 中的 `timeSpent` 相加作为流程墙钟耗时：`WHEN` 和并行循环中的步骤会重叠执行，累加会重复计算。需要流程总耗时时，应在调用 `execute2Resp` 的外层使用单调时钟计时，或接入 `liteflow-metrics`／链路追踪；步骤耗时只用于分析单个节点。
 
 ### 回滚步骤（源码核对存在）
 
@@ -236,7 +260,7 @@ Queue<CmpStep> stepQueue = response.getExecuteStepQueue();
 | Getter | 返回 | 说明 |
 |---|---|---|
 | `String getRequestId()` | `String` | 本次执行请求 ID（未传则框架自动生成） |
-| `String getConversationId()` | `String` | 会话 ID（源码核对存在，ReAct Agent 等连续对话场景使用） |
+| `String getConversationId()` | `String` | 会话 ID（LiteFlow Agent 连续对话等场景使用） |
 | `String getChainId()` | `String` | 本次执行的 chain ID |
 
 ### 超时对象

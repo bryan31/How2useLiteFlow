@@ -2,7 +2,9 @@
 
 [English](./README.md) | **中文**
 
-一个帮助 AI 正确使用 **[LiteFlow](https://liteflow.cc)（v2.16.1）** 的 Agent Skill。LiteFlow 是一款轻量级的 Java 规则引擎／业务编排框架。本 skill 内置了从官方文档与源码蒸馏出的用法与代码细节，包括 Rule-DB 的 SQL、PostgreSQL、MongoDB、Redis、ZooKeeper、etcd、Nacos 七后端，以及指标监控、组件、EL 规则、脚本、执行器、AI Agent 编排、测试调试和源码实现；并规定了“答不到时怎么办”的严格流程——**不杜撰、不拿网络内容充当 LiteFlow 行为依据**。
+一个帮助 AI 正确使用 **[LiteFlow](https://liteflow.cc)（v2.16.2）** 的 Agent Skill。LiteFlow 是一款轻量级的 Java 规则引擎／业务编排框架。本 skill 内置了从官方文档与源码蒸馏出的用法与代码细节，包括 Rule-DB 的 SQL、PostgreSQL、MongoDB、Redis、ZooKeeper、etcd、Nacos 七后端，以及指标监控、组件、EL 规则、脚本、执行器、AgentScope 2 集成、测试调试和源码实现；并规定了“答不到时怎么办”的严格流程——**不杜撰、不拿网络内容充当 LiteFlow 行为依据**。
+
+> **知识基线（2026-09-19）：**LiteFlow `2.16.2`、AgentScope Java `2.0.3`。Agent 入口为 `liteflow-agent-core` 中的 `HarnessAgentComponent`。示例统一使用 `2.16.2`；镜像未同步时核对仓库，或先安装匹配源码。
 
 ## 安装
 
@@ -30,7 +32,7 @@ npx skills update how2useliteflow -g -y   # 全局安装
 npx skills update how2useliteflow -p -y   # 项目安装
 ```
 
-skill 也会自检：每次会话通过 `scripts/version-check.sh` 对比自身 `version` 与远端发布的 SKILL.md，发现新版本时会提示你执行更新命令。结果按天缓存，网络失败时静默跳过，不影响使用。
+skill 也会自检：每次会话通过 `scripts/version-check.sh` 对比自身 `version` 与远端发布的 SKILL.md，发现新版本时会提示你执行更新命令。结果按天缓存；网络或解析失败时会输出简短诊断，但不影响正常使用。
 
 ### 可选：用 agent hook 强制执行检查
 
@@ -66,9 +68,9 @@ command = "sh ~/.agents/skills/how2useliteflow/scripts/version-check.sh || true"
 
 ## 工作原理
 
-**你只需要安装这个 skill，不需要任何额外配置。** 它能回答**任何** LiteFlow 问题，靠的是一套分层策略：
+**安装后即可使用分主题参考资料与本地源码查询。** 覆盖率按当前 guide 章节和核心文档页面的明确清单计算，详见[覆盖报告](skills/how2useliteflow/references/coverage.md)。这是文档功能覆盖率，不是 Java 测试覆盖率，也不代表问答准确率。
 
-1. **蒸馏知识（覆盖约 90%）** — 内置高频速查表 + 分主题参考文档（`references/`），全部从 LiteFlow 官方文档与源码蒸馏而来。绝大多数问题——EL 算子、组件类型、执行 API、配置项、源码实现——都直接由这些内容作答，不联网、无需额外设置。
+1. **蒸馏知识** — 内置高频速查表与分主题参考文档（`references/`），全部从 LiteFlow 2.16.2 文档与源码蒸馏而来。EL 算子、组件类型、执行 API、配置项、AgentScope 2、Rule-DB、常见排错和源码实现等问题可直接作答，不联网、无需额外设置。
 2. **源码托底** — 对于蒸馏知识未覆盖的少数冷门或深层问题，skill 会去读 LiteFlow 的真实源码：优先查找本地 LiteFlow 仓库，没有则在征得你同意后克隆官方仓库，再用精确的 `path:line` 引用作答。
 3. **绝不杜撰** — 若 reference 与源码都无法确认，skill 会如实说明，而不是臆测、也不拿网络内容充当 LiteFlow 的行为依据。
 
@@ -76,7 +78,7 @@ command = "sh ~/.agents/skills/how2useliteflow/scripts/version-check.sh || true"
 
 ## 触发方式
 
-当你向 AI 提到 LiteFlow 相关内容（组件、EL 规则、上下文、脚本组件、规则源、执行器、ReAct Agent 编排、测试、源码细节等）时，该 skill 会自动启用。
+当你向 AI 提到 LiteFlow 相关内容（组件、EL 规则、上下文、脚本组件、规则源、执行器、AgentScope 2 编排、测试、源码细节等）时，该 skill 会自动启用。
 
 ## 仓库结构
 
@@ -84,6 +86,5 @@ command = "sh ~/.agents/skills/how2useliteflow/scripts/version-check.sh || true"
 skills/how2useliteflow/
 ├── SKILL.md          # 入口：决策流程 + 高频速查 + 知识地图
 ├── references/       # 分主题的详细参考文档
-├── scripts/          # 本地优先的源码定位、受控克隆与版本自检工具
-└── assets/
+└── scripts/          # 本地优先的源码定位、受控克隆与版本自检工具
 ```

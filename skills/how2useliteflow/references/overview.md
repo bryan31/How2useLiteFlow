@@ -4,9 +4,9 @@
 > - `180.性能表现.md`
 > - 模块目录与职责交叉验证自源码仓库 `liteFlow/`（`README.zh-CN.md` + 各模块 `liteflow-*` 目录）
 >
-> 本文档对齐 **LiteFlow v2.16.X**。
+> 本文档对齐 **LiteFlow 2.16.2**。
 
-# LiteFlow 框架概览（v2.16.X）
+# LiteFlow 框架概览（2.16.2）
 
 ## 一句话定位
 
@@ -32,7 +32,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
                                         │  叶子节点
                                         ▼
                               NodeComponent（业务组件）
-            普通组件 / 脚本组件 / 声明式组件 / ReAct Agent 组件
+            普通组件 / 脚本组件 / 声明式组件 / LiteFlow Agent 组件
 ```
 
 - **FlowExecutor**：入口执行器，负责解析规则、注册组件、装配元信息，并触发链路执行（大部分解析装配在启动期完成）。
@@ -53,11 +53,12 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 | **liteflow-script-plugin** | 脚本语言插件聚合，含 11 个子模块（见下）。 |
 | **liteflow-rule-plugin** | 规则持久化插件聚合，含 6 个子模块（见下）。 |
 | **liteflow-rule-db** | **v2.16.1 新增**：统一规则数据库聚合模块，规则/脚本以存储为权威源，含 sql / postgresql / mongodb / redis / zk / etcd / nacos 7 个插件与统一发布 API，与 `rule-source` 模式互斥（见 `references/rule-db.md`）。 |
+| **liteflow-metrics** | **v2.16.1 新增**：基于 Micrometer 的 chain/node 指标与 LiteFlow 结构视图；starter 会传递依赖（见 `references/metrics.md`）。 |
 | **liteflow-spring** | 纯 Spring（非 SpringBoot）场景的集成支持。 |
 | **liteflow-spring-boot-starter** | SpringBoot 2.X / 3.X 场景的官方 starter。 |
 | **liteflow-spring-boot4-starter** | SpringBoot 4.X 场景的专用 starter（API 差异较大，**勿与上面那个混用**）。 |
 | **liteflow-solon-plugin** | 国产 Solon 应用框架的集成支持（非 Spring 系生态的另一选择）。 |
-| **liteflow-react-agent** | **v2.16.0 全新特性**：把完整 ReAct Agent 封装成 LiteFlow 组件（“一个组件 = 一个 Agent”），对接主流大模型，自带多轮记忆、Skills、工作空间文件工具、流式输出。当前模块以 **JDK 17** 编译。 |
+| **liteflow-agent** | **v2.16.0 首次引入，2.16.2 迁移到 AgentScope 2**：把 Agent 封装成 LiteFlow 组件。聚合模块含 core / openai / anthropic / gemini / dashscope / redis / mysql / a2a 8 个子模块，覆盖模型、工具、持久化会话、事件、HITL、Harness 与远程 Agent（见 `references/agent.md`）。要求 **JDK 17+**。 |
 | **liteflow-testcase-el** | EL 编排相关的测试用例集合（2000+ 测试用例的覆盖来源之一）。 |
 
 > 另有 `liteflow-benchmark`（基准压测）辅助模块，一般业务接入不直接依赖（以源码为准）。v2.16.1 起新增两个模块：**`liteflow-rule-db`**（统一规则数据库聚合模块，含 sql / postgresql / mongodb / redis / zk / etcd / nacos 7 个插件 + publisher 统一发布 API，见 `references/rule-db.md`）与 **`liteflow-metrics`**（指标监控模块，基于 Micrometer，已是 `liteflow-spring-boot-starter` / `liteflow-spring-boot4-starter` 的传递依赖，用 starter 无需单独引入，见 `references/metrics.md`）。
@@ -104,7 +105,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 - 最低 **JDK 8**，**v2.15.0（含）以上版本（即 v2.16.X）支持 JDK 8 ~ JDK 25**，直接依赖、无需任何 JVM 参数。
 - 历史参考：v2.10.6 ~ v2.13.2 仅支持 JDK 8~17，且 JDK 9 以上需加 `--add-opens java.base/sun.reflect.annotation=ALL-UNNAMED`（v2.16.X 无此负担）。
 - **JDK 21+ 原生支持虚拟线程**。
-- 各 JDK 版本均通过 2000+ 测试用例验证，测试覆盖率约 90%。
+- 官方提供 2000+ 测试用例；测试数量与技能功能覆盖率不是同一指标。
 
 ### SpringBoot
 
@@ -143,7 +144,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 
 - **SpringBoot 4.X 必须用 `liteflow-spring-boot4-starter`**，两个 starter 不可混用。
 - **SpringBoot 3.X / Spring 6.X 起需 JDK 17+**（这是 Spring 自身的 JDK 要求，不是 LiteFlow 单独限制）。
-- **`liteflow-react-agent`（AI Agent）要求 JDK 17+**；还需同时满足 agentscope-java 与具体模型 SDK 的运行要求。
+- **`liteflow-agent`（AI Agent）要求 JDK 17+**，2.16.2 基于 AgentScope Java 2.0.3；核心框架的 JDK 8+ 支持不等于 Agent 模块也能在 JDK 8 上运行。
 - v2.16.X（≥ v2.15.0）在 JDK 9+ 下**无需**再加 `--add-opens` JVM 参数（老版本的旧坑已解决）。
 - 脚本语言官方明确支持的是 8 种；仓库里的 `graaljs` / `javax` / `javax-pro` 子模块官方文档未单独说明，使用前以源码/官方文档为准。
 - LiteFlow **不是审批流引擎**，不要拿它做角色任务流转。

@@ -65,7 +65,7 @@ List<LiteflowResponse> responseList =
 
 - **不用再传 chainId**——LiteFlow 会遍历所有带 `<route>` 的 chain（准确说是目标 namespace 内的，不传 namespace 时即默认 namespace，见下节）；
 - 决策判断与命中规则的执行均为**并行**；
-- 与 `execute2Resp` 一致地支持：用已初始化的上下文传入、多上下文传入等；
+- 与 `execute2Resp` 一致地支持传上下文 Class 或现成 Bean，也支持多个上下文；但路由执行会并发复用 Bean，具体边界见下文；
 - **返回 `List<LiteflowResponse>`**：每个元素对应一条命中规则的执行结果；`LiteflowResponse` 中新增了 **`chainId` 字段**，用于识别是哪条规则产生的结果。
 
 ### 错误提示
@@ -156,7 +156,7 @@ YAML 同理：chain 条目下并列 `route` 与 `value` 两个 key（另有可�
 
 1. **组件类型**：`<route>` 里的节点**只能是布尔组件**，不能是其它任何类型的组件。
 2. **主表达式**：`<route>` 里的表达式**只能是"与或非表达式"**（`AND` / `OR` / `NOT`），不能用其它主表达式。
-3. **上下文隔离**：匹配到的每一条规则都拥有**单独的上下文实例**，运行时**并行执行，互不相干**。
+3. **上下文实例并非一概隔离**：传 Class 时，每次 route 判断和每次命中 body 执行都会重新创建上下文，因此 route 中写入的数据不会带到 body；传 Bean 时，同一批对象会被所有 route/body 并发复用。需要跨 route/body 共享数据时应明确使用线程安全的 Bean，或把判定所需数据放在只读 `param` 中。
 4. **启动检查**：[启动不检查规则]特性对决策路由 EL **不起作用**——决策体中的 EL 在启动时**一定会被检查**；不过决策体中的 EL **可以加 `node` 关键字**。
 5. **副表达式**：决策路由体中的 EL **可以加 `tag`、`data` 等副表达式**。
 6. **返回识别**：返回是 `List<LiteflowResponse>`，通过其中的 `chainId` 字段区分各命中规则的结果。
@@ -167,12 +167,12 @@ YAML 同理：chain 条目下并列 `route` 与 `value` 两个 key（另有可�
 
 | 维度 | 普通 chain 执行 | 决策路由 |
 |---|---|---|
-| 入口方法 | `execute2Resp` / `executeInParam` 等 | `executeRouteChain` |
+| 入口方法 | `execute2Resp` / `execute2Future` | `executeRouteChain` |
 | 是否指定 chain | **必须**指定 chainId | **不传** chainId，遍历所有带 `<route>` 的 chain |
 | 链路选择 | 静态写死，或靠主规则 `SWITCH` 手工编排 | 由决策 EL（布尔组件 + 与或非）动态判定 |
 | 命中数量 | 单条 | 0~多条，命中的多条**并行执行** |
 | 规则体结构 | 只有规则 EL | `<route>` + `<body>` |
-| 上下文 | 单条链路共享 | 每条命中规则**独立上下文实例** |
+| 上下文 | 单条链路共享 | Class：route/body 各自新实例；Bean：所有 route/body 并发复用同一批对象 |
 | 返回类型 | `LiteflowResponse` | `List<LiteflowResponse>`（含 `chainId`） |
 | namespace | 不涉及 | 支持 `namespace` 维度筛选（v2.12.1+） |
 | 存储支持 | 全部 | 文件类（XML / JSON / YAML）+ 数据库（含 v2.16.1 Rule-DB） |

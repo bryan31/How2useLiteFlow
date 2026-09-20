@@ -1,6 +1,6 @@
 #!/bin/sh
 # Check whether the installed copy of this skill is behind the published version.
-# Never blocks the skill's normal work: network or parse failures exit 1 quietly.
+# Never blocks the skill's normal work: network or parse failures print a short diagnostic and exit 1.
 # Results are cached once per day; repeated runs on the same day replay the cache.
 #
 # Exit codes:
@@ -41,6 +41,10 @@ version_gt() {
   }'
 }
 
+valid_version() {
+  awk -v v="$1" 'BEGIN { exit(v ~ /^[0-9]+([.][0-9]+)*$/ ? 0 : 1) }'
+}
+
 fetch_remote() {
   if command -v curl >/dev/null 2>&1; then
     curl -fsL --max-time "$TIMEOUT" -- "$REMOTE_URL" 2>/dev/null
@@ -53,11 +57,13 @@ fetch_remote() {
 
 run_check() {
   local_version="$(extract_version <"$SKILL_MD" 2>/dev/null || true)"
-  [ -n "$local_version" ] || { echo "version-check: cannot read version from $SKILL_MD" >&2; return 1; }
+  [ -n "$local_version" ] || { echo "version-check: cannot read version from $SKILL_MD"; return 1; }
+  valid_version "$local_version" || { echo "version-check: local version is not dotted numeric: $local_version"; return 1; }
 
-  remote_md="$(fetch_remote)" || { echo "version-check: remote check unavailable (offline or blocked)" >&2; return 1; }
+  remote_md="$(fetch_remote)" || { echo "version-check: remote check unavailable (offline or blocked)"; return 1; }
   remote_version="$(printf '%s\n' "$remote_md" | extract_version)"
-  [ -n "$remote_version" ] || { echo "version-check: remote SKILL.md has no version field" >&2; return 1; }
+  [ -n "$remote_version" ] || { echo "version-check: remote SKILL.md has no version field"; return 1; }
+  valid_version "$remote_version" || { echo "version-check: remote version is not dotted numeric: $remote_version"; return 1; }
 
   if version_gt "$remote_version" "$local_version"; then
     printf '本 skill 有新版本：本地 %s → 远端 %s\n' "$local_version" "$remote_version"

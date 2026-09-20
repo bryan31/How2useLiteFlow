@@ -1,6 +1,6 @@
 # LiteFlow 指标监控 liteflow-metrics（v2.16.1 新增）
 
-> 对齐版本：**v2.16.1**。来源：`docs/liteflow-metrics-guide.md` + `liteflow-metrics/` 模块源码。
+> 对齐版本：**2.16.2**。该模块在 v2.16.1 首次引入；来源为 `docs/liteflow-metrics-guide.md` + `liteflow-metrics/` 模块源码。
 > 能力：把每条 chain、每个 node 的执行情况（次数/耗时/错误/在途并发）变成 Micrometer 指标，对接 Prometheus / Grafana；另提供 `/actuator/liteflow` 结构检视端点。
 
 ## 1. 定位与依赖关系
@@ -19,13 +19,17 @@
 liteflow.metrics.enabled=true
 ```
 
-装配守护**三条件同时满足**才装配 `ChainMetricsLifeCycle` / `NodeMetricsLifeCycle` / `LiteflowMeterBinder`：
+以下自动装配只适用于两个 Spring Boot starter。当前审计的 **2.16.2 源码**中，**三条件同时满足**就会装配 `ChainMetricsLifeCycle` / `NodeMetricsLifeCycle` / `LiteflowMeterBinder`：
 
 1. classpath 存在 `io.micrometer.core.instrument.MeterRegistry`；
 2. 容器中存在 `MeterRegistry` Bean；
 3. `liteflow.metrics.enabled` 非 false。
 
 **没有引入任何 registry 就不会有任何指标行为。**
+
+源码核验边界（2026-09-19）：当前两个 starter 的 Metrics 配置没有 `FlowExecutor` Bean 前置条件；关闭 LiteFlow 主装配时同步关闭 `liteflow.metrics.enabled`，避免 Gauge 访问未初始化对象。`LiteflowMeterBinder` 还要求 `LiteflowConfig` Bean，其他采集生命周期要求 MeterRegistry。
+
+根 POM 当前未显式启用 Maven `-parameters`。若 Spring 6.1+ 下参数化 Actuator 端点无法解析 selector 参数，检查实际制品是否保留参数名，必要时在源码构建中启用该编译参数；不要只凭版本号推断已包含某项补丁。
 
 ## 3. 端点暴露（采集 ≠ 暴露）
 
@@ -78,8 +82,10 @@ management.endpoints.web.exposure.include=liteflow,prometheus,metrics
 |---|---|---|
 | `liteflow.chains.registered` | `FlowBus.getChainMap().size()` | 已注册 chain 总数 |
 | `liteflow.nodes.registered` | `FlowBus.getNodeMap().size()` | 已注册 node 总数 |
-| `liteflow.slot.size` | `LiteflowConfig.slotSize` | slot 池容量 |
-| `liteflow.slot.occupied` | `DataBus.OCCUPY_COUNT` | 当前在用 slot 数（逼近容量 = 并发吃紧/泄漏） |
+| `liteflow.slot.size` | `LiteflowConfig.slotSize` | 启动时配置的初始 slot 数，不是扩容后的实时容量 |
+| `liteflow.slot.occupied` | `DataBus.OCCUPY_COUNT` | 当前在用 slot 数 |
+
+`DataBus` 在空闲下标耗尽时会按约 1.75 倍自动扩容，而 `liteflow.slot.size` Gauge 仍是初始配置值。因此 `occupied / size` 可能大于 1，不能当成池饱和度；应观察 occupied 的趋势、异常回落和执行延迟来排查并发压力或 slot 未释放。
 
 ## 5. 结构端点 `/actuator/liteflow`（只读，`LiteflowMetaView` 提供，`@Endpoint(id="liteflow")`）
 
@@ -95,6 +101,7 @@ management.endpoints.web.exposure.include=liteflow,prometheus,metrics
 指标快照字段：`count` / `failed` / `errorRate`(=failed/count) / `meanMs` / `maxMs`。快照是"尽力而为"的，但要分清两种"没指标"的场景：
 
 - **`liteflow.metrics.enabled=false`：整个端点消失（404）。** Boot2/3 与 Boot4 的 `LiteflowMetricsAutoConfiguration` 类级都挂 `@ConditionalOnProperty(prefix="liteflow.metrics", name="enabled", ...)`，而 `LiteflowMetaView` 与 `LiteflowEndpoint` 只在该配置类内注册——开关一关整个类不装配，端点 Bean 不存在，`/actuator/liteflow` 直接 404，**不是"仍返回结构信息"**。
+- **当前 2.16.2 源码中，`liteflow.enable=false` 不会自动抑制 Metrics 自动配置。** 若 classpath 和容器里仍有 `MeterRegistry`，请同步关闭 `liteflow.metrics.enabled`，否则可能在启动阶段出现 NPE。装配条件应以实际使用的制品为准。
 - **enabled 未关、但容器中没有 `MeterRegistry` Bean：端点仍在。** `LiteflowMetaView` 允许 null registry，此时仍返回结构信息，只是 `metrics` 快照字段为 null/省略。
 
 也就是说，想"临时关采集、但保留结构端点"目前**没有这样的组合**——关开关会连端点一起关。
@@ -131,15 +138,15 @@ sum(rate(liteflow_chain_executions_seconds_count{chain="mChain", status="failed"
 sum by (exception) (rate(liteflow_chain_errors_total{chain="mChain"}[5m]))
 # P95（需先开直方图）
 histogram_quantile(0.95, sum by (le) (rate(liteflow_chain_executions_seconds_bucket{chain="mChain"}[5m])))
-# slot 池饱和度
-liteflow_slot_occupied / liteflow_slot_size
+# 当前占用 slot 数；slot 会自动扩容，不能除以 slot_size 当作饱和度
+liteflow_slot_occupied
 # 在途执行数（LongTaskTimer 后缀是 _active_count / _duration_sum，不是 _count/_sum）
 liteflow_chain_active_seconds_active_count{chain="mChain"}
 ```
 
 ### 告警规则示例（Prometheus alerting rules）
 
-骨架固定为 `groups → rules → alert/expr/for/labels/annotations`，`expr` 直接复用上面的错误率 / 饱和度 PromQL。官方文档收录的两条现成规则：
+骨架固定为 `groups → rules → alert/expr/for/labels/annotations`，`expr` 可直接复用上面的错误率 PromQL：
 
 ```yaml
 groups:
@@ -157,20 +164,13 @@ groups:
           severity: warning
         annotations:
           summary: "LiteFlow chain {{ $labels.chain }} 错误率过高"
-
-      # slot 池占用超过 80%
-      - alert: LiteflowSlotSaturated
-        expr: liteflow_slot_occupied / liteflow_slot_size > 0.8
-        for: 2m
-        labels:
-          severity: critical
-        annotations:
-          summary: "LiteFlow slot 池饱和，可能并发吃紧或存在 slot 泄漏"
 ```
 
-## 8. 非 Spring / Solon 环境
+## 8. Solon / 非 Spring 环境
 
-`liteflow-metrics` 框架无关，但**钩子不会自动发现**：Spring/Solon 下两个 LifeCycle 是作为 `LifeCycle` Bean 被扫描注册进 `LifeCycleHolder` 的；非 Spring 环境**只 new 出实例不会产生任何指标**，必须手动两步：
+`liteflow-metrics` 的采集类本身与框架无关，但只有 Spring Boot starter 提供指标自动装配。Solon 插件既不传递依赖 `liteflow-metrics`，也不创建指标钩子；使用者必须显式引入该模块，把 `ChainMetricsLifeCycle`、`NodeMetricsLifeCycle` 注册为 Solon Bean，并自行调用 `LiteflowMeterBinder.bindTo(registry)` 绑定全局 Gauge。Solon 会把用户注册的 `LifeCycle` Bean 加入 `LifeCycleHolder`。
+
+纯 Java 环境没有 Bean 扫描，必须手动完成两步：
 
 ```java
 // 1. 注册执行钩子（否则永远不会被回调）
@@ -180,7 +180,7 @@ LifeCycleHolder.addLifeCycle(new NodeMetricsLifeCycle(registry));
 new LiteflowMeterBinder(config).bindTo(registry);
 ```
 
-`/actuator/liteflow` 结构端点是 Spring Actuator 能力，非 Spring 不可用，但指标照常采集。
+`/actuator/liteflow` 结构端点由 Spring Boot Actuator 自动配置提供，Solon 与纯 Java 环境不会自动拥有该端点；完成上述注册后，Micrometer 指标本身仍可照常采集。
 
 ## 9. 性能与基数
 
@@ -192,3 +192,11 @@ new LiteflowMeterBinder(config).bindTo(registry);
 - 依赖：starter + actuator + registry；`exposure.include` 含 `liteflow,prometheus`；`curl /actuator/prometheus | grep liteflow_` 有输出。
 - 开箱即用的 Prometheus + Grafana `docker-compose.yml`、`prometheus.yml`、「LiteFlow 概览」仪表盘 JSON 在仓库 `docs/metrics-integration/`（演示用，生产自行加固）。
 - 源码：`liteflow-metrics/`（`ChainMetricsLifeCycle` / `NodeMetricsLifeCycle` / `LiteflowMeterBinder` / `LiteflowMetaView`）；starter 侧装配 `liteflow-spring-boot-starter/.../metrics/LiteflowMetricsAutoConfiguration.java` + `LiteflowEndpoint.java`（boot4 同名）。node 指标钩子基于 core 新增的 `PostProcessNodeExecuteLifeCycle`（见 `references/lifecycle.md`）。
+
+## 11. 从指标到 Grafana 曲线
+
+源码仓库 `docs/metrics-integration/` 包含 docker-compose.yml、prometheus.yml 和 Grafana provisioning／仪表盘。先在应用引入 starter、actuator 和 prometheus registry，暴露端点，再将 Prometheus scrape target 设置为应用可达的管理端口。
+
+在该目录执行 `docker compose up -d`。Prometheus 默认 9090，打开 Targets 确认应用为 UP；Grafana 默认 3000，演示 compose 默认开启匿名 Admin 访问并预置 LiteFlow 仪表盘。容器里 localhost 指向容器自身，宿主应用在 Docker Desktop 可用 host.docker.internal，Linux 按网络配置处理。
+
+连续执行一条真实 chain 产生流量；先用 `/actuator/prometheus` 确认有 liteflow 指标，再排查 scrape target、数据源和看板时间范围。未执行节点没有执行 Timer 样本。演示匿名访问和默认凭据不能直接沿用于公网服务。具体端口／凭据以 compose 文件为准。

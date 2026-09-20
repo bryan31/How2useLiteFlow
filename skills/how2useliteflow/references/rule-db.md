@@ -1,6 +1,6 @@
 # Rule-DB 统一规则数据库（v2.16.1 新增）
 
-> 对齐版本：**LiteFlow v2.16.1（tag 已发布，`cac48e201`，2026-07-27）**；内容已对齐 `84539caba` 澄清后的 `docs/liteflow-rule-db-guide.md`（last-good 语义、撞 id 启动报错等均为澄清后口径）+ `liteflow-rule-db/` 模块源码。源码仓 HEAD 已为修复版 2.16.1.1（多出 `liteflow-script-javax-pro` 的 ThreadLocal 泄漏修复 #IK6XVN）；另有补丁版 2.16.0.1（修复 WHEN 并行子 chain 的 ConcurrentModificationException #IDB16L，v2.16.1 已含）。
+> 对齐版本：**LiteFlow 2.16.2**。Rule-DB 在 v2.16.1 首次引入；当前内容以 `docs/liteflow-rule-db-guide.md` 和 `liteflow-rule-db/` 源码为准。引入版本不代表后续实现完全相同；具体行为以当前源码核验结果为准。
 > 这是与 `rule-sources.md` 里 6 个传统规则插件运行模型不同的全新模式。传统插件仍可使用，但 `rule-source` 与 Rule-DB 互斥；同一后端迁移时必须移除旧插件，尤其不要同时引入两个 Nacos 插件。
 
 ## 目录
@@ -15,14 +15,14 @@
 
 **Rule-DB 模式让规则和脚本真正以 SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / etcd / Nacos 为权威源，JVM 只保留轻量索引 + 有界缓存。**
 
-老的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）本质是「启动时全量读出 → 拼成一个大 XML → 全量常驻各节点 JVM 堆」，存储只是启动数据源。Rule-DB 解决两个本质痛点：
+老的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）会在启动时全量读取规则，变化后通常也会重新读取并全量解析，结果常驻各节点 JVM 堆。各实例独立消费轮询或 watch／推送，没有统一的发布版本和周期对账。Rule-DB 解决两个本质痛点：
 
 | 痛点（老插件） | Rule-DB 的做法 |
 |---|---|
 | 多节点无一致性保证：刷新靠各自轮询/通知，通知丢失无兜底 | 存储是权威源；「变更通知 + 周期对账」两条腿，**最终收敛、秒级窗口** |
 | 规则/脚本全量常驻 JVM 堆，规则总量推高内存 | EL 文本/脚本源码/编译产物进 **Caffeine 有界缓存**（按访问热度淘汰）；JVM 常驻规则清单、影子 Chain/Node 与状态索引（条目随规则总量线性增长但单条极小）——正文与编译产物的常驻规模由缓存容量封顶 |
 
-一句话划界：**老 6 个插件 = 启动一次性灌库，之后各节点各跑各的；Rule-DB = 存储永远是权威，JVM 只缓存热规则，所有节点最终一致。**
+一句话划界：**老 6 个插件 = 启动及变化时全量读取／解析，各实例独立刷新；Rule-DB = 存储始终是权威源，JVM 只缓存热规则，并通过变更通知与周期对账使节点最终一致。**
 
 **影子状态（shadow）**：一个 chain 只注册了 chainId、没有 EL、未编译；一个脚本 Node 只登记元数据（type/language/name）、没有源码。索引常驻、内容按需懒加载——执行到它时才回源拉取并编译。
 
@@ -52,20 +52,20 @@
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-spring-boot-starter</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 <!-- 七选一 -->
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-db-sql</artifactId>
     <!-- 也可选 -postgresql / -mongodb / -redis / -zk / -etcd / -nacos -->
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
 Spring Boot 4 项目 starter 换成 `liteflow-spring-boot4-starter`；Solon 用 `liteflow-solon-plugin`（支持 rule-db 配置绑定，但不携带 Spring 风格 IDE 元数据）。SQL 模式数据库驱动用户自带。
 
-**发布脚本时，执行应用还必须自行引入对应语言的脚本插件**：例如脚本 `language("groovy")` 需要 `com.yomahub:liteflow-script-groovy:2.16.1`（其他语言同理）。Rule-DB 后端模块和 starter 都不会自动引入任何脚本语言实现；Publisher 只保存源码与语言标识、不编译不校验，缺插件时到节点首次加载该脚本才失败。只发布普通 chain 时不需要脚本插件。
+**发布脚本时，执行应用还必须自行引入对应语言的脚本插件**：例如脚本 `language("groovy")` 需要 `com.yomahub:liteflow-script-groovy:2.16.2`（其他语言同理）。Rule-DB 后端模块和 starter 都不会自动引入任何脚本语言实现；Publisher 只保存源码与语言标识、不编译不校验，缺插件时到节点首次加载该脚本才失败。只发布普通 chain 时不需要脚本插件。
 
 ### 3.2 配置（各后端最省姿势）
 
@@ -75,7 +75,8 @@ Spring Boot 4 项目 starter 换成 `liteflow-spring-boot4-starter`；Solon 用 
 liteflow.rule-db.sql.url=jdbc:mysql://host:3306/liteflow_rules
 liteflow.rule-db.sql.username=root
 liteflow.rule-db.sql.password=your-password
-# driver-class-name 留空从 url 推断；application-name 留空取 spring.application.name
+liteflow.rule-db.application-name=your-app
+# driver-class-name 留空时从 url 推断
 ```
 
 姿势 C：默认 `auto-init-table=false` 需自建四张表（含 `change_lock`；缺表启动报错并附完整 DDL）；或开 `liteflow.rule-db.sql.auto-init-table=true` 启动时 `CREATE TABLE IF NOT EXISTS`。
@@ -131,26 +132,23 @@ try (RulePublisher publisher = RulePublisherFactory.create(
                 .url("jdbc:mysql://host:3306/liteflow_rules")
                 .username("root").password("your-password")
                 .build())) {
-    // expectedVersion(0L)：仅当不存在时创建；并发首发同一 id 时多余请求被明确拒绝
-    long version = publisher.publishChain(PublishChainRequest.builder()
-            .chainId("orderChain")
-            .el("THEN(a, b, IF(c, d, e))")
-            .expectedVersion(0L)
-            .build()).getVersion();
-
     publisher.publishScript(PublishScriptRequest.builder()
             .nodeId("s1").type("script")       // 对齐 NodeTypeEnum：script/boolean_script/switch_script/for_script
             .language("groovy")                 // 空则用全局默认；执行应用须自行引入 liteflow-script-groovy
             .script("def a = 1; return a").build());
 
-    publisher.removeChain(RemoveRuleRequest.builder().targetId("orderChain").build());
-    publisher.removeScript(RemoveRuleRequest.builder().targetId("s1").build());
+    // expectedVersion(0L)：仅当不存在时创建；并发首发同一 id 时多余请求被明确拒绝
+    long version = publisher.publishChain(PublishChainRequest.builder()
+            .chainId("orderChain")
+            .el("THEN(a, b, s1, IF(c, d, e))")
+            .expectedVersion(0L)
+            .build()).getVersion();
 }
 ```
 
 注意：**先发脚本、再发引用它的 chain**（反过来，别的节点可能在收敛窗口内拉到新 chain 却找不到脚本，编译瞬时失败）。
 
-> **SQL 兼容门面（2.16.1 新代码不推荐）**：SQL 模块仍保留 `com.yomahub.liteflow.repository.sql.SqlRulePublisher`（无参构造从全局 `LiteflowConfig` 取配置；`publishChain(chainId, el)` UPSERT 语义返回新版本号，`publishScript` 传 `ScriptRecord`）。下面代码只用于识别和迁移旧调用，不建议新写：
+> **SQL 兼容门面（不建议新代码使用）**：SQL 模块仍保留 `com.yomahub.liteflow.repository.sql.SqlRulePublisher`（无参构造从全局 `LiteflowConfig` 取配置；`publishChain(chainId, el)` UPSERT 语义返回新版本号，`publishScript` 传 `ScriptRecord`）。下面代码只用于识别和迁移旧调用，不建议新写：
 >
 > ```java
 > SqlRulePublisher publisher = new SqlRulePublisher();
@@ -165,6 +163,17 @@ try (RulePublisher publisher = RulePublisherFactory.create(
 ### 3.4 执行
 
 应用侧 API 完全不变：`flowExecutor.execute2Resp("orderChain", param, XxxContext.class)`。首次执行回源拉取 EL 并编译；命中缓存后热路径**零远程调用**。EL 里引用的 `a`/`b`/`c` 仍是应用里已注册的 Java 组件——Rule-DB 只纳管 EL 和脚本，Java 组件照旧随应用部署。
+
+确认执行成功后如需清理演示数据，再单独调用删除 API。不要在发布示例中立即删除，否则下一步无法执行：
+
+```java
+try (RulePublisher publisher = RulePublisherFactory.create(publisherConfig)) {
+    publisher.removeChain(RemoveRuleRequest.builder()
+            .targetId("orderChain").build());
+    publisher.removeScript(RemoveRuleRequest.builder()
+            .targetId("s1").build());
+}
+```
 
 ## 4. 配置参考（`liteflow.rule-db.*`）
 
@@ -388,7 +397,7 @@ v1 是**惰性刷新 + last-good**：驻留条目收到变更通知后标记为�
 9. **手写 `LiteFlowChainELBuilder` build 的 chain 可共存，但 id 不要与存储中的 chain/script 撞车**——id 不在存储清单中的手写 chain 不受对账影响；但手写 chain 与存储 chain 同 id、或应用注册的 script node 与存储 script 同 id 时，Rule-DB 初始化直接抛 `ConfigErrorException`（`assertNoForeignChain`/`assertNoForeignScript`，fail-fast，**不会覆盖应用对象**），必须保证两边 id 集合不相交。
 10. **路由模式批量冷加载**：`executeRouteChain` 为取得 route 元数据，会在路由执行前逐个回源并编译所有尚未就绪（非 READY）的 Rule-DB chain（`prepareRouteChains`），而非只加载命中的那条。大清单 + 路由模式的首次请求会产生明显冷启动尖刺；缓解手段是把关键 chain 配进 `cache.preload-chain-ids`、按 `application-name` 拆分清单，并把首次路由延迟纳入压测。
 
-**发布参数与后端限制矩阵**（v2.16.1；长度按 Unicode code point 计，仅 SQL 正文按 UTF-8 字节）：
+**发布参数与后端限制矩阵**（对齐 2.16.2；长度按 Unicode code point 计，仅 SQL 正文按 UTF-8 字节）：
 
 | 后端 | id／字段限制 | 正文与键限制 |
 |---|---|---|
@@ -424,7 +433,7 @@ WHERE application_name = 'your-app' AND chain_id = 'chain1';
 - **Spring Boot actuator 端点**（`liteflow-metrics` 提供，两个 starter 已传递依赖）：`GET /actuator/liteflow/ruledb` 返回 `RuleDbRuntimeSnapshot` JSON：`changeSource.status`（STARTING/UP/DEGRADED/DOWN）、`lastAppliedSeq`、`targets` 按状态计数（shadow/loading/ready/stale/failed/deleted）、`failedTargets` 明细（最多 20 条，含 desiredVersion/activeVersion/error——定位「某条规则为什么执行报错」的入口）。`failedTargets` 中 `activeVersion > 0` 表示该目标仍有 last-good 在服务（执行不会中断）、`activeVersion = 0` 才表示没有可回退的成功版本（再执行会抛 `ChainLoadException`）。
 - **非 Spring / Solon**：直接调 `com.yomahub.liteflow.repository.RuleDbRuntime.snapshot()` 拿同一对象自行对接。
 
-## 13. 源码类索引（v2.16.1）
+## 13. 源码类索引（2.16.2）
 
 | 关注点 | 位置 |
 |---|---|
@@ -434,20 +443,20 @@ WHERE application_name = 'your-app' AND chain_id = 'chain1';
 | VO | `repository/vo/`：`ChainRecord` / `ScriptRecord` / `RuleManifest` / `ChangeRecord` / `RuleDbRuntimeSnapshot` 等 |
 | 发布 API | 独立模块 `liteflow-rule-db-publisher`：`RulePublisher` / `RulePublisherFactory` / 请求与结果类型 / `PublisherBackend` 七枚举值 / `exception.*`；各插件提供对应 `*PublisherConfig` 与 SPI Provider，SQL 另有旧式简化门面 `SqlRulePublisher` |
 | 新异常 | `liteflow-core/.../exception/ChainLoadException.java`（@since 2.16.1）、`SeqGapException` |
-| 官方完整指南 | 仓库 `docs/liteflow-rule-db-guide.md`（上手篇 + 参考篇；行数随版本变化，以对齐 tag `v2.16.1` 的 `84539caba` 澄清版为准） |
+| 官方完整指南 | 仓库 `docs/liteflow-rule-db-guide.md`（上手篇 + 参考篇；行数随版本变化，以当前 2.16.2 源码为准） |
 
 ## 14. 从老规则插件迁移（liteflow-rule-sql 等 → Rule-DB）
 
-**不是直接换依赖**，连接配置、存储协议、发布方式和一致性模型都要换。传统插件在 2.16.1 中仍然有效，不迁也能继续用；要迁则注意：
+**不是直接换依赖**，连接配置、存储协议、发布方式和一致性模型都要换。传统插件在 2.16.2 中仍然有效，不迁也能继续用；要迁则注意：
 
 | 维度 | 老插件（`liteflow-rule-sql/redis/...`） | Rule-DB（`liteflow-rule-db-sql/redis/...`） |
 |---|---|---|
 | 配置 | `rule-source-ext-data-map`（连接信息 + 表名/字段映射如 `chainTableName`、`elDataField`） | `liteflow.rule-db.*`；**整体删掉旧的 `rule-source*` 配置**（互斥，同配启动报错） |
 | 存储结构 | 不约束表名/字段名，全靠配置映射 | 后端协议固定：SQL/PostgreSQL 为四张表（含 `change_lock`），MongoDB 为四个 Collection，Redis/ZooKeeper/etcd/Nacos 各有固定键或 Catalog 布局；存量数据需自行迁移 |
 | 写入方式 | 直接插/改库行，启动或轮询时全量重读 | 走发布 API（`SqlRulePublisher` 门面或统一 API）；**手改库必须 `version+1`**（+ `content_md5`，要 3s 级生效还得同事务补 change_log），否则改动永不生效（§11） |
-| 一致性 | 规则全量常驻 JVM 堆，多节点各跑各的 | 存储权威源 + 索引/缓存，「轮询/watch + 60s 对账」最终一致（秒级窗口，非原子切版，§7） |
+| 一致性 | 启动或变化时全量读取／解析并常驻 JVM；各实例独立消费轮询或 watch／推送，没有统一发布版本与周期对账兜底 | 存储权威源 + 索引/缓存，“轮询／watch + 60s 对账”最终一致（秒级窗口，非原子切版，§7） |
 
-迁移期还要记住：`parseMode`/`enableMonitorFile`/`chainCache*` 配置失效（§4）；启动时存储不可用直接启动失败（§9）；回源失败抛 `ChainLoadException`（§9）；发布顺序先脚本后 chain（§3.3）。
+迁移期还要记住：`parseMode`/`enableMonitorFile`/`chainCache*` 配置失效（§4）；启动时存储不可用直接启动失败（§9）；运行期已有激活版本时回源／编译失败继续使用 last-good，只有冷加载且没有可用版本时才抛 `ChainLoadException`（§9）；发布顺序先脚本后 chain（§3.3）。
 
 ### 备份恢复
 

@@ -1,236 +1,217 @@
 ---
 name: how2useliteflow
-description: 当用户提到 LiteFlow（Java 轻量级规则引擎/业务编排框架）时启用。覆盖：组件、EL 规则（THEN/WHEN/IF/SWITCH/FOR/WHILE/ITERATOR 等）、上下文、脚本组件、规则配置源、Rule-DB 统一规则数据库（v2.16.1：SQL/PostgreSQL/MongoDB/Redis/ZooKeeper/etcd/Nacos 七后端、发布 API、多节点一致性）、指标监控（liteflow-metrics、Micrometer、Prometheus、/actuator/liteflow 端点）、配置项、执行器、AI Agent 编排（ReAct Agent / liteflow-react-agent）、测试与调试、源码细节。
+description: 当用户询问、使用、设计、排查或升级 LiteFlow 时启用。覆盖 LiteFlow 2.16.2 的接入与配置、组件、EL、上下文、执行器、脚本、规则源、Rule-DB、监控、动态构建、测试、源码，以及基于 AgentScope 2 的 liteflow-agent、模型、工具、MCP、会话、事件、HITL、Skills、Harness 和 A2A。也用于识别并迁移旧 liteflow-react-agent / ReActAgentComponent 用法。
 metadata:
-  version: "1.2.0"
+  version: "2.1.0"
 ---
 
-# LiteFlow 助手
+# LiteFlow 2.16.2 助手
 
-本 skill 帮助用户用 AI 使用 **LiteFlow（v2.16.1）**。它内置了从官方文档与源码蒸馏出的绝大部分**用法细节与代码细节**，并规定了“答不到时怎么办”的严格流程。
+帮助用户正确使用 LiteFlow，并在信息不足时通过本地源码核实，而不是猜测 API、配置项、默认值或运行行为。
 
-> 版本对齐：本 skill 内容对齐 LiteFlow **v2.16.1（tag `cac48e201`，2026-07-27，源码 `<revision>`=2.16.1）**，包含 **Rule-DB 七后端**与 **liteflow-metrics 指标模块**。源码仓库 HEAD 已为修复版 **2.16.1.1**（在 v2.16.1 之上多一个 javax-pro `ThreadLocal` 泄漏修复 #IK6XVN）；另有补丁版 **2.16.0.1**（修复 WHEN 并行子 chain 的 `ConcurrentModificationException` #IDB16L，该修复已含在 v2.16.1 内）。作答时涉及发布版与补丁版差异必须明确标注。
+## 版本边界
 
----
+- 知识基线为 LiteFlow `2.16.2`，依据源码、仓库内三份 guide 和官网 2.16.X 文档核验，日期为 `2026-09-19`。源码快照及覆盖口径见 [coverage.md](references/coverage.md)。
+- Maven 示例统一使用 `2.16.2`。发布准备完成不等于所有镜像已同步；依赖无法解析时检查实际仓库，或从匹配源码执行 `mvn install -DskipTests`，不要自动退回旧版本。
+- 核心支持 JDK 8～25；Agent 要求 JDK 17+，源码管理 AgentScope Java `2.0.3`。
+- Agent 业务组件统一继承 `com.yomahub.liteflow.agent.harness.component.HarnessAgentComponent`，来自 `liteflow-agent-core`。旧 `AgentComponent`、`ReActAgentComponent` 和独立 `liteflow-agent-harness` 不用于新项目。
+- Rule-DB、Metrics、节点执行生命周期在 2.16.1 引入，2.16.2 继续支持。
 
-## 一、何时使用
+## 回答流程
 
-用户提到以下任一场景时启用本 skill：
-- 写**组件**（普通/选择/布尔/次数循环/迭代循环组件，或声明式组件）。
-- 写 **EL 规则**（THEN/WHEN/IF/SWITCH/FOR/WHILE/ITERATOR/CATCH/RETRY/TIMEOUT/PRE/FINALLY/AND/OR/NOT、tag/data/bind 等）。
-- **上下文**（数据上下文、别名、参数注入、表达式取参）。
-- **脚本组件**（Groovy/JS/Python/QLExpress/Lua/Aviator/Kotlin/Java 等）。
-- **规则配置源**（本地文件/SQL/ZK/Nacos/Etcd/Apollo/Redis/自定义）。
-- **Rule-DB 统一规则数据库**（v2.16.1 新增：`liteflow-rule-db-sql/postgresql/mongodb/redis/zk/etcd/nacos` 七选一、统一发布 API、规则版本与多节点一致性、有界缓存与懒加载、`liteflow.rule-db.*` 配置、降级语义）。
-- **指标监控**（v2.16.1 新增：`liteflow-metrics`、Micrometer 指标、Prometheus/Grafana 对接、`/actuator/liteflow` 结构端点）。
-- **配置项**（SpringBoot/Spring/Solon/纯代码）。
-- **执行器**（FlowExecutor 的执行方法、LiteflowResponse）。
-- **编写 / 调试测试用例**（JUnit5 + SpringBoot 测试范式、`BaseTest` 全局状态清理、各功能的官方测试模块）。
-- **AI Agent 编排**（`liteflow-react-agent`：把 ReAct Agent 当组件编排进 EL、模型/凭据配置、自定义工具、流式输出、会话/记忆）。
-- **调试/报错/链路排查**、热刷新、线程池、动态构造、决策路由、生命周期、降级/回滚/切面等高级特性。
-- 询问 **LiteFlow 源码实现/代码细节**（FlowExecutor、FlowBus、DataBus、Condition 树、两阶段解析等）。
+1. 每次会话首次使用本 Skill 时，运行 `scripts/version-check.sh`。退出码 `1` 表示检查失败，脚本会输出简短诊断，但不影响继续作答；退出码 `2` 表示远端 Skill 有更新，告知用户并在获得同意后执行脚本建议的更新命令。
+2. 先按下方知识地图只读取与问题直接相关的 reference。简单问题可直接使用高频速查，不要一次加载全部文件。
+3. 遇到版本敏感、reference 未覆盖、用户要求源码依据，或不同文档说法冲突时，先运行 `scripts/source-lookup.sh path` 定位本地仓库，并核对根 POM 的 revision／AgentScope 版本与用户基线。
+4. 若仓库根存在 `.codegraph/` 且命令可用，优先执行 `scripts/source-lookup.sh explore "问题或符号"`；否则使用 `grep`、`grepall`、`find`、`show` 子命令。回答源码问题时引用真实 `path:line`。
+5. 本地没有源码且问题无法确认时，先征得用户同意，再运行 `scripts/source-lookup.sh clone`。用户未同意时应明确说无法确认，不得自行克隆或臆测。
 
----
+网络文章、搜索摘要和模型记忆不能替代 LiteFlow 当前源码。用户明确要求联网查资料时，可把网络内容作为补充，并清楚区分“官方当前源码行为”和“外部资料说法”。
 
-## 二、回答 LiteFlow 问题时的决策流程（必须严格遵守）
+## 高频速查
 
-> 这是最重要的章节。**绝不杜撰、绝不用网络内容充当 LiteFlow 行为依据。**
+### Maven 与最小接入
 
-**先做更新自检**（每次会话首次触发本 skill 时）：必须先运行 `scripts/version-check.sh` 再处理用户问题；结果按「七、更新自检」一节处理，检查失败则静默继续，不得因该检查中断或拒绝正常回答。
+Spring Boot 2/3：
 
-**第 0 步 — 先查本文件速查表**（下方第三节）：约 80% 的常见问题（EL 算子、组件类型、执行 API、核心配置）可直接作答，无需加载任何文件。
-
-**第 1 步 — 加载对应 reference**：速查表不够时，按"知识地图"（第四节）用 `Read` 打开 `references/<文件>.md`。绝大多数用法与代码细节问题在此解决。**作答时标注来源 reference 文件名**。
-
-**第 2 步 — 本地源码**：若 reference 也未覆盖（通常是更冷门或更深层的源码细节），先探测本地 LiteFlow 仓库，按优先级：环境变量 `LITEFLOW_REPO` → `~/openSource/liteFlow`、`~/openSource/LiteFlow-Jdk17` 等常见布局 → `./liteFlow` → 克隆缓存。
-- 用 `scripts/source-lookup.sh path` 探测（找到则打印绝对路径；找不到退出码 2）。
-- 找到后用 `scripts/source-lookup.sh grep <关键词>`（搜 `*.java`）/ `grepall` / `find <名字>` / `show <相对路径> [a-b]` 定位，**引用 `path:line` 作答**。
-
-**第 3 步 — 请求克隆（必须先征得用户同意）**：本地也没有、或问题明确需要线上/最新源码时，**停下来告知用户并请求确认**，例如：
-> “这部分内容不在我的内置知识里。我可以 git clone LiteFlow 官方仓库（gitee.com/dromara/liteFlow，默认 `dev` 分支，与内置的 v2.16.1 开发源码对齐）到临时目录，从源码里确认后再回答。是否允许？”
-
-- 用户**同意** → 运行 `scripts/source-lookup.sh clone`（克隆到缓存 `~/.cache/liteflow-skill`），再用 `grep/find/show` 定位，**引用 `path:line` 作答**。
-- 用户**拒绝 / 未明确同意** → 如实说明"暂时无法确认，不建议臆测"，**不要**自行克隆、**不要**杜撰、**不要**用网络搜索结果充当 LiteFlow 的行为依据。
-
-### 绝对禁止
-- 在未读到对应 reference 或源码前，凭记忆编造 API、方法名、参数、配置项、默认值或行为。
-- 把网络搜索（WebSearch/网页）结果当作 LiteFlow 真实行为的依据（除非用户明确要求联网查证）。
-- 在用户未明确同意前执行 `git clone` 或 `source-lookup.sh clone`。
-
----
-
-## 三、高频速查（直接作答，无需加载 reference）
-
-> 以下均经官方文档 + 源码核对。下方若仍不够，去对应 reference 查细节。
-
-### 3.1 EL 算子速查（详见 `references/el-rules.md`）
-
-| 算子 | 语义 | 最小示例 |
-|---|---|---|
-| `THEN(a,b,c)`（别名 `SER`） | 串行 | `THEN(a, b, c)` |
-| `WHEN(a,b,c)`（别名 `PAR`） | 并行（异步） | `WHEN(a, b, c)` |
-| `IF(x, a, b)` | 条件（x 为布尔组件/表达式；可 `ELIF`/`ELSE`） | `IF(x, a, b)` |
-| `SWITCH(x).to(a,b,c)` | 选择（x 返回目标 nodeId） | `SWITCH(x).to(a, b, c)` |
-| `FOR(x).DO(y)` | 次数循环（x 返回次数） | `FOR(n).DO(a)` |
-| `WHILE(x).DO(y)` | 条件循环 | `WHILE(x).DO(a)` |
-| `ITERATOR(x).DO(y)` | 迭代循环（x 返回 Iterator） | `ITERATOR(it).DO(a)` |
-| `BREAK(x)` | 循环中断（配合循环） | `WHILE(x).DO(a).BREAK(b)` |
-| `CATCH(a).DO(b)` | 捕获 a 的异常交 b 处理 | `CATCH(a).DO(b)` |
-| `.retry(n)`（小写、后缀形式） | 重试（v2.12.0+） | `THEN(a, b.retry(3))` 或 `THEN(a,b).retry(3)` |
-| `a.maxWaitSeconds(5)` / `maxWaitMilliseconds(...)` | 超时控制 | `WHEN(a,b).maxWaitSeconds(5)` |
-| `PRE(a,b)` / `FINALLY(a,b)` | 前置 / 后置（始终执行） | `THEN(PRE(a), b, FINALLY(c))` |
-| `AND(a,b)` / `OR(a,b)` / `NOT(a)` | 布尔与/或/非（用于 IF 条件） | `IF(AND(a,b), c, d)` |
-| 子变量赋值 | 复用片段（无 `let` 关键字，直接赋值；赋值语句必须以分号结尾） | `t1 = THEN(a, b); THEN(t1, c);` |
-| 节点修饰 | `tag` / `data` / `bind` / `id` | `a.tag("t").bind("k","v")`（KV 双参用 `bind`；`data` 只收单参 JSON，如 `a.data("{\"k\":\"v\"}")`） |
-| 链路继承 | `extends` | 见 el-rules.md |
-
-**WHEN 并行修饰**：`ignoreError`（忽略错误继续）、`any`（任一完成即结束）、`must(a,b)`（必须完成的节点）、`percentage(n)`（按比例）、是否独立线程池等——细节见 el-rules.md。
-
-**重试补充**：`.retry(n)` 可作用于组件/任意表达式/子变量/整个 chain；可追加指定异常全限定类名，如 `retry(3, "java.lang.NullPointerException")`（多个异常继续往后列，仅命中这些异常才重试）。没有 `RETRY(...)` 包装函数也没有 `.times()`，写成大写 `RETRY` 会解析失败。
-
-**规则写在哪**：`flow.el.xml` / `flow.el.json` / `flow.el.yml`（经典格式 `flow.xml` / `flow.json` / `flow.yml`）等规则文件中 `<chain name="..."> ... </chain>`，结尾分号可省略；支持注释。注意没有纯 `.el` 后缀的规则文件写法（`flow.el` 启动会抛 `ErrorSupportPathException`）。
-
-### 3.2 组件类型速查（详见 `references/components.md`）
-
-| 想要的行为 | 用哪种组件 | 关键方法/注解 |
-|---|---|---|
-| 普通处理 | `NodeComponent` | `process()` |
-| 多路选择（返回 nodeId） | `NodeSwitchComponent` | `processSwitch()` 返回字符串 |
-| 布尔判断（IF/WHILE 条件） | `NodeBooleanComponent` | `processBoolean()` 返回 boolean |
-| 次数循环 | `NodeForComponent` | `processFor()` 返回次数 |
-| 迭代循环 | `NodeIteratorComponent` | `processIterator()` 返回 `Iterator` |
-| 声明式（不继承基类） | `@LiteflowComponent("id")` 注册 Bean | 方法加 `@LiteflowMethod(PROCESS, nodeType=...)`；或类上加 `@LiteflowCmpDefine(类型)` 声明 nodeType |
-
-- 注册：继承式/声明式组件都用 `@LiteflowComponent("nodeId")`（也可用 `name` 设别名）。
-- **组件生命周期钩子**（继承式可覆写，声明式用 `@LiteflowMethod`）：`isAccess()`（准入，false 则跳过）、`beforeProcess()`/`afterProcess()`、`onSuccess()`/`onError()`、`isContinueOnError()`、`isEnd()`、`rollback()`。
-- 组件内取上下文：`this.getContextBean(XxxContext.class)` / `this.getFirstContextBean()`；取流程入参：`this.getRequestData()`。
-
-### 3.3 执行 API 速查（详见 `references/executor.md`）
-
-```java
-@Resource private FlowExecutor flowExecutor;
-
-// 同步执行：chainId + 入参 + 多个上下文 Class（框架实例化）
-LiteflowResponse resp = flowExecutor.execute2Resp("chain1", param, OrderContext.class, UserContext.class);
-
-// 直接执行一段 EL（v2.15.0+，无需规则文件）；自定义上下文必须走带 requestId 的四参重载，requestId 可传 null（框架自动生成）
-LiteflowResponse resp2 = flowExecutor.execute2RespWithEL("THEN(a, b, c)", param, null, OrderContext.class);
-
-// 异步 / 路由
-Future<LiteflowResponse> f = flowExecutor.execute2Future("chain1", param, OrderContext.class);
-List<LiteflowResponse> rs = flowExecutor.executeRouteChain(param, OrderContext.class);
+```xml
+<dependency>
+    <groupId>com.yomahub</groupId>
+    <artifactId>liteflow-spring-boot-starter</artifactId>
+    <version>2.16.2</version>
+</dependency>
 ```
 
-> ⚠️ `execute2RespWithEL` **没有** `(elStr, param, XxxContext.class)` 三参重载（源码仅 4 个重载，第三参是 `String requestId`，见 `FlowExecutor.java:302-341`；官方 050 文档示例照抄会编译报错）。自定义上下文必须走四参形式（`requestId` 可传 `null`）；无自定义上下文需求时用 `(elStr, param)` 两参形式即可（默认 `DefaultContext`）。
+Spring Boot 4 改用 `liteflow-spring-boot4-starter`。纯 Spring 用 `liteflow-spring`，Solon 用 `liteflow-solon-plugin`。规则文件场景至少配置：
 
-`LiteflowResponse` 常用取值（**方法名以源码为准**）：
+```properties
+liteflow.rule-source=config/flow.el.xml
+```
 
-| 需求 | 方法 |
-|---|---|
-| 是否成功 | `resp.isSuccess()` |
-| 失败异常 | `resp.getCause()`（**是 `getCause`，不是 `getException`**） |
-| 异常 code/message | `resp.getCode()` / `resp.getMessage()` |
-| 上下文 | `resp.getContextBean(XxxContext.class)` / `getFirstContextBean()` |
-| 步骤字符串（带耗时） | `resp.getExecuteStepStrWithTime()` |
-| 结构化步骤 | `resp.getExecuteSteps()`（`Map<String, List<CmpStep>>`）/ `getExecuteStepQueue()` |
-| 请求/会话/链路 ID | `getRequestId()` / `getConversationId()` / `getChainId()` |
-| 超时节点（v2.12.3+） | `getTimeoutItems()` |
-| 回滚步骤 | `getRollbackStepQueue()` / `getRollbackSteps()` |
+### EL 算子
 
-### 3.4 核心配置速查（详见 `references/config.md`，SpringBoot `liteflow.*`）
-
-| key | 默认 | 说明 |
+| 需求 | 写法 | 说明 |
 |---|---|---|
-| `rule-source` | — | 规则文件路径，**用规则文件时必填**；改为代码动态构造时自动失效 |
-| `parse-mode` | `PARSE_ALL_ON_START` | 另有 `PARSE_ONE_ON_FIRST_EXEC` / `PARSE_ALL_ON_FIRST_EXEC`（懒加载） |
-| `slot-size` | `1024` | 上下文槽位数，自动扩容 |
-| `when-max-wait-time`(+`-unit`) | `15000`(ms) | WHEN 并行整体超时 |
-| `global-thread-pool-size` | `64` | 全局异步节点并发上限 |
-| `support-multiple-type` | `false` | 多种规则文件格式（xml/json/yml/el）混装时设 true；不能用它混装多个配置源（单源约束不变） |
-| `enable-monitor-file` | `false` | 本地规则文件变更自动重载 |
-| `fast-load` | `false` | 快速解析模式 |
-| `enable-virtual-thread` | `true` | 仅 JDK21+ 生效 |
+| 串行 | `THEN(a, b, c)` | 别名 `SER` |
+| 并行 | `WHEN(a, b, c)` | 别名 `PAR`；可配 `any`、`must`、`percentage`、`ignoreError`、超时 |
+| 条件 | `IF(x, a, b)` | 支持 `ELIF` / `ELSE` |
+| 多路选择 | `SWITCH(x).to(a, b, c)` | x 返回目标 nodeId 或匹配 tag |
+| 次数循环 | `FOR(n).DO(a)` | n 为次数组件或表达式 |
+| 条件循环 | `WHILE(x).DO(a)` | 可配 `BREAK` |
+| 迭代循环 | `ITERATOR(it).DO(a)` | it 返回 `Iterator` |
+| 异常处理 | `CATCH(a).DO(b)` | b 处理 a 的异常 |
+| 重试 | `a.retry(3)` | 是小写后缀；没有 `RETRY(...).times(...)` |
+| 超时 | `a.maxWaitSeconds(5)` | 也有 `maxWaitMilliseconds` |
+| 前后置 | `PRE(a)` / `FINALLY(b)` | 配合主表达式使用 |
+| 布尔组合 | `AND(a,b)` / `OR(a,b)` / `NOT(a)` | 用于条件表达式 |
+| 节点修饰 | `.id(...)` / `.tag(...)` / `.data(json)` / `.bind(k,v)` | `data` 单参，KV 双参用 `bind` |
+| 子变量 | `x = THEN(a,b); THEN(x,c);` | 无 `let`，赋值语句必须有分号 |
+
+规则文件支持 `.xml`、`.json`、`.yml` 及 `.el.xml`、`.el.json`、`.el.yml`；没有纯 `.el` 文件格式。完整语法和约束读 `references/el-rules.md`。
+
+`WHEN.any`、`must`、`percentage` 只是达到条件后让主流程提前继续。所有分支都可能已提交，`CompletableFuture.cancel(true)` 不能可靠停止底层任务；未等待分支仍可能继续写共享 Context 或产生外部副作用。
+
+### 组件
+
+| 行为 | 基类 / 方式 | 主方法 |
+|---|---|---|
+| 普通处理 | `NodeComponent` | `process()` |
+| 布尔判断 | `NodeBooleanComponent` | `processBoolean()` |
+| 多路选择 | `NodeSwitchComponent` | `processSwitch()` |
+| 次数循环 | `NodeForComponent` | `processFor()` |
+| 迭代数据 | `NodeIteratorComponent` | `processIterator()` |
+| 声明式组件 | `@LiteflowComponent` + `@LiteflowMethod` | 可用 `@LiteflowCmpDefine` 声明节点类型 |
+
+组件内用 `getRequestData()` 取流程入参，用 `getContextBean(...)` 取上下文。常用钩子：`isAccess`、`beforeProcess`、`afterProcess`、`onSuccess`、`onError`、`isContinueOnError`、`isEnd`、`rollback`。
+
+组件通常是容器单例，Node 克隆仍共享组件实例；请求状态必须放 Context／Slot，不要放成员字段。
+
+### 执行器
+
+```java
+LiteflowResponse response = flowExecutor.execute2Resp(
+        "chain1", request,
+        ExecuteOption.of()
+                .requestId("req-001")
+                .conversationId("conversation-001")
+                .contextClass(OrderContext.class));
+
+Future<LiteflowResponse> future = flowExecutor.execute2Future(
+        "chain1", request, ExecuteOption.of()
+                .autoConversationId()
+                .contextClass(DefaultContext.class));
+
+LiteflowResponse direct = flowExecutor.execute2RespWithEL(
+        "THEN(a, b)", request, null, OrderContext.class);
+```
+
+- 新代码需要组合 requestId、conversationId、上下文或事件监听器时，优先 `ExecuteOption`。
+- `ExecuteOption.contextClass(...)` 尝试为本次执行反射创建上下文，创建失败的项会被过滤，复杂构造对象应改传 Bean；`contextBean(...)` 直接复用已有实例，跨请求／并发隔离由调用方负责。
+- 同一 `ExecuteOption` 同时设置 Class 与 Bean 时，Class 非空就优先，Bean 会被忽略。空 `ExecuteOption`／`null` option 不会自动补 `DefaultContext`，需要上下文时必须显式设置。
+- `execute2RespWithEL` 没有 `(el, param, Context.class)` 三参重载；自定义上下文必须用四参形式，requestId 可传 `null`。
+- 失败异常取 `response.getCause()`，不是 `getException()`。
+- 常用结果：`isSuccess()`、`getContextBean(...)`、`getExecuteStepStrWithTime()`、`getExecuteSteps()`、`getRequestId()`、`getConversationId()`、`getTimeoutItems()`。
+
+### 核心配置
+
+Spring Boot 配置前缀为 `liteflow.*`：
+
+| key | 默认值 | 说明 |
+|---|---|---|
+| `parse-mode` | `PARSE_ALL_ON_START` | 另有两种首次执行时解析模式 |
+| `slot-size` | `1024` | 初始槽位数，可扩容 |
+| `when-max-wait-time` / `-unit` | `15000` / `MILLISECONDS` | WHEN 整体等待时间 |
+| `global-thread-pool-size` | `64` | Spring Boot 全局异步节点线程池；Solon 默认 `16` |
+| `global-thread-pool-queue-size` | `512` | 全局异步队列容量 |
+| `when-thread-pool-isolate` | `false` | 每个 WHEN 是否隔离线程池 |
+| `support-multiple-type` | `false` | 混用多种规则文件格式，不代表可混用多个配置源 |
+| `enable-monitor-file` | `false` | 本地规则文件监听 |
+| `fast-load` | `false` | 快速解析 |
+| `enable-virtual-thread` | `true` | 仅 JDK 21+ 生效 |
 | `print-execution-log` | `true` | 执行过程日志 |
-| `monitor.enable-log` | `false` | 简易监控统计 |
+| `metrics.enabled` | `true` | 有 MeterRegistry 时启用 Micrometer 指标 |
 
-> ⚠️ 这些配置名在 v2.16.1 **无效**，勿臆造：`whenMaxWorkers`（Solon 插件 `LiteflowProperty.java:50` 中残留该字段，但不接入 `LiteflowConfig`，配置了没有任何效果；并发由 `global-thread-pool-size` 控制）、`printExecutionResult`（应为 `print-execution-log`）。`chain-cache.enabled` 与 `chain-cache.capacity` **真实存在**，仅在 Rule-DB 模式下不读取。
+`whenMaxWorkers` 和 `printExecutionResult` 不是有效的 LiteFlow 配置。完整表及 Spring、Solon、纯 Java 差异读 `references/config.md`。
 
-### 3.5 v2.16.1 新变化速览
+### Rule-DB 与 Metrics
 
-| 新能力 | 一句话 | 详情 |
-|---|---|---|
-| **Rule-DB 统一规则数据库** | SQL/PostgreSQL/MongoDB/Redis/ZooKeeper/etcd/Nacos 七后端，classpath 七选一；存储为权威源 + JVM 有界缓存懒加载，多节点最终一致；与 `rule-source` **互斥**；统一发布 API `RulePublisherFactory` | `references/rule-db.md` |
-| **liteflow-metrics 指标** | Micrometer 指标（chain/node 次数/耗时/错误/在途）+ `/actuator/liteflow` 结构端点；starter 已传递依赖；开关 `liteflow.metrics.enabled`（默认开），无 registry 无任何行为 | `references/metrics.md` |
-| **节点执行生命周期钩子** | 新增框架级钩子 `PostProcessNodeExecuteLifeCycle`（before/after 节点执行，带耗时与异常；框架级钩子至此共 6 个） | `references/lifecycle.md` |
-| **新异常 `ChainLoadException`** | Rule-DB 回源加载失败（规则存在但取不回来），区别于 `ChainNotFoundException` | `references/rule-db.md` §9 |
+- Rule-DB 在 2.16.1 引入，2.16.2 当前仍有 SQL、PostgreSQL、MongoDB、Redis、ZooKeeper、etcd、Nacos 七个后端，classpath 七选一。
+- Rule-DB 与 `rule-source` 互斥；外部存储是权威源，JVM 使用轻量索引和有界懒加载缓存；发布统一走 `RulePublisherFactory`。
+- 传统 `liteflow-rule-*` 配置源与 `liteflow-rule-db-*` 是两套运行模型，迁移时不能同时保留同一后端插件。
+- `liteflow-metrics` 提供 chain/node 次数、耗时、错误、在途指标及 `/actuator/liteflow` 结构端点；它与简单日志监控 `liteflow.monitor.*` 相互独立。
 
----
+### LiteFlow Agent 2.16.2
 
-## 四、知识地图（问题类型 → reference 文件）
+- 引入 starter、`liteflow-agent-core` 和所选模型模块；继承 `HarnessAgentComponent`。完整可用示例读 [agent.md](references/agent.md)。
+- 应用身份使用 `liteflow.agent.application-name`，Spring Boot 默认取 `spring.application.name`。会话由应用名、`conversationId` 和稳定的 `agentKey` 隔离；没有请求级 `userId` 维度，业务接口自行校验会话归属。
+- 配置使用 `session-store.*`；JSON 默认持久化到 `./data/agent-state`，也支持 Redis／MySQL。三者独立于本地／Docker 执行环境。
+- 文件工具默认可用，Shell 默认开启。纯聊天显式覆写 `enableShellTool()` 返回 `false`；本地 Shell 开启时必须配置 `harness.local.workspace-root`。
+- `execution-timeout` 默认 `10m`，`max-iterations` 默认 `100`；等会话锁和首次构建不包含在该执行计时内。
+- 流式输出需要模型 `.stream(true)` 和 `ExecuteOption.eventListener(...)`；正文事件为 `agent.text.delta`。同步方法仍等待最终结果。
+- `invocation-guard.mode=AUTO` 根据存储选择本地或分布式协调；同一会话共享工作区，多个 Agent 放入 `WHEN` 也不保证同时运行。
+- 聊天历史用 `AgentConversationService`；模型上下文压缩不会删展示历史。删除会话不会自动清除全部文件和快照。
+- 默认权限为 BYPASS，人工确认必须显式配 ASK 和 `AgentConfirmationHandler`。`toolkit.parallel`、`skills.strict` 是当前不生效的配置，不能据此承诺行为。
+- Docker 与三种存储自由组合；JSON 持久恢复需保存快照目录，Redis／MySQL 快照在后端保存，不能同时设置本地 `snapshot-root`。
 
-用 `Read` 打开 `references/` 下对应文件获取细节：
+## 知识地图
 
-| 问题类型 / 关键词 | 加载文件 |
+只加载当前问题需要的文件：
+
+| 问题 | Reference |
 |---|---|
-| 框架定位、执行模型、模块地图、版本/JDK 支持、性能 | `references/overview.md` |
-| 安装运行、Hello World（SpringBoot/Spring/Solon/其他） | `references/quickstart.md` |
-| 全部配置项、各场景差异、LiteflowConfig | `references/config.md` |
-| 组件（继承式 5 种 / 声明式 / 生命周期钩子） | `references/components.md` |
-| EL 全语法、组件参数语法、重试/超时/继承/验证 | `references/el-rules.md` |
-| 数据上下文、别名、参数注入、表达式取参 | `references/context.md` |
-| FlowExecutor 方法、入参、LiteflowResponse | `references/executor.md` |
-| 测试用例与示例（测试范式、BaseTest 清理、功能→测试模块速查、DEMO） | `references/testing.md` |
-| 脚本组件、各语言坐标、绑定变量、动态刷新/验证/卸载 | `references/scripts.md` |
-| 规则配置源（本地/SQL/ZK/Nacos/Etcd/Apollo/Redis/自定义） | `references/rule-sources.md` |
-| **Rule-DB 统一规则数据库**（v2.16.1：七后端上手、`rule-db.*` 配置、发布 API、一致性/降级/限制、手改存储规范） | `references/rule-db.md` |
-| **指标监控**（v2.16.1：liteflow-metrics、Micrometer 指标目录、`/actuator/liteflow` 端点、PromQL、非 Spring 注册） | `references/metrics.md` |
-| 元数据操作器、平滑热刷新、启动不检查 | `references/metadata.md` |
-| 异步线程池（FlowExecutor 层/组件异步层/虚拟线程） | `references/thread-pools.md` |
-| 动态构造 Node/EL/Chain | `references/dynamic-build.md` |
-| 决策路由（概念/用法/executeRouteChain） | `references/decision-routing.md` |
-| 框架级生命周期（启动时/执行时钩子接口） | `references/lifecycle.md` |
-| 高级特性（降级/回滚/切面/隐式子流程/步骤/监控…18 项） | `references/advanced.md` |
-| **AI Agent 编排**（ReAct Agent 组件、模型/凭据、自定义工具、流式输出、会话记忆、`liteflow-react-agent`） | `references/react-agent.md` |
-| **源码细节**（FlowExecutor/FlowBus/DataBus/Condition 树/算子→类映射） | `references/code-internals.md` |
-| 常见坑与 FAQ | `references/faq-pitfalls.md` |
+| 框架定位、版本/JDK、模块、执行模型 | `references/overview.md` |
+| 安装、Hello World、Spring Boot/Spring/Solon/纯 Java | `references/quickstart.md` |
+| 配置全集及不同容器差异 | `references/config.md` |
+| 组件类型、注册、声明式组件、组件钩子 | `references/components.md` |
+| EL 全语法、修饰符、重试、继承、校验 | `references/el-rules.md` |
+| 上下文、别名、参数注入、表达式取参 | `references/context.md` |
+| FlowExecutor、ExecuteOption、LiteflowResponse | `references/executor.md` |
+| 脚本语言、绑定变量、刷新、验证、卸载 | `references/scripts.md` |
+| 传统规则配置源 | `references/rule-sources.md` |
+| Rule-DB 七后端、发布、一致性、降级、存储协议 | `references/rule-db.md` |
+| Micrometer、Prometheus、Actuator 端点 | `references/metrics.md` |
+| 元数据操作与热刷新 | `references/metadata.md` |
+| FlowExecutor、WHEN、虚拟线程等线程池 | `references/thread-pools.md` |
+| 动态构造 Node、EL、Chain | `references/dynamic-build.md` |
+| 决策路由与 `executeRouteChain` | `references/decision-routing.md` |
+| 框架级生命周期 | `references/lifecycle.md` |
+| 降级、回滚、切面、步骤、监控等高级能力 | `references/advanced.md` |
+| 测试范式与源码示例索引 | `references/testing.md` |
+| 性能、吞吐、启动速度调优 | `references/overview.md`、`references/config.md`、`references/thread-pools.md`、`references/advanced.md` |
+| 非 Agent 跨版本升级、补丁选择 | `references/overview.md`、`references/faq-pitfalls.md` |
+| Agent 快速开始、HarnessAgentComponent、多 Agent 编排、可靠性、离线测试 | `references/agent.md` |
+| Agent 模型平台、Java/内置/MCP 工具、中间件、Skills | `references/agent-models-tools.md` |
+| Agent 会话、Session 存储、聊天历史、事件、结构化输出、HITL、并发 | `references/agent-state-events-hitl.md` |
+| Harness、压缩、记忆、沙箱、计划与子代理 | `references/agent-harness.md` |
+| Agent 全部配置、默认值、约束和保留项 | `references/agent-config.md` |
+| A2A 远程 Agent 客户端 | `references/agent-a2a.md` |
+| 从旧 ReAct API 迁移到 2.16.2 | `references/react-agent.md` |
+| 核心源码调用链和类索引 | `references/code-internals.md` |
+| 常见报错与易错点 | `references/faq-pitfalls.md` |
 
----
+## 作答要求
 
-## 五、引用规范
+- 给出可直接采用的最小答案，再补充必要的边界、配置和排错信息；不要为了展示覆盖面而堆砌无关功能。
+- 涉及版本、默认值、废弃 API、并发、资源所有权和安全边界时，必须读取对应 reference 或当前源码后再答。
+- 用户给出旧 Agent 代码时，先指出它属于哪个版本，再给 2.16.2 的完整替代写法；不要混搭新旧模块。
+- API 与配置示例默认描述 `2.16.2` 源码行为。用户指定其他版本时先核验该版本，不把开发中间态当作发布 API。
+- 用法问题可注明对应 reference；源码问题必须引用实际文件和行号。源码发生移动时按类名重新定位，不要沿用 reference 中可能过期的绝对行号。
 
-- **用法类问题**：作答末尾标注来源 reference 文件名，例如"详见 `references/el-rules.md`"。
-- **代码/源码类问题**：引用源码 `path:line`（来自 `references/code-internals.md` 或第 2/3 步实地查到的源码）。
-- 涉及版本依赖的 API/配置，标注所对齐版本（默认 v2.16.1 tag `cac48e201`；源码仓 HEAD 为修复版 2.16.1.1）。
+## 辅助脚本
 
-## 六、关于 `scripts/source-lookup.sh`
-
-本地优先 / 受控克隆 + 检索的命令行助手（POSIX sh，macOS 可直接运行）：
+`scripts/source-lookup.sh`：
 
 | 子命令 | 作用 |
 |---|---|
-| `path` | 打印解析到的本地仓库路径（找不到退出码 2，**不克隆**） |
-| `clone` | **显式**克隆 gitee 仓库到缓存（默认 `dev` 分支，其 HEAD 与内置 `v2.16.1` tag 基线同源、仅多 2.16.1.1 的 javax-pro ThreadLocal 修复等少量提交；仅在用户同意后调用）。如需严格对齐内置基线，显式设置 `LITEFLOW_TAG=v2.16.1`；查 v2.16.1 新特性优先用本地源码或内置 `references/rule-db.md` / `references/metrics.md` |
-| `grep <pattern>` | 在仓库 `*.java` 中检索（优先 `rg`，回落 `grep -rn`） |
-| `grepall <pattern>` | 在仓库所有文件中检索 |
-| `find <name>` | 按文件名查找 |
-| `show <relpath> [a-b]` | 显示某文件（带行号，可选区间） |
+| `path` | 定位本地 LiteFlow 仓库，不克隆 |
+| `explore <问题>` | 在存在 `.codegraph/` 时调用 CodeGraph 理解符号与调用链 |
+| `grep <模式>` | 搜索 Java 源码 |
+| `grepall <模式>` | 搜索仓库所有文本 |
+| `find <名称>` | 按文件名定位 |
+| `show <相对路径> [a-b]` | 带行号显示源码 |
+| `clone` | 经用户同意后克隆指定版本到缓存，默认请求 `v2.16.2` |
 
-环境变量：`LITEFLOW_REPO`（指定本地仓库覆盖探测）、`LITEFLOW_TAG`（可选，指定 tag/分支；不设则克隆 `dev`，显式留空 `LITEFLOW_TAG=` 才回落远端默认分支）、`LITEFLOW_CACHE`（默认 `~/.cache/liteflow-skill`）。
+环境变量：`LITEFLOW_REPO` 增加最高优先级的本地仓库候选，`LITEFLOW_TAG` 指定克隆分支或 tag，`LITEFLOW_CACHE` 指定缓存目录。
 
-**职责边界**：脚本不做用户交互，是否克隆由本 skill 的决策流程（第 3 步）征得用户同意后决定。
+`scripts/version-check.sh` 每天缓存一次 Skill 版本检查；它只读取远端 `SKILL.md` 的 `metadata.version`，不会执行远端代码。
 
----
-
-## 七、更新自检
-
-本 skill 每次会话首次被触发时，先运行 `scripts/version-check.sh` 检查自身是否为最新版本：
-
-| 退出码 | 含义 | 处理方式 |
-|---|---|---|
-| 0 | 已是最新 | 继续正常工作，无需提示 |
-| 2 | 远端有更新 | 告知用户本地与远端版本号，征得同意后执行脚本输出的 `npx skills update` 命令完成更新 |
-| 1 | 检查失败（离线、网络受限等） | 静默跳过，不影响任何正常功能 |
-
-该检查只读取远端 SKILL.md 的 `version` 字段，不执行远端任何代码。结果按天缓存在 `~/.cache/how2useliteflow/`（可用 `HOW2USELITEFLOW_CACHE` 覆盖），同一天内重复运行直接回放缓存、不重复联网；`HOW2USELITEFLOW_CHECK_FORCE=1` 可强制重新检查。
-
-如需在 agent hook 中挂载本脚本，命令末尾必须追加 `|| true`——部分 hook 体系把退出码 2 解释为「阻断」，与本脚本的「有更新」含义冲突。
+维护技能时使用 `scripts/audit-coverage.py --source <源码仓库> --homepage <官网仓库>` 复查覆盖清单、源码证据和 reference 定位。该结果衡量文档功能覆盖，不代表代码测试覆盖率或真实问答准确率。

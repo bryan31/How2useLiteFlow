@@ -1,10 +1,10 @@
-> 来源：LiteFlow 官方文档 `04.v2.16.X文档/110.🗂规则配置源/`（本地规则文件、SQL、ZK、Nacos、Etcd、Apollo、Redis 配置源/轮询/订阅、自定义配置源）。版本对齐 v2.16.1，依赖坐标示例版本为 `2.16.1`。
+> 来源：LiteFlow 官方文档 `04.v2.16.X文档/110.🗂规则配置源/`（本地规则文件、SQL、ZK、Nacos、Etcd、Apollo、Redis 配置源/轮询/订阅、自定义配置源）。内容与依赖坐标对齐 LiteFlow `2.16.2`。
 
 # 规则配置源（Rule Source）
 
-> **【v2.16.1 分界说明】** 本文档讲的是传统的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）——「启动时全量读出、拼成大 XML 解析、规则全量常驻 JVM 堆」的模式，在 v2.16.1 中**依然有效**。但同一后端迁移到 Rule-DB 时必须移除旧插件，Nacos 两代插件还使用不同客户端主版本，不能共存。
+> **【传统配置源与 Rule-DB 分界】** 本文档讲的是传统的 6 个规则插件（`liteflow-rule-sql/redis/zk/nacos/etcd/apollo`）——启动时读取全部规则，变化后通常也会重新读取并全量解析，结果常驻 JVM 堆；每个应用实例独立消费轮询或 watch／推送通知。该模式在 2.16.2 中仍然有效，但没有 Rule-DB 的统一发布版本、增量缓存和周期对账兜底。同一后端迁移到 Rule-DB 时必须移除旧插件，Nacos 两代插件还使用不同客户端主版本，不能共存。
 >
-> v2.16.1 新增了**纯增量**的 **Rule-DB 统一规则数据库**模式（聚合模块 `liteflow-rule-db`，含 SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / etcd / Nacos 7 个插件 + 统一发布 API）：存储为权威源，JVM 只留轻量索引 + 有界 LRU 缓存（懒加载），多节点靠「变更通知（SQL/PostgreSQL/MongoDB/Redis seq 轮询；ZooKeeper/etcd/Nacos 监听）+ 周期对账」达到最终一致。它与本文档的老插件**运行模型独立**，但 `liteflow.rule-source` 与 `liteflow.rule-db.*` **互斥**，同一后端迁移时也必须移除旧插件。
+> v2.16.1 新增了支持**增量加载**的 **Rule-DB 统一规则数据库**模式（聚合模块 `liteflow-rule-db`，含 SQL / PostgreSQL / MongoDB / Redis / ZooKeeper / etcd / Nacos 7 个插件 + 统一发布 API）：存储为权威源，JVM 只留轻量索引 + Caffeine 有界缓存（懒加载），多节点靠“变更通知（SQL/PostgreSQL/MongoDB/Redis seq 轮询；ZooKeeper/etcd/Nacos 监听）+ 周期对账”达到最终一致。它与本文档的老插件**运行模型独立**，但 `liteflow.rule-source` 与 `liteflow.rule-db.*` **互斥**，同一后端迁移时也必须移除旧插件。
 >
 > 生产新项目建议优先评估 Rule-DB 模式，详见 `references/rule-db.md`。
 
@@ -16,7 +16,7 @@ LiteFlow 通过 **rule-source** 定位规则内容；除了内置的本地文件
 
 | 配置源 | Maven artifactId | 最低版本 | 规则存放形式 | 热刷新机制 | 关键适用场景 |
 |---|---|---|---|---|---|
-| 本地文件 | （核心内置，无插件） | — | `.xml` 文件 | 默认启动加载；`enable-monitor-file=true` 可监听本地磁盘文件自动热刷新（单文件 v2.10.0+，模糊路径 v2.11.1+） | 单机、规则不常变 |
+| 本地文件 | （核心内置，无插件） | — | XML／JSON／YML | 默认启动加载；`enable-monitor-file=true` 可监听本地磁盘文件自动热刷新（单文件 v2.10.0+，模糊路径 v2.11.1+） | 单机、规则不常变 |
 | SQL | `liteflow-rule-sql` | v2.9.0+ | chain 表 + script 表 | 轮询（可选，v2.11.1+，SHA 对比） | 已有关系库；与业务表共库；运维习惯 SQL |
 | ZooKeeper | `liteflow-rule-zk` | — | ZK 节点（chain 节点 + script 节点） | ZK 原生推送，实时 | 已有 ZK 集群；需强一致/实时 |
 | Nacos | `liteflow-rule-nacos` | v2.9.0+ | 单个 dataId 内的 XML | Nacos 推送，实时 | 已用 Nacos 做配置中心 |
@@ -26,22 +26,20 @@ LiteFlow 通过 **rule-source** 定位规则内容；除了内置的本地文件
 | Redis（订阅） | `liteflow-rule-redis` | v2.11.0+ | Redisson `RMapCache` | Pub/Sub 实时 | 已用 Redisson；对实时性要求高 |
 | 自定义 | （继承 `ClassXmlFlowELParser`） | — | 自行组装 XML | 取决于实现 | 多源混合 / 框架未内置的存储 |
 
-:::tip 单源约束
-框架原生**只允许一种配置源**——不能"一部分规则来自 SQL、另一部分来自 Redis"。若要多源混合或接入未支持的存储，需走【自定义配置源】。
-:::
+> **单源约束：**框架原生**只允许一种配置源**——不能“一部分规则来自 SQL、另一部分来自 Redis”。若要多源混合或接入未支持的存储，需走“自定义配置源”。
 
-:::tip 通用规则/脚本 key 格式（ZK / Etcd / Apollo / Redis 通用）
+**通用规则／脚本 key 格式（ZK／Etcd／Apollo／Redis 通用）：**
+
 - 规则 key：`规则ID[:是否启用]`，value 为纯 EL（如 `THEN(a,b,c);`）。省略启用项等价于 `true`。
 - 脚本 key：`脚本组件ID:脚本类型[:脚本名称:脚本语言:是否启用]`，方括号为可选。value 为脚本数据。
 - **位置严格按冒号对齐**：要写第 5 段（是否启用），前 4 段必须补齐，否则报错。例：`s1:script:脚本s1:false` 非法，应写 `s1:script:脚本s1:groovy:false`。
 - 只引入了一种脚本语言插件时，"脚本语言"段可省略（自动识别）；多语言共存时必须写明。
-:::
 
 ---
 
 ## 二、本地规则文件配置
 
-无插件依赖，规则文件格式为 **XML**，由 `<nodes>`（可选）与 `<chain>` 组成。Spring 体系下 node 自动注册，`<nodes>` 仅在需要声明脚本节点 / 非 Spring 显式声明类时使用。
+无插件依赖，规则文件支持 XML、JSON、YML，以及对应的 `.el.xml`、`.el.json`、`.el.yml` 后缀。Spring 体系下 node 通常由容器自动注册；规则文件中的 `nodes` 主要用于声明脚本节点，或在非 Spring 环境显式声明组件类。
 
 ### 2.1 application 配置
 
@@ -62,6 +60,8 @@ liteflow.rule-source=/data/lf/**/*Rule.xml
 
 ### 2.2 规则文件样例
 
+XML：
+
 ```xml
 <flow>
     <!-- Spring 体系可省略 <nodes>；这里声明脚本节点 -->
@@ -76,10 +76,36 @@ liteflow.rule-source=/data/lf/**/*Rule.xml
 </flow>
 ```
 
-:::warning 热刷新
+同一条普通 chain 的 JSON 写法：
+
+```json
+{
+  "flow": {
+    "chain": [
+      {
+        "name": "chain1",
+        "value": "THEN(a, b, c);"
+      }
+    ]
+  }
+}
+```
+
+YML 写法：
+
+```yaml
+flow:
+  chain:
+    - name: chain1
+      value: "THEN(a, b, c);"
+```
+
+单个 `rule-source` 同时加载不同格式时，还要设置 `liteflow.support-multiple-type=true`；它只表示可混用规则文件格式，不表示可同时使用多个外部配置源。
+
+**热刷新：**
+
 本地文件配置源默认在**启动时加载**，但可配置 `liteflow.enable-monitor-file=true`（默认 `false`）开启**文件监听自动热刷新**：文件改动后自动重载整个规则，无需重启——单文件监听 **v2.10.0+**，模糊匹配路径（如 `/data/lf/**/*Rule.xml`）同样可监听，**v2.11.1+**（官方文档《高级特性 → 本地规则文件监听》；源码 `FlowExecutor.init()` 在 `enableMonitorFile` 为 true 时注册 `MonitorFile`）。
 监听仅对 `rule-source` 指向的**本地磁盘文件/模糊路径**生效（底层是 commons-io 对磁盘目录的 `FileAlterationObserver`）；classpath（尤其打包进 jar 的）资源无法被监听，此时改了文件仍需重启，或调用 `FlowExecutor.reloadRule()` / `LiteflowMetaOperator` 热刷新接口。需要配置中心级别的实时推送，请改用外部配置源。
-:::
 
 ---
 
@@ -93,7 +119,7 @@ liteflow.rule-source=/data/lf/**/*Rule.xml
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-sql</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -183,7 +209,7 @@ liteflow:
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-zk</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -221,7 +247,7 @@ liteflow:
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-nacos</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -249,9 +275,7 @@ liteflow:
 
 ### 5.2 存储约定（重要）
 
-:::danger
-Nacos 里**只能存 XML 形式**，且**所有规则与脚本必须放在同一个 dataId 里**，不可拆分成多个 dataId。
-:::
+> **重要：**Nacos 里**只能存 XML 形式**，且**所有规则与脚本必须放在同一个 dataId 里**，不可拆分成多个 dataId。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -279,7 +303,7 @@ Nacos 节点改动自动推送，实时平滑热刷新，无需任何操作。
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-etcd</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -318,7 +342,7 @@ liteflow:
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-apollo</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -334,9 +358,7 @@ liteflow:
 | `chainNamespace` | 规则命名空间名称 |
 | `scriptNamespace` | 脚本命名空间名称 |
 
-:::tip 连接信息去哪儿了
-Apollo 推荐把连接信息和环境信息放在服务器 `appdatas` 下的 `server.properties` 中，**LiteFlow 配置里不指定连接信息**。
-:::
+> **连接信息：**Apollo 推荐把连接信息和环境信息放在服务器 `appdatas` 下的 `server.properties` 中，**LiteFlow 配置里不指定连接信息**。
 
 ### 7.2 存储约定与热刷新
 
@@ -356,7 +378,7 @@ Apollo 推荐把连接信息和环境信息放在服务器 `appdatas` 下的 `se
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-rule-redis</artifactId>
-    <version>2.16.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -410,9 +432,7 @@ liteflow:
 - 规则 Hash 的 field 格式 `规则ID[:是否启用]`，value 为纯 EL。
 - 脚本 Hash 的 field 格式 `脚本组件ID:脚本类型[:脚本名称:脚本语言:是否启用]`，value 为脚本数据。
 
-:::tip 客户端编码
-用代码（如 Redisson）写入轮询模式的 Hash 时，**Codec 必须设为 `StringCodec`**；直接在 Redis UI/命令行写入则无此问题。
-:::
+> **客户端编码：**用代码（如 Redisson）写入轮询模式的 Hash 时，**Codec 必须设为 `StringCodec`**；直接在 Redis UI／命令行写入则无此问题。
 
 ### 8.5 订阅模式配置示例与约束
 
@@ -430,13 +450,13 @@ liteflow:
     scriptKey: scriptKey
 ```
 
-数据写入必须用 Redisson 的 `RMapCache`：
+数据写入必须用 Redisson 的 `RMapCache`。下面的客户端必须连接与配置相同的 Redis DB `1`，Map 名必须与 `chainKey`／`scriptKey` 完全一致：
 
 ```java
-RMapCache<String, String> chains = redissonClient.getMapCache("chains");
+RMapCache<String, String> chains = redissonClient.getMapCache("chainKey");
 chains.put("chain1", "THEN(a, b, c);");
 
-RMapCache<String, String> scripts = redissonClient.getMapCache("scripts");
+RMapCache<String, String> scripts = redissonClient.getMapCache("scriptKey");
 scripts.put("s1:script:脚本组件1", "defaultContext.setData(\"test1\",\"hello\");");
 ```
 
@@ -477,9 +497,7 @@ public class TestCustomParser extends ClassXmlFlowELParser {
 </flow>
 ```
 
-:::tip Spring 注入
-自定义 parser 类会**自动注入 Spring 上下文**，类内可用 `@Autowired` / `@Resource` 注入任意 bean，便于读取业务数据源、调用服务等。
-:::
+> **Spring 注入：**自定义 parser 类会**自动注入 Spring 上下文**，类内可用 `@Autowired`／`@Resource` 注入任意 bean，便于读取业务数据源、调用服务等。
 
 ### 9.3 配置路径
 

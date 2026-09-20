@@ -1,7 +1,7 @@
 # 测试用例与示例
 
 > 来源：官方文档 `04.v2.16.X文档/170.⛱测试用例以及示例/010.测试用例.md`、`020.DEMO案例.md`，以及 LiteFlow 源码 `liteflow-testcase-el/` 下 30+ 测试模块（已用源码核对真实写法）。
-> 对齐版本：LiteFlow **v2.16.X**。官方称项目内有 **1800+ 测试用例**，几乎覆盖文档所有功能点——**遇到"某个功能到底怎么用"，去对应测试模块找例子是最可靠的途径**。
+> 对齐版本：LiteFlow **2.16.2**。项目内有 **2000+ 测试用例**，覆盖了绝大多数公开功能——**遇到“某个功能到底怎么用”，去对应测试模块找例子是最可靠的途径**。
 
 ---
 
@@ -160,13 +160,23 @@ liteflow 配置写在 `@Import` 引入的 properties 里（同样是 `liteflow.r
 | 决策路由 | `liteflow-testcase-el-routechain` |
 | ZK/SQL/Nacos/Apollo/Etcd/Redis 配置源 | `liteflow-testcase-el-(zk|sql|nacos|apollo|etcd|redis)-springboot` |
 | SQL 多数据源 / sharding-jdbc / 动态 | `liteflow-testcase-el-sql-springboot-{dynamic,sharding-jdbc}` 等 |
-| ReAct Agent（JDK17+） | `liteflow-testcase-el-react-agent` |
+| Agent 底层运行时、工具调用、HITL（JDK17+） | `liteflow-testcase-el-agent-core` |
+| Agent Harness、压缩、长期记忆、沙箱（JDK17+） | `liteflow-testcase-el-agent-harness` |
+| LiteFlow Agent 组件与端到端编排（JDK17+） | `liteflow-testcase-el-agent` |
 | Metrics 指标采集 / 装配守护 / 端点（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/metrics/`（`MetricsScenarioSpringbootTest`、`MetricsLifeCycleGuardTest`、`MetricsEndpointSpringbootTest`；资源 `resources/metrics/`、`metrics-scenario/`）；Boot4 端点见 `liteflow-testcase-el-springboot4` 的 `test/metrics/MetricsEndpointSpringboot4Test` |
 | 节点执行生命周期钩子 `PostProcessNodeExecuteLifeCycle`（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/nodeexecute/`（`NodeExecuteLifeCycleSpringbootTest` + `TestNodeExecuteLifeCycle`，资源 `resources/nodeexecute/`） |
 | Rule-DB 核心／发布 API／七后端 | `liteflow-testcase-el-rule-db-core`、`-publisher`、`-sql-springboot`、`-postgresql-springboot`、`-mongodb-springboot`、`-redis-springboot`、`-etcd-springboot`、`-zk-springboot`、`-nacos-springboot`；七后端均有 Boot 4 对应模块 |
-| Rule-DB 配置绑定（v2.16.1+） | `liteflow-testcase-el-springboot` 与 `liteflow-testcase-el-springboot4` 的 `test/config/RuleDbConfigBindingTest` |
+| Rule-DB 配置绑定（v2.16.1+） | `liteflow-testcase-el-springboot`、`liteflow-testcase-el-springboot4` 与 `liteflow-testcase-el-solon` 的 `test/config/RuleDbConfigBindingTest` |
 
-> v2.16.1 仓库根目录另有 `scripts/verify-rule-db-{publisher,sql,postgresql,mongodb,redis,etcd,zk}-release.sh` 发布验证脚本（非 JUnit）；Nacos 以对应 Spring Boot 2/3 与 Boot 4 测试模块覆盖。
+三个 Agent 测试模块由 Maven profile `testcase-agent` 纳入聚合构建；该 profile 在 JDK 17+ 自动激活，也可显式指定。例如：
+
+```bash
+mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent-core
+mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent-harness
+mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent
+```
+
+> 2.16.2 仓库根目录另有 `scripts/verify-rule-db-{publisher,sql,postgresql,mongodb,redis,etcd,zk}-release.sh` 发布验证脚本（非 JUnit）；Nacos 以对应 Spring Boot 2/3 与 Boot 4 测试模块覆盖。
 
 ---
 
@@ -185,3 +195,18 @@ liteflow 配置写在 `@Import` 引入的 properties 里（同样是 `liteflow.r
 - 当用户问"某功能怎么写/怎么测"时，**优先**指向对应的测试模块（上表）作为权威示例；必要时用 `source-lookup.sh` 在 `liteflow-testcase-el/` 检索真实代码再回答。
 - 生成测试代码时，**务必带上 `extends BaseTest`（或等价清理）** 与每个类独立的 `@TestPropertySource`，否则容易踩全局状态污染的坑。
 - 断言用 JUnit 5 的 `Assertions`；取上下文用 `response.getContextBean(...)`，详见 `references/executor.md`。
+
+## 九、2.16.2 Agent guide 对应验证
+
+离线测试使用 ScriptedChatModel／假工具，不需要模型 Key：
+
+| 能力 | 测试类 |
+|---|---|
+| guide 最小聊天组件 | AgentGuideQuickStartTest |
+| 默认值与配置绑定 | AgentGuideDefaultsTest、AgentPropertyBindingTest |
+| 会话身份与展示历史 | InvocationIdentityResolverTest、AgentConversationServiceTest、HarnessConversationServiceTest |
+| 同会话工作区协调 | CrossAgentWorkspaceGuardTest |
+| 自动压缩与动态技能 | AdaptiveCompactionMiddlewareTest、SessionSkillWorkspaceTest |
+| ExecuteOption 与链路入口 | AgentChainGuideTest |
+
+仓库脚本 `liteflow-testcase-el/scripts/run-agent-guide-tests.sh unit` 跑完整离线组；integration 需要 Docker 与预置数据库／沙箱镜像，live 需要真实平台凭据。只核验文档改动时优先 Maven `-Dtest=类名列表 -Dsurefire.failIfNoSpecifiedTests=false -am` 选择对应模块。不要把离线通过当作数据库／平台连通性验证。

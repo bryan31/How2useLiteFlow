@@ -14,7 +14,7 @@ LiteFlow 中一切异步行为都落在两类线程池上。理解这两层的�
 要点：
 - FlowExecutor 层服务的是"整条链路跑在哪个池里"，只在用 `execute2Future` 时才相关；`execute2Resp` 同步返回不涉及这一层。
 - 组件异步层服务的是"链路内部节点并行/异步执行时跑在哪个池里"，影响所有 WHEN 与异步循环。
-- 两层各自独立配置，互不干扰；虚拟线程开关对**两层同时生效**（见末节）。
+- 两层各自独立配置。虚拟线程开关会影响 LiteFlow 默认 Builder；自定义 Builder 是否跟随取决于它调用的构建方法（见末节）。
 
 ## FlowExecutor 层：主执行器线程池
 
@@ -61,9 +61,11 @@ LiteflowResponse resp = future.get();   // 需要结果时再阻塞获取
 
 ## 组件异步层：编排内并行线程池
 
-组件异步层按**作用域从大到小**分三档：全局线程池 → Chain 层线程池 → 表达式层线程池。三者共存时优先级为：
+组件异步层按**作用域从大到小**分三档：全局线程池 → Chain 层线程池 → 表达式层线程池。正常优先级为：
 
 > **表达式层面 > Chain 层面 > 全局**
+
+`when-thread-pool-isolate=true` 是额外规则：没有显式表达式线程池时，它仍会把每个 WHEN 提升为 condition 级隔离池，使用全局 Builder 按表达式 hash 分池，并覆盖 Chain 层线程池。因此完整优先级是：**表达式显式线程池 > WHEN 隔离池 > Chain 层 > 共享全局池**。该隔离开关只针对 WHEN，不改变并行循环的选择逻辑。
 
 ### 1. 全局线程池（默认共用）
 
@@ -134,17 +136,19 @@ public class CustomExprExecutorBuilder implements ExecutorBuilder {
 liteflow.when-thread-pool-isolate=true
 ```
 
+线程池按 Builder 类名缓存。共享全局池和主执行器池若配置成**同一个 Builder 全限定类名**，会命中同一个缓存 key，实际复用同一个 `ExecutorService`；Chain／表达式／隔离池则在类名后追加对应对象 hash 形成独立池。需要真正隔离主执行器与全局池时，请使用不同的 Builder 类名。
+
 ### 默认丢弃策略
 
 v2.13.0+ 默认线程池的拒绝策略为 `ThreadPoolExecutor.CallerRunsPolicy()`（源码 `ExecutorBuilder#buildDefaultExecutor` 确认）——即**不丢弃任务**，队列满时由调用线程亲自执行。高并发下若不想被反压，应主动放大线程池/队列或自定义 Builder。
 
-> 附加（源码细节，文档未展开）：默认 Builder 全部经 `TtlExecutors.getTtlExecutorService(...)` 包装，因此异步线程中可正确传递 `TransmittableThreadLocal` 上下文；线程 `daemon=false`，keepAlive 60s，队列为 `ArrayBlockingQueue`。
+> 附加（源码细节，文档未展开）：默认 Builder 全部经 `TtlExecutors.getTtlExecutorService(...)` 包装，因此异步线程中可正确传递 `TransmittableThreadLocal` 上下文；线程 `daemon=false`，keepAlive 60s，队列为 `ArrayBlockingQueue`。自定义 Builder 若直接返回普通 `ExecutorService`，框架不会在外层自动补 TTL 包装；需要透传 `TransmittableThreadLocal` 时，应调用 LiteFlow 的默认构建方法或自行使用 `TtlExecutors` 包装。
 
 ## 虚拟线程（JDK 21+）
 
 > 版本支持：v2.15.0+。
 
-JDK ≥ 21 时，框架**默认**把所有异步线程（FlowExecutor 层 + 组件异步层）切换为虚拟线程。虚拟线程在 IO 密集场景下单机可承载极高并发，且无需你再为容量调参。
+JDK ≥ 21 时，LiteFlow 的两个**默认 Builder**会默认切换到虚拟线程。虚拟线程适合大量阻塞 IO；自定义 Builder 不一定受此开关控制。
 
 ```properties
 # 默认 true。设为 false 可强制回到普通平台线程
@@ -154,7 +158,7 @@ liteflow.enable-virtual-thread=false
 机制要点（源码 `ExecutorBuilder#buildDefaultExecutor`）：
 - 开关开启时，调用 `Executors.newVirtualThreadPerTaskExecutor()`，此时 core/max/queue 参数全部被忽略——每个任务一个虚拟线程，不存在排队与拒绝。
 - 两个默认 Builder（`LiteFlowDefaultMainExecutorBuilder`、`LiteFlowDefaultGlobalExecutorBuilder`）走的都是 `buildDefaultExecutor`，故开关对它们都生效。
-- 自定义 Builder 若用了 `ExecutorBuilder#buildDefaultExecutor(...)` 同样自动跟随开关；若希望自定义池**永远使用平台线程**（不受开关影响），改用 `ExecutorBuilder#buildCommonExecutor(...)` 这个 default 方法即可——它无条件构造 `ThreadPoolExecutor`。
+- 自定义 Builder 只有调用 `ExecutorBuilder#buildDefaultExecutor(...)` 才跟随开关；直接自行创建线程池，或调用 `buildCommonExecutor(...)`，都不会自动切换为虚拟线程。
 
 虚拟线程 vs 平台线程对照：
 

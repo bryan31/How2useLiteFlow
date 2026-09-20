@@ -1,4 +1,4 @@
-> 来源：LiteFlow 官方文档 `04.v2.16.X文档/100.🍋脚本组件/`（脚本语言介绍、各脚本引擎、脚本与 Java 交互、多语言混合、文件脚本、动态刷新、验证、卸载）。版本对齐 v2.16.1（源码基线 2.16.1.1），依赖坐标示例版本为 `2.16.1`；`liteflow-script-javax-pro` 例外——≤2.16.1 存在 ThreadLocal 泄漏（bug #IK6XVN，2.16.1.1 修复），其坐标示例为 `2.16.1.1`（见第三、四节）。
+> 来源：LiteFlow 官方文档 `04.v2.16.X文档/100.🍋脚本组件/`（脚本语言介绍、各脚本引擎、脚本与 Java 交互、多语言混合、文件脚本、动态刷新、验证、卸载）。内容和依赖坐标对齐 LiteFlow `2.16.2`。`liteflow-script-javax-pro` 在 ≤2.16.1 存在 ThreadLocal 泄漏，2.16.1.1 修复，2.16.2 已包含修复（见第三、四节）。
 
 # 脚本组件（Script Component）
 
@@ -21,13 +21,11 @@
 | `boolean_script` | 条件（布尔）脚本节点 | 返回 `true`/`false` |
 | `for_script` | 数量循环节点 | 返回数值，表示循环次数 |
 
-:::warning
-脚本组件**无法定义循环迭代组件**（iterator）。需要循环请用 `for_script`；Java 脚本中即使继承了 `NodeIteratorComponent` 也无法正确执行。
-:::
+> **注意：**脚本组件**无法定义循环迭代组件**（iterator）。需要循环请用 `for_script`；Java 脚本中即使继承了 `NodeIteratorComponent` 也无法正确执行。
 
 ## 三、支持的语言与依赖坐标
 
-LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Java 有 3 个插件、JS 有 2 个引擎）。`groupId` 统一为 `com.yomahub`，版本随主版本（示例为 `2.16.1`；`liteflow-script-javax-pro` 因下述泄漏修复，示例为 `2.16.1.1`）。
+LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Java 有 3 个插件、JS 有 2 个引擎）。`groupId` 统一为 `com.yomahub`，版本与 LiteFlow 主版本一致，本文示例统一使用 `2.16.2`。
 
 | 语言 | Maven artifactId | 备注 / 版本要求 |
 |---|---|---|
@@ -38,16 +36,14 @@ LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Ja
 | JavaScript | `liteflow-script-javascript` | 基于 JDK 自带引擎，仅 ES5；仅 JDK8 可用 |
 | JavaScript (ES6) | `liteflow-script-graaljs` | 基于 GraalJs，支持 ES6；JDK11/17 只能用此引擎 |
 | QLExpress | `liteflow-script-qlexpress` | — |
-| Python | `liteflow-script-python` | 依赖 **Jython** 环境，需额外安装配置 |
+| Python | `liteflow-script-python` | 基于 Jython；插件已传递 `jython-standalone`，通常无需另装 Python/Jython 环境 |
 | Lua | `liteflow-script-lua` | 调用 Java 方法用 `:` 而非 `.` |
 | Aviator | `liteflow-script-aviator` | 调用 Java 方法为 `method(bean, args)` 形式 |
 | Kotlin | `liteflow-script-kotlin` | v2.12.1+；上下文必须通过 `bindings` 获取 |
 
 > 说明：Groovy/JS/QLExpress/Python/Lua/Aviator/Kotlin 文档均明确列出支持上述 4 种 `type`。Java（javax-pro）为类式定义，节点 `type` 仍按上表使用（如迭代场景改用 `for_script`），具体行为以源码/官方文档为准。
 
-:::warning
-**javax-pro ≤2.16.1 存在 ThreadLocal 泄漏（bug #IK6XVN，2.16.1.1 已修复）**：`liteflow-script-javax-pro` 的编译产物是跨执行共享的单例，≤2.16.1 中每次执行脚本组件时（`process`/`isAccess`/`onSuccess` 等所有执行入口）都会向 `NodeComponent` 的 `ThreadLocal<Stack<Node>> refNodeStackTL` 压入 refNode 却不清理，线程池线程上的栈随调用次数无界增长，长期运行有内存膨胀甚至 OOM 风险。2.16.1.1 起所有执行入口统一在 `finally` 中 `removeRefNode()` 清理。**使用 javax-pro（官方首推的 Java 脚本插件）请升级到 2.16.1.1 及以上**。另见 `faq-pitfalls.md` 中该问题的条目。
-:::
+> **注意：javax-pro ≤2.16.1 存在 ThreadLocal 泄漏（bug #IK6XVN，2.16.1.1 已修复）。**`liteflow-script-javax-pro` 的编译产物是跨执行共享的单例，≤2.16.1 中每次执行脚本组件时（`process`／`isAccess`／`onSuccess` 等所有执行入口）都会向 `NodeComponent` 的 `ThreadLocal<Stack<Node>> refNodeStackTL` 压入 refNode 却不清理，线程池线程上的栈随调用次数无界增长，长期运行有内存膨胀甚至 OOM 风险。2.16.1.1 起所有执行入口统一在 `finally` 中 `removeRefNode()` 清理。**使用 javax-pro（官方首推的 Java 脚本插件）请升级到 2.16.1.1 及以上**。另见 `faq-pitfalls.md` 中该问题的条目。
 
 ## 四、规则文件中定义脚本节点
 
@@ -161,13 +157,13 @@ LiteFlow 支持 **8 种**脚本语言，对应下表 **11 个**插件坐标（Ja
 
 **Java（javax-pro）示例 —— 类式定义，与静态 Java 完全一致：**
 
-Maven 依赖（≤2.16.1 有 ThreadLocal 泄漏（#IK6XVN），请使用 `2.16.1.1` 及以上）：
+Maven 依赖（2.16.2 已包含 #IK6XVN 修复）：
 
 ```xml
 <dependency>
     <groupId>com.yomahub</groupId>
     <artifactId>liteflow-script-javax-pro</artifactId>
-    <version>2.16.1.1</version>
+    <version>2.16.2</version>
 </dependency>
 ```
 
@@ -210,7 +206,7 @@ userContext.doYourMethod();             // 调用任意方法
 
 | 关键字 | 含义 |
 |---|---|
-| `_meta.slotIndex` | slot 下标，可用 `FlowBus.getSlot(slotIndex)` 取 slot |
+| `_meta.slotIndex` | slot 下标，可用 `DataBus.getSlot(slotIndex)` 取 slot |
 | `_meta.currChainId` | 当前执行的 chain 名 |
 | `_meta.nodeId` | 当前 node Id |
 | `_meta.tag` | tag 值 |
