@@ -1,8 +1,8 @@
 ---
 name: how2useliteflow
-description: 当用户询问、使用、设计、排查或升级 LiteFlow 时启用。覆盖 LiteFlow 2.16.2 的接入与配置、组件、EL、上下文、执行器、脚本、规则源、Rule-DB、监控、动态构建、测试、源码，以及基于 AgentScope 2 的 liteflow-agent、模型、工具、MCP、会话、事件、HITL、Skills、Harness 和 A2A。也用于识别并迁移旧 liteflow-react-agent / ReActAgentComponent 用法。
+description: 当用户询问、使用、设计、排查或升级 LiteFlow 时启用。覆盖 LiteFlow 2.16.2 的接入与配置、组件、EL、上下文、执行器、脚本、规则源、Rule-DB、监控、动态构建、测试、源码，Jev 智能选择与 SWITCH 路由，以及基于 AgentScope 2 的 liteflow-agent、模型、工具、MCP、会话、事件、HITL、Skills、Harness 和 A2A。也用于识别并迁移旧 liteflow-react-agent / ReActAgentComponent 用法。
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # LiteFlow 2.16.2 助手
@@ -14,7 +14,8 @@ metadata:
 - 知识基线为 LiteFlow `2.16.2`，依据源码、仓库内三份 guide 和官网 2.16.X 文档核验，日期为 `2026-09-19`。源码快照及覆盖口径见 [coverage.md](references/coverage.md)。
 - Maven 示例统一使用 `2.16.2`。发布准备完成不等于所有镜像已同步；依赖无法解析时检查实际仓库，或从匹配源码执行 `mvn install -DskipTests`，不要自动退回旧版本。
 - 核心支持 JDK 8～25；Agent 要求 JDK 17+，源码管理 AgentScope Java `2.0.3`。
-- Agent 业务组件统一继承 `com.yomahub.liteflow.agent.harness.component.HarnessAgentComponent`，来自 `liteflow-agent-core`。旧 `AgentComponent`、`ReActAgentComponent` 和独立 `liteflow-agent-harness` 不用于新项目。
+- AgentScope 业务组件继承 `com.yomahub.liteflow.agent.harness.component.HarnessAgentComponent`，来自 `liteflow-agent-core`。旧 `AgentComponent`、`ReActAgentComponent` 和独立 `liteflow-agent-harness` 不用于新项目。
+- Jev 智能选择组件继承 `JevSwitchComponent`，来自独立模块 `liteflow-agent-jev`，要求 JDK 17+，不依赖 AgentScope。本次补充依据 2026-09-21 的 `2.16.2` 工作区更新，使用前确认源码或制品包含该模块，详见 [agent-jev.md](references/agent-jev.md)。
 - Rule-DB、Metrics、节点执行生命周期在 2.16.1 引入，2.16.2 继续支持。
 
 ## 回答流程
@@ -77,6 +78,7 @@ liteflow.rule-source=config/flow.el.xml
 | 普通处理 | `NodeComponent` | `process()` |
 | 布尔判断 | `NodeBooleanComponent` | `processBoolean()` |
 | 多路选择 | `NodeSwitchComponent` | `processSwitch()` |
+| Jev 智能选择 | `JevSwitchComponent` | 实现 `state()`、`instructions()`、`choices()`；框架提供 `processSwitch()` |
 | 次数循环 | `NodeForComponent` | `processFor()` |
 | 迭代数据 | `NodeIteratorComponent` | `processIterator()` |
 | 声明式组件 | `@LiteflowComponent` + `@LiteflowMethod` | 可用 `@LiteflowCmpDefine` 声明节点类型 |
@@ -152,6 +154,13 @@ Spring Boot 配置前缀为 `liteflow.*`：
 - 默认权限为 BYPASS，人工确认必须显式配 ASK 和 `AgentConfirmationHandler`。`toolkit.parallel`、`skills.strict` 是当前不生效的配置，不能据此承诺行为。
 - Docker 与三种存储自由组合；JSON 持久恢复需保存快照目录，Redis／MySQL 快照在后端保存，不能同时设置本地 `snapshot-root`。
 
+### Jev 智能选择
+
+- 添加 `liteflow-agent-jev`，配置 `liteflow.agent.jev.provider`（默认 `typesafe`，也支持 `openrouter`）及对应平台的 `api-key`；通过 `JevSwitchComponent` 接入 `SWITCH(...).to(...).DEFAULT(...)`，无需配置 Harness 会话与工具。
+- `base-url`、`model` 未设置或为空白时使用所选 provider 的默认值，显式覆盖值不会随 provider 切换而重置。OpenRouter 使用 Decisions API，不能按聊天模型配置到 `openai-compatible` 中；具体地址、模型及示例读 [agent-jev.md](references/agent-jev.md)。
+- 候选 key 必须是当前 `.to(...)` 中唯一的组件或子链 ID，不能用 tag 选择语法。低置信度或 `NO_MATCH` 走 `DEFAULT`；网络、鉴权、超时和协议错误抛异常。
+- 在 `onDecision(...)` 中将原始决策保存到本次流程 Context。完整示例、阈值与配置读 [agent-jev.md](references/agent-jev.md)。
+
 ## 知识地图
 
 只加载当前问题需要的文件：
@@ -173,6 +182,7 @@ Spring Boot 配置前缀为 `liteflow.*`：
 | FlowExecutor、WHEN、虚拟线程等线程池 | `references/thread-pools.md` |
 | 动态构造 Node、EL、Chain | `references/dynamic-build.md` |
 | 决策路由与 `executeRouteChain` | `references/decision-routing.md` |
+| Jev／TypeSafe／OpenRouter、provider 配置、JevSwitchComponent、置信度与 DEFAULT | `references/agent-jev.md` |
 | 框架级生命周期 | `references/lifecycle.md` |
 | 降级、回滚、切面、步骤、监控等高级能力 | `references/advanced.md` |
 | 测试范式与源码示例索引 | `references/testing.md` |

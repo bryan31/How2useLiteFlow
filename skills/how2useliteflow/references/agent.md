@@ -8,6 +8,7 @@
 - 会话、StateStore、事件、结构化输出、HITL、并发和配置：`agent-state-events-hitl.md`。
 - 上下文压缩、长期记忆、沙箱、计划和子代理：`agent-harness.md`。
 - 调用远程 A2A Agent：`agent-a2a.md`。
+- Jev 单次智能选择、`SWITCH` 分支与置信度： [agent-jev.md](agent-jev.md)，独立于本文的 AgentScope Runtime。
 - 从 2.16.1 旧 Agent API 迁移：`react-agent.md`。
 
 ## 1. 定位与模块
@@ -21,6 +22,7 @@ Maven groupId 均为 `com.yomahub`：
 | 模块 | 作用 |
 |---|---|
 | `liteflow-agent-core` | `HarnessAgentComponent`、模型抽象、工具、会话、历史、事件、HITL、压缩、记忆、计划、子代理、沙箱 |
+| `liteflow-agent-jev` | `JevSwitchComponent`，单次 Choice 决策接入 `SWITCH`，直接依赖 `liteflow-core` |
 | `liteflow-agent-openai` | OpenAI、DeepSeek、Kimi、GLM、MiniMax、OpenAI 兼容端点 |
 | `liteflow-agent-anthropic` | Anthropic 和兼容网关 |
 | `liteflow-agent-gemini` | Google Gemini |
@@ -29,7 +31,7 @@ Maven groupId 均为 `com.yomahub`：
 | `liteflow-agent-mysql` | MySQL StateStore |
 | `liteflow-agent-a2a` | A2A 协议客户端 |
 
-业务项目引入 starter、core 和模型平台模块；平台模块也会传递 core。当前聚合模块共有 8 个子模块，独立 harness 模块已合并到 core。
+AgentScope 业务项目引入 starter、core 和模型平台模块；平台模块也会传递 core。包含本次 Jev 更新的聚合模块共有 9 个子模块，独立 harness 模块已合并到 core。仅使用 Jev 时引入 starter 与 `liteflow-agent-jev` 即可，无需 AgentScope core 或模型平台模块。
 
 ## 2. 五步跑通
 
@@ -315,6 +317,7 @@ protected Model buildModel() {
 | 模块 | 用途 |
 |---|---|
 | `liteflow-testcase-el-agent-core` | core 单元和契约测试 |
+| `liteflow-testcase-el-agent-jev` | Jev HTTP 协议、默认分支、阈值、异常与并发复用的离线测试 |
 | `liteflow-testcase-el-agent-harness` | Harness、filesystem、permission、sandbox 契约 |
 | `liteflow-testcase-el-agent` | Spring/Solon 集成、feature、platform、真实模型测试 |
 

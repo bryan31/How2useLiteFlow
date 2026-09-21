@@ -58,7 +58,7 @@ LiteFlow 基于**工作台模式**：组件 = 工人，编排顺序 = 工人座�
 | **liteflow-spring-boot-starter** | SpringBoot 2.X / 3.X 场景的官方 starter。 |
 | **liteflow-spring-boot4-starter** | SpringBoot 4.X 场景的专用 starter（API 差异较大，**勿与上面那个混用**）。 |
 | **liteflow-solon-plugin** | 国产 Solon 应用框架的集成支持（非 Spring 系生态的另一选择）。 |
-| **liteflow-agent** | **v2.16.0 首次引入，2.16.2 迁移到 AgentScope 2**：把 Agent 封装成 LiteFlow 组件。聚合模块含 core / openai / anthropic / gemini / dashscope / redis / mysql / a2a 8 个子模块，覆盖模型、工具、持久化会话、事件、HITL、Harness 与远程 Agent（见 `references/agent.md`）。要求 **JDK 17+**。 |
+| **liteflow-agent** | **v2.16.0 首次引入，2.16.2 迁移到 AgentScope 2**：把 Agent 封装成 LiteFlow 组件。包含本次 Jev 更新的聚合模块含 core / jev / openai / anthropic / gemini / dashscope / redis / mysql / a2a 共 9 个子模块。模型、工具、会话、事件、HITL、Harness 与远程 Agent 见 [agent.md](agent.md)；独立的 Jev 智能选择见 [agent-jev.md](agent-jev.md)。要求 **JDK 17+**。 |
 | **liteflow-testcase-el** | EL 编排相关的测试用例集合（2000+ 测试用例的覆盖来源之一）。 |
 
 > 另有 `liteflow-benchmark`（基准压测）辅助模块，一般业务接入不直接依赖（以源码为准）。v2.16.1 起新增两个模块：**`liteflow-rule-db`**（统一规则数据库聚合模块，含 sql / postgresql / mongodb / redis / zk / etcd / nacos 7 个插件 + publisher 统一发布 API，见 `references/rule-db.md`）与 **`liteflow-metrics`**（指标监控模块，基于 Micrometer，已是 `liteflow-spring-boot-starter` / `liteflow-spring-boot4-starter` 的传递依赖，用 starter 无需单独引入，见 `references/metrics.md`）。

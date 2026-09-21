@@ -2,9 +2,11 @@
 
 [English](./README.md) | **中文**
 
-一个帮助 AI 正确使用 **[LiteFlow](https://liteflow.cc)（v2.16.2）** 的 Agent Skill。LiteFlow 是一款轻量级的 Java 规则引擎／业务编排框架。本 skill 内置了从官方文档与源码蒸馏出的用法与代码细节，包括 Rule-DB 的 SQL、PostgreSQL、MongoDB、Redis、ZooKeeper、etcd、Nacos 七后端，以及指标监控、组件、EL 规则、脚本、执行器、AgentScope 2 集成、测试调试和源码实现；并规定了“答不到时怎么办”的严格流程——**不杜撰、不拿网络内容充当 LiteFlow 行为依据**。
+一个帮助 AI 正确使用 **[LiteFlow](https://liteflow.cc)（v2.16.2）** 的 Agent Skill。LiteFlow 是一款轻量级的 Java 规则引擎／业务编排框架。本 skill 内置了从官方文档与源码蒸馏出的用法与代码细节，包括 Rule-DB 的 SQL、PostgreSQL、MongoDB、Redis、ZooKeeper、etcd、Nacos 七后端，以及指标监控、组件、EL 规则、脚本、执行器、AgentScope 2 集成、Jev 智能选择、测试调试和源码实现；并规定了“答不到时怎么办”的严格流程——**不杜撰、不拿网络内容充当 LiteFlow 行为依据**。
 
-> **知识基线（2026-09-19）：**LiteFlow `2.16.2`、AgentScope Java `2.0.3`。Agent 入口为 `liteflow-agent-core` 中的 `HarnessAgentComponent`。示例统一使用 `2.16.2`；镜像未同步时核对仓库，或先安装匹配源码。
+> **知识基线（2026-09-19）：**LiteFlow `2.16.2`、AgentScope Java `2.0.3`。AgentScope 入口为 `liteflow-agent-core` 中的 `HarnessAgentComponent`。示例统一使用 `2.16.2`；镜像未同步时核对仓库，或先安装匹配源码。
+>
+> **Jev 增量（2026-09-21）：**新增 [Jev 智能选择](skills/how2useliteflow/references/agent-jev.md)，覆盖 `liteflow-agent-jev`、`JevSwitchComponent`、`typesafe`／`openrouter` 两种 provider、默认地址与模型、配置覆盖规则、置信度、`DEFAULT`、异常和离线测试。要求 JDK 17+，独立于 AgentScope；依据本次 `2.16.2` 源码更新，使用前确认源码或制品已包含该模块。
 
 ## 安装
 

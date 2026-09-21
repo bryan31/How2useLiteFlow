@@ -161,6 +161,7 @@ liteflow 配置写在 `@Import` 引入的 properties 里（同样是 `liteflow.r
 | ZK/SQL/Nacos/Apollo/Etcd/Redis 配置源 | `liteflow-testcase-el-(zk|sql|nacos|apollo|etcd|redis)-springboot` |
 | SQL 多数据源 / sharding-jdbc / 动态 | `liteflow-testcase-el-sql-springboot-{dynamic,sharding-jdbc}` 等 |
 | Agent 底层运行时、工具调用、HITL（JDK17+） | `liteflow-testcase-el-agent-core` |
+| Jev 协议、智能选择与默认分支（JDK17+，本地 HTTP 模拟） | `liteflow-testcase-el-agent-jev`，用法见 [agent-jev.md](agent-jev.md) |
 | Agent Harness、压缩、长期记忆、沙箱（JDK17+） | `liteflow-testcase-el-agent-harness` |
 | LiteFlow Agent 组件与端到端编排（JDK17+） | `liteflow-testcase-el-agent` |
 | Metrics 指标采集 / 装配守护 / 端点（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/metrics/`（`MetricsScenarioSpringbootTest`、`MetricsLifeCycleGuardTest`、`MetricsEndpointSpringbootTest`；资源 `resources/metrics/`、`metrics-scenario/`）；Boot4 端点见 `liteflow-testcase-el-springboot4` 的 `test/metrics/MetricsEndpointSpringboot4Test` |
@@ -168,10 +169,11 @@ liteflow 配置写在 `@Import` 引入的 properties 里（同样是 `liteflow.r
 | Rule-DB 核心／发布 API／七后端 | `liteflow-testcase-el-rule-db-core`、`-publisher`、`-sql-springboot`、`-postgresql-springboot`、`-mongodb-springboot`、`-redis-springboot`、`-etcd-springboot`、`-zk-springboot`、`-nacos-springboot`；七后端均有 Boot 4 对应模块 |
 | Rule-DB 配置绑定（v2.16.1+） | `liteflow-testcase-el-springboot`、`liteflow-testcase-el-springboot4` 与 `liteflow-testcase-el-solon` 的 `test/config/RuleDbConfigBindingTest` |
 
-三个 Agent 测试模块由 Maven profile `testcase-agent` 纳入聚合构建；该 profile 在 JDK 17+ 自动激活，也可显式指定。例如：
+四个 Agent 测试模块由 Maven profile `testcase-agent` 纳入聚合构建；该 profile 在 JDK 17+ 自动激活，也可显式指定。例如：
 
 ```bash
 mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent-core
+mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent-jev -am -DskipTests=false
 mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent-harness
 mvn test -Ptestcase-agent -pl liteflow-testcase-el/liteflow-testcase-el-agent
 ```

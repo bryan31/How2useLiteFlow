@@ -2,7 +2,7 @@
 
 根据 `docs/liteflow-agent-guide.md` 第 7 节与 `liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/` 核验。下表均省略 `liteflow.agent.` 前缀，时间使用带单位的 `60s`／`2m`。表中为实际生效默认值，部分存储字段在配置类中为 null，由 Provider 填充。
 
-应在首次调用前完成配置，修改配置对象不会自动重建 Runtime。非 Spring Boot 通过 `LiteflowConfig#setAgent(AgentConfig)` 提供完整配置；应用名不能假定自动回填。
+AgentScope 应在首次调用前完成配置，修改配置对象不会自动重建 Runtime。非 Spring Boot 通过 `LiteflowConfig#setAgent(AgentConfig)` 提供完整配置；应用名不能假定自动回填。Jev 独立使用 `jev.*`，不要求 AgentScope 的应用名、会话、模型或工作区配置，见第 8 节。
 
 ## 1. 常用设置
 
@@ -98,3 +98,20 @@ date, whoami, hostname, uname, env, df, du, ps, md5sum, sha256sum, jq, curl, wge
 旧 `runtime.namespace`、`runtime.timeout`、`state-store.*`、`workspace.*`、`harness.trusted-local`、`harness.local-shell-enabled` 不属于当前配置。分别迁移为 application-name、execution-timeout、session-store，以及按需使用 harness.local／harness.docker；完整映射见 [react-agent.md](react-agent.md)。
 
 配置错误应在首次使用前发现：正数时限和次数、0～1 之间且不含端点的比例、连接来源二选一、JSON／共享存储与快照条件、自定义后端限制。不要通过设置不存在的属性绕过校验。
+
+## 8. Jev 智能选择
+
+依据本次新增的 `JevConfig`、`JevProvider` 与 `JevChoiceClient` 核验，日期为 2026-09-21。以下同样省略 `liteflow.agent.` 前缀。
+
+| 配置 | 默认值 | 用途与约束 |
+| --- | --- | --- |
+| `jev.provider` | `typesafe` | 仅支持 `typesafe`、`openrouter`；Java 使用 `JevProvider.TYPESAFE`／`OPENROUTER`，不能为 `null` |
+| `jev.api-key` | 未设置 | 使用 Jev 时必填，填写所选 provider 的凭据；非空白且不可包含空格、控制字符或非 ASCII 字符，建议从环境变量注入 |
+| `jev.base-url` | 随 provider 选择 | `typesafe`：`https://api.typesafe.ai/v1`，追加 `/systemone`；`openrouter`：`https://openrouter.ai/api/alpha`，追加 `/decisions`。支持末尾斜杠和网关路径，必须为 HTTP(S)，禁止内嵌凭据、query、fragment |
+| `jev.model` | 随 provider 选择 | `typesafe`：`jev-1.13.0`；`openrouter`：`typesafe/jev-1.13` |
+| `jev.timeout` | `3s` | 完整 HTTP 响应含响应体的最大等待时间，至少 `1ms` |
+| `jev.min-confidence` | `0.6` | 有限数值且在闭区间 `[0, 1]` 内；低于阈值走 `DEFAULT`，可覆写组件 `minConfidence()` |
+
+`base-url` 与 `model` 未设置、为 `null` 或为空白时，使用所选 provider 的默认值；显式覆盖值不会随 provider 切换而重置。`base-url` 是 API 根地址，不填完整接口路径。OpenRouter 使用 Decisions API，不使用聊天接口或 `openai-compatible` 配置。
+
+Spring Boot 在属性绑定时拒绝未知 `provider`，其他运行约束在执行 Jev 组件时校验。`execution-timeout`、`session-store.*`、`harness.*` 等 AgentScope 设置不控制 Jev。完整组件与 EL 示例见 [agent-jev.md](agent-jev.md)。

@@ -45,11 +45,15 @@ python3 skills/how2useliteflow/scripts/audit-coverage.py \
 
 ## 本次验证
 
-- skill-creator 的 quick_validate.py 通过，Shell 脚本语法检查通过。
-- 65 项相关离线测试通过：默认值、Spring Boot 2/3 与 Boot 4 绑定、ExecuteOption 链路、身份、历史、工作区锁、压缩、Skills、最小接入；Shell 测试在允许本地进程执行的环境复跑通过。
-- 从 reference 提取 ChatAgentCmp 与 A2A 组件／鉴权覆写，使用当前 reactor 类路径和 javac --release 17 编译通过。
-- 覆盖审计的负例验证包括遗漏单元、新增章节、失效标题、源码变化、重复条目和低于 90% 的分组，全部拒绝；代码块伪标题不进入分母。
-- 没有调用真实模型、启动 Docker／数据库集成测试或重新执行全仓库测试；本报告不据此承诺平台连通性或全仓库测试结果。
+- 2026-09-21 Jev provider 文档更新：依据 JevConfig、JevProvider、JevChoiceClient 与现有 provider 测试核对 TypeSafe／OpenRouter 的默认地址、模型、路径、覆盖规则及属性绑定失败时机。Skill 结构、5 个 Jev YAML 示例和本次修改的本地链接校验通过；本次未重跑 Java 测试或调用真实模型。全量覆盖审计仍因缺少 docs/liteflow-rule-db-guide.md 中止，历史覆盖分母保持不变。
+- 2026-09-21 Jev 增量：[agent-jev.md](agent-jev.md) 依据源码提交 `ad5c12dd6e4cf6a4df8bf99cefea85019422f66e` 之上的本次工作区更新核验，源码与 reference 指纹已记录；Jev 尚未纳入原三份 guide／官网页面清单，不改变上方 2026-09-19 的历史覆盖分母。
+- 2026-09-21 Jev 验证：31 项离线测试全部通过；从 reference 提取 SupportRouter 与 SupportContext，使用当前 reactor 类路径和 javac --release 17 编译通过；Skill 结构校验通过。
+- 2026-09-21 全量覆盖审计未能完成：当前源码缺少原基线的 docs/liteflow-rule-db-guide.md 与 docs/liteflow-metrics-guide.md。保留原清单与指纹，恢复匹配文档后再运行完整审计；没有把缺失文档移出分母或把历史验证当作本次重跑结果。
+- 2026-09-19 基线验证：skill-creator 的 quick_validate.py 通过，Shell 脚本语法检查通过。
+- 2026-09-19 基线验证：65 项相关离线测试通过：默认值、Spring Boot 2/3 与 Boot 4 绑定、ExecuteOption 链路、身份、历史、工作区锁、压缩、Skills、最小接入；Shell 测试在允许本地进程执行的环境复跑通过。
+- 2026-09-19 基线验证：从 reference 提取 ChatAgentCmp 与 A2A 组件／鉴权覆写，使用当前 reactor 类路径和 javac --release 17 编译通过。
+- 2026-09-19 基线验证：覆盖审计的负例验证包括遗漏单元、新增章节、失效标题、源码变化、重复条目和低于 90% 的分组，全部拒绝；代码块伪标题不进入分母。
+- 2026-09-19 基线验证：没有调用真实模型、启动 Docker／数据库集成测试或重新执行全仓库测试；本报告不据此承诺平台连通性或全仓库测试结果。
 
 ## 逐项映射
 
