@@ -7,6 +7,8 @@
 > **知识基线（2026-09-19）：**LiteFlow `2.16.2`、AgentScope Java `2.0.3`。AgentScope 入口为 `liteflow-agent-core` 中的 `HarnessAgentComponent`。示例统一使用 `2.16.2`；镜像未同步时核对仓库，或先安装匹配源码。
 >
 > **Jev 增量（2026-09-21）：**新增 [Jev 智能选择](skills/how2useliteflow/references/agent-jev.md)，覆盖 `liteflow-agent-jev`、`JevSwitchComponent`、`typesafe`／`openrouter` 两种 provider、默认地址与模型、配置覆盖规则、置信度、`DEFAULT`、异常和离线测试。要求 JDK 17+，独立于 AgentScope；依据本次 `2.16.2` 源码更新，使用前确认源码或制品已包含该模块。
+>
+> **Jev laya 入口（2026-09-24，`2.16.3`）：**`liteflow.agent.jev.provider` 新增 `laya`，两个 Jev 组件可直接指向本地自托管的 [laya-serve](https://github.com/NandhaKishorM/laya)（同一套 `/v1/systemone` 协议）：checkpoint 首次使用时自动从 Hugging Face 下载，默认模型 `auto` 由其路由器按语言选择；`api-key` 可留空，仅当服务端设置 `LAYA_API_KEY` 时填写相同的值。
 
 ## 安装
 

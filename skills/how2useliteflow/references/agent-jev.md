@@ -1,12 +1,12 @@
-# Jev 智能选择组件（2.16.2）
+# Jev 智能选择与布尔判断组件（2.16.2 起）
 
-依据本次 `2.16.2` 工作区新增的 `liteflow-agent-jev`、`JevConfig`、`JevProvider` 与离线测试核验，日期为 2026-09-21。模块版本沿用 `2.16.2`，不代表已发布到 Maven 仓库；依赖无法解析时使用包含本次更新的源码构建，不能仅凭版本号假定已有该模块。
+依据本次 `2.16.2` 工作区新增的 `liteflow-agent-jev`、`JevConfig`、`JevProvider` 与离线测试核验，日期为 2026-09-21。模块版本沿用 `2.16.2`，不代表已发布到 Maven 仓库；依赖无法解析时使用包含本次更新的源码构建，不能仅凭版本号假定已有该模块。`JevBooleanComponent`、`JevNoulResult`、`JevNoulClient`、`JevTransport` 与 `jev.noul-threshold` 依据 2026-09-23 的 `2.16.3` 工作区更新核验；布尔判断要求模块版本 `2.16.3` 及以上。`JevProvider.LAYA`、`laya` 入口的空 `api-key` 放行与默认 `model` 为 `auto` 依据 2026-09-24 的 `2.16.3` 工作区更新核验。
 
 ## 1. 定位与依赖
 
-`com.yomahub.liteflow.agent.jev.JevSwitchComponent` 继承 `NodeSwitchComponent`，按 `provider` 通过 TypeSafe 的 System One 接口或 OpenRouter 的 Decisions API 发起一次 Jev Choice 请求，将目标 ID 交给 `SWITCH(...).to(...).DEFAULT(...)` 执行。适合从若干已定义的处理分支中按文本或业务数据选择一条。
+`com.yomahub.liteflow.agent.jev.JevSwitchComponent` 继承 `NodeSwitchComponent`，按 `provider` 通过 TypeSafe 的 System One 接口、OpenRouter 的 Decisions API 或本地 laya-serve 服务（2.16.3 起）发起一次 Jev Choice 请求，将目标 ID 交给 `SWITCH(...).to(...).DEFAULT(...)` 执行。适合从若干已定义的处理分支中按文本或业务数据选择一条。
 
-要求 **JDK 17+**。模块直接依赖 `liteflow-core`，不依赖 `liteflow-agent-core` 或 AgentScope，不需要聊天模型、会话存储、工作区或 Harness 初始化。它也不使用 `executeRouteChain` 遍历 `<route>`：该能力要求布尔组件，详见 [decision-routing.md](decision-routing.md)。
+要求 **JDK 17+**。模块直接依赖 `liteflow-core`，不依赖 `liteflow-agent-core` 或 AgentScope，不需要聊天模型、会话存储、工作区或 Harness 初始化。`JevSwitchComponent` 是选择组件，不能用作 `<route>` 的布尔条件；2.16.3 起的 `JevBooleanComponent` 是真实布尔组件，可以出现在 `executeRouteChain` 的 `<route>` 表达式中，详见 [decision-routing.md](decision-routing.md)。
 
 在已有 LiteFlow 应用中添加：
 
@@ -47,20 +47,36 @@ liteflow:
       min-confidence: 0.6
 ```
 
-`OPENROUTER_API_KEY` 使用 OpenRouter 的凭据。两种入口的依赖与组件写法相同，不需要额外引入 `liteflow-agent-openai`。
+`OPENROUTER_API_KEY` 使用 OpenRouter 的凭据。
+
+本地自托管 [laya](https://github.com/NandhaKishorM/laya) 时（2.16.3 起），将 `jev` 配置替换为：
+
+```yaml
+liteflow:
+  agent:
+    jev:
+      provider: laya
+```
+
+laya 是开源的本地决策引擎，其 `laya-serve` 服务实现了同一套 `/systemone` 协议：模型在本地运行，不需要真实 API Key，数据不出本机。通过 `pip install "laya[serve]"` 安装并运行 `laya-serve`（默认监听 `0.0.0.0:8000`），首次加载模型时自动从 Hugging Face 下载 checkpoint 到本地缓存，之后离线可用。`api-key` 仅当服务端设置 `LAYA_API_KEY` 时填写相同的值，其余情况留空，客户端不发送 Authorization 头。laya-serve 默认启动时预热模型（`LAYA_PRELOAD=1`）；关闭预热时第一个请求会触发模型下载与加载，耗时远超 `timeout` 默认的 3 秒。
+
+三种入口的依赖与组件写法相同，不需要额外引入 `liteflow-agent-openai`。
 
 | `provider` | 默认 `base-url` | 自动追加的接口路径 | 默认 `model` |
 | --- | --- | --- | --- |
 | `typesafe`（默认） | `https://api.typesafe.ai/v1` | `/systemone` | `jev-1.13.0` |
 | `openrouter` | `https://openrouter.ai/api/alpha` | `/decisions` | `typesafe/jev-1.13` |
+| `laya`（2.16.3 起） | `http://127.0.0.1:8000/v1` | `/systemone` | `auto` |
 
 `base-url`、`model` 未设置、为 `null` 或为空白时，使用所选 provider 的默认值。显式覆盖值会保留，不受 setter 调用顺序影响；切换 provider 时应移除旧值或一并更新，不能只改 provider 后仍保留 TypeSafe 的地址与模型。
 
 `base-url` 填 API 根地址，支持网关路径和末尾斜杠；不要包含客户端会追加的 `/systemone` 或 `/decisions`。OpenRouter 使用 Decisions API，不能填写聊天接口的 `/api/v1` 地址，也不配置到 `openai-compatible` 中。
 
-`timeout` 限制完整 HTTP 响应的等待时间，包括响应体；它独立于 Harness 的 `liteflow.agent.execution-timeout`。`min-confidence` 可在组件中覆写 `minConfidence()`，有效范围为闭区间 `[0, 1]`，并要求有限数值。
+`laya` 的默认 `model` 为 `auto`，不是具体 checkpoint，表示由其路由器按文本语言自动选择（中文会进入多语言 checkpoint）；可显式填 `english`、`multilingual` 或 `typed-decisions` 固定某个 checkpoint。
 
-Spring Boot 在属性绑定时拒绝未知 `provider`；API Key、地址、超时与阈值等运行约束在执行 Jev 组件时校验，普通组件和其他 Agent 不需要 Jev 凭据。Java 配置使用 `JevConfig#setProvider(JevProvider.OPENROUTER)`，枚举位于 `com.yomahub.liteflow.property.agent` 包，不接受字符串 setter。通过 `LiteflowConfig.getAgent().getJev()` 设置，或调用 `AgentConfig.setJev(JevConfig)`。六项配置的完整约束见 [agent-config.md](agent-config.md#8-jev-智能选择)。
+`timeout` 限制完整 HTTP 响应的等待时间，包括响应体；它独立于 Harness 的 `liteflow.agent.execution-timeout`。`min-confidence` 可在组件中覆写 `minConfidence()`，有效范围为闭区间 `[0, 1]`，并要求有限数值。2.16.3 起新增 `noul-threshold`（默认 `0.5`），作为布尔组件的默认阈值，可覆写 `probabilityThreshold()`，约束相同。
+
+Spring Boot 在属性绑定时拒绝未知 `provider`；API Key、地址、超时与阈值等运行约束在执行 Jev 组件时校验，普通组件和其他 Agent 不需要 Jev 凭据。Java 配置使用 `JevConfig#setProvider(...)`，枚举 `JevProvider` 包含 `TYPESAFE`、`OPENROUTER`、`LAYA`（2.16.3 起），位于 `com.yomahub.liteflow.property.agent` 包，不接受字符串 setter。通过 `LiteflowConfig.getAgent().getJev()` 设置，或调用 `AgentConfig.setJev(JevConfig)`。七项配置的完整约束见 [agent-config.md](agent-config.md#8-jev-智能选择)。
 
 ## 3. 组件与 EL
 
@@ -141,7 +157,48 @@ JevChoiceResult decision = response.getContextBean(SupportContext.class).getDeci
 - ID 不得为空白、包含冒号或等于 `JevSwitchComponent.NO_MATCH`。当前不支持 `tag:...` 选择语法，也不接受同 ID 的多个目标。
 - 框架自动加入保留项 `__liteflow_no_match__`，代表均不适用或信息不足；不要手动加入候选，也不要把它作为业务目标。
 
-## 4. 结果、默认分支与异常
+## 4. 布尔判断组件（Noul，2.16.3）
+
+`JevBooleanComponent` 继承 `NodeBooleanComponent`，每次执行发起一次 Noul 判断：模型返回“是”的概率，达到阈值（含等于）时 `processBoolean()` 返回 `true`。`processBoolean()` 由框架实现且为 `final`，业务实现 `state()` 与 `instructions()`；两者要求与选择组件相同，`instructions()` 只问一个是非问题，两个条件应拆成两个组件再用 `AND` 组合。
+
+```java
+import com.yomahub.liteflow.agent.jev.JevBooleanComponent;
+import com.yomahub.liteflow.agent.jev.JevNoulResult;
+import com.yomahub.liteflow.annotation.LiteflowComponent;
+
+@LiteflowComponent("humanEscalation")
+public class HumanEscalation extends JevBooleanComponent {
+    @Override
+    protected Object state() {
+        return getRequestData();
+    }
+
+    @Override
+    protected String instructions() {
+        return "客户明确要求人工客服介入";
+    }
+
+    @Override
+    protected void onDecision(JevNoulResult result) {
+        getContextBean(SupportContext.class).setEscalation(result);
+    }
+}
+```
+
+```xml
+<flow>
+    <chain name="supportChain">
+        IF(humanEscalation, manual, SWITCH(supportRouter).to(refund, exchange).DEFAULT(manual));
+    </chain>
+</flow>
+```
+
+- 阈值默认读取 `liteflow.agent.jev.noul-threshold`（默认 `0.5`），组件可覆写 `probabilityThreshold()`；有效范围为闭区间 `[0, 1]` 的有限数值。Noul 没有独立的置信度字段，概率本身同时表达答案与确定程度，接近阈值时应视为不确定。
+- `JevNoulResult` 是 record，提供 `model()`、`probability()`；`onDecision(...)` 对每个有效结果回调，并发与存放约束与选择组件相同。
+- 鉴权失败、限流、超时或非法响应抛出 `JevInvocationException`，不会伪装成 `false`；技术故障兜底使用 `CATCH(...).DO(...)`。
+- 它是真实布尔组件，可用于 `IF(...)`、`WHILE(...).DO(...)`、`AND`／`OR`／`NOT`，也可出现在 `executeRouteChain` 的 `<route>` 表达式中；注意每次求值都会发起一次 Jev 请求。
+
+## 5. 结果、默认分支与异常
 
 | 情况 | 执行结果 |
 | --- | --- |
@@ -157,11 +214,11 @@ JevChoiceResult decision = response.getContextBean(SupportContext.class).getDeci
 
 `onDecision(JevChoiceResult)` 在当前流程线程中、目标执行前调用。正常命中、低置信度、`NO_MATCH` 的有效答案都会调用；请求或协议失败不会调用。回调抛出异常会阻止目标执行。
 
-`JevChoiceResult` 是 Java record，读取方法为 `model()`、`choice()`、`confidence()`、`probabilities()`，没有 `getChoice()` 等 Bean getter。`model()` 保留服务端返回的实际模型标识，可能与请求中的模型别名不同；两种 provider 都保留响应中的置信度和概率，不由客户端重新估算。概率 Map 不可变；记录的是阈值判断前的原始结果，因此走 `DEFAULT` 时 `choice()` 仍可能是 `refund`。置信度需要结合业务样本校准，不能等同于单次判断正确率。
+`JevChoiceResult` 是 Java record，读取方法为 `model()`、`choice()`、`confidence()`、`probabilities()`，没有 `getChoice()` 等 Bean getter。`model()` 保留服务端返回的实际模型标识，可能与请求中的模型别名不同；各 provider 都保留响应中的置信度和概率，不由客户端重新估算。概率 Map 不可变；记录的是阈值判断前的原始结果，因此走 `DEFAULT` 时 `choice()` 仍可能是 `refund`。置信度需要结合业务样本校准，不能等同于单次判断正确率。
 
 组件实例会被并发复用；决策和请求状态应放在本次执行的 Context 中，不要保存到组件成员字段。并行分支若共用一个 Context 字段，还需自行处理覆盖或并发写入。
 
-## 5. 离线验证与源码入口
+## 6. 离线验证与源码入口
 
 在包含本次更新的 LiteFlow 源码仓库中运行：
 
@@ -169,11 +226,11 @@ JevChoiceResult decision = response.getContextBean(SupportContext.class).getDeci
 mvn -pl liteflow-testcase-el/liteflow-testcase-el-agent-jev -am test -DskipTests=false
 ```
 
-`JevChoiceClientTest` 通过本地 HTTP 服务验证两种 provider 的默认值、覆盖值、请求路径、响应保留、异常、超时和中断；`JevSwitchComponentTest` 验证真实分支执行、子链、阈值边界、默认分支、回调和并发复用。Spring Boot 2/3 与 Boot 4 的 `AgentPropertyBindingTest` 验证 `jev.*` 属性绑定，包括 provider 默认值、OpenRouter 配置及未知 provider 拒绝。不需要真实 API Key；这些测试不衡量真实模型的中文识别效果。
+`JevChoiceClientTest` 通过本地 HTTP 服务验证各 provider 的默认值、覆盖值、请求路径、响应保留、异常、超时和中断；`LayaProviderTest`（2.16.3 起）验证 `laya` 入口的默认地址与 `auto` 模型透传、空 `api-key` 不发送 Authorization 头、显式 checkpoint 名透传、配置 key 时发送 Bearer 头、非法 key 拒绝，以及 `typesafe`／`openrouter` 仍强制要求 key；`JevSwitchComponentTest` 验证真实分支执行、子链、阈值边界、默认分支、回调和并发复用；`JevNoulClientTest` 与 `JevBooleanComponentTest`（2.16.3 起）验证 Noul 协议、IF 分支、阈值边界（含等于命中）、布尔组合与并发复用。Spring Boot 2/3 与 Boot 4 的 `AgentPropertyBindingTest` 验证 `jev.*` 属性绑定，包括 provider 默认值、OpenRouter 与 laya 配置及未知 provider 拒绝。不需要真实 API Key；这些测试不衡量真实模型的中文识别效果。
 
 以下路径均相对 LiteFlow 仓库：
 
 - 模块说明：`liteflow-agent/liteflow-agent-jev/README.md`。
-- 组件、HTTP 客户端、结果和异常：`liteflow-agent/liteflow-agent-jev/src/main/java/com/yomahub/liteflow/agent/jev/`。
+- 组件、HTTP 客户端、结果和异常：`liteflow-agent/liteflow-agent-jev/src/main/java/com/yomahub/liteflow/agent/jev/`，含 `JevSwitchComponent`、`JevBooleanComponent`（2.16.3 起）与共享传输层 `JevTransport`。
 - 配置、provider 与默认值：`liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/` 下的 `JevConfig.java`、`JevProvider.java`。
 - 离线测试：`liteflow-testcase-el/liteflow-testcase-el-agent-jev/src/test/java/com/yomahub/liteflow/agent/jev/`。

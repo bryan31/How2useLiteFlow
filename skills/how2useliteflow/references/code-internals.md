@@ -658,7 +658,7 @@ AgentScope 业务入口是 core 模块内的 `HarnessAgentComponent`。Jev 入�
 | Docker 缓存与恢复 | 同模块 `agent/harness/sandbox/SessionSandboxRegistry.java` |
 | A2A 客户端 | `liteflow-agent/liteflow-agent-a2a/src/main/java/com/yomahub/liteflow/agent/a2a/A2aAgentComponent.java` |
 | Jev 选择与 HTTP 协议 | `liteflow-agent/liteflow-agent-jev/src/main/java/com/yomahub/liteflow/agent/jev/` 下的 `JevSwitchComponent`、`JevChoiceClient`、`JevChoiceResult`、`JevInvocationException` |
-| Jev 配置、provider 与默认值 | `liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/` 下的 `JevConfig.java`、`JevProvider.java`；后者定义 TypeSafe／OpenRouter 的默认地址、模型与接口路径 |
+| Jev 配置、provider 与默认值 | `liteflow-core/src/main/java/com/yomahub/liteflow/property/agent/` 下的 `JevConfig.java`、`JevProvider.java`；后者定义 TypeSafe／OpenRouter／Laya（2.16.3 起）的默认地址、模型与接口路径 |
 
 调用顺序：`FlowExecutor` 分配 Slot → `AbstractAgentComponent.process()` 校验配置并解析 conversationId／agentKey → 取得 Agent 与工作区租约 → 惰性构建 Runtime → 创建带执行 deadline 的 LiteFlowAgentContext → 生成输入并调用 Harness → 事件／工具／可能的审批 → `handleReply` 写 responseData → 清理上下文、释放租约。
 

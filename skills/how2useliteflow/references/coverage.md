@@ -1,7 +1,7 @@
 # LiteFlow 2.16.2 技能覆盖报告
 
-核验日期：2026-09-19。知识基线：LiteFlow 2.16.2／AgentScope 2.0.3。
-源码提交：`8623451380ee32e2d9eefd3e5f2e721a68482a28`；官网提交：`e50a2e15cc9641c4444a04faed97742349b43113`。以工作区实际文件为准，包含尚未提交的官网文档；文件 SHA-256 记录在 [coverage-map.json](coverage-map.json)。
+核验日期：2026-09-24。知识基线：LiteFlow 2.16.2／AgentScope 2.0.3。
+源码提交：`24b577ec492faed6b05b5ac75c1edbbef0a8eea0`；官网提交：`9c91ec6bd9faadebcad0407c55e5e109ae48f7d1`。以工作区实际文件为准，包含尚未提交的官网文档；文件 SHA-256 记录在 [coverage-map.json](coverage-map.json)。
 
 **已覆盖 239／249 个功能单元，覆盖率 95.98%，目标至少 90%。**
 
@@ -54,6 +54,8 @@ python3 skills/how2useliteflow/scripts/audit-coverage.py \
 - 2026-09-19 基线验证：从 reference 提取 ChatAgentCmp 与 A2A 组件／鉴权覆写，使用当前 reactor 类路径和 javac --release 17 编译通过。
 - 2026-09-19 基线验证：覆盖审计的负例验证包括遗漏单元、新增章节、失效标题、源码变化、重复条目和低于 90% 的分组，全部拒绝；代码块伪标题不进入分母。
 - 2026-09-19 基线验证：没有调用真实模型、启动 Docker／数据库集成测试或重新执行全仓库测试；本报告不据此承诺平台连通性或全仓库测试结果。
+- 2026-09-23 Jev 布尔判断增量：依据源码 2.16.3 工作区核验 JevBooleanComponent、JevNoulClient、JevNoulResult、JevTransport 与 jev.noul-threshold；agent-jev.md、agent-config.md、SKILL.md、decision-routing.md、testing.md 已同步；jev 模块 61 项离线测试全部通过；不改变 2026-09-19 的历史覆盖分母。
+- 2026-09-24 Jev laya provider 增量：依据源码 2.16.3 工作区核验 `JevProvider.LAYA` 默认值（`http://127.0.0.1:8000/v1`、`/systemone`、`auto`）、`laya` 入口空 `api-key` 放行与条件化 Authorization 头、非法 key 拒绝及托管 provider 强制校验不变；agent-jev.md、agent-config.md、SKILL.md、decision-routing.md、code-internals.md、testing.md 已同步；jev 模块 70 项离线测试全部通过（含新增 `LayaProviderTest` 7 项），Spring Boot 2/3 与 Boot 4 的 AgentPropertyBindingTest 通过；不改变 2026-09-19 的历史覆盖分母。
 
 ## 逐项映射
 

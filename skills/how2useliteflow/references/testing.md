@@ -161,7 +161,7 @@ liteflow 配置写在 `@Import` 引入的 properties 里（同样是 `liteflow.r
 | ZK/SQL/Nacos/Apollo/Etcd/Redis 配置源 | `liteflow-testcase-el-(zk|sql|nacos|apollo|etcd|redis)-springboot` |
 | SQL 多数据源 / sharding-jdbc / 动态 | `liteflow-testcase-el-sql-springboot-{dynamic,sharding-jdbc}` 等 |
 | Agent 底层运行时、工具调用、HITL（JDK17+） | `liteflow-testcase-el-agent-core` |
-| Jev 协议、智能选择与默认分支（JDK17+，本地 HTTP 模拟） | `liteflow-testcase-el-agent-jev`，用法见 [agent-jev.md](agent-jev.md) |
+| Jev 协议、智能选择、是非判断、laya provider 与默认分支（JDK17+，本地 HTTP 模拟） | `liteflow-testcase-el-agent-jev`，用法见 [agent-jev.md](agent-jev.md) |
 | Agent Harness、压缩、长期记忆、沙箱（JDK17+） | `liteflow-testcase-el-agent-harness` |
 | LiteFlow Agent 组件与端到端编排（JDK17+） | `liteflow-testcase-el-agent` |
 | Metrics 指标采集 / 装配守护 / 端点（v2.16.1+） | `liteflow-testcase-el-springboot` 的 `test/metrics/`（`MetricsScenarioSpringbootTest`、`MetricsLifeCycleGuardTest`、`MetricsEndpointSpringbootTest`；资源 `resources/metrics/`、`metrics-scenario/`）；Boot4 端点见 `liteflow-testcase-el-springboot4` 的 `test/metrics/MetricsEndpointSpringboot4Test` |

@@ -1,6 +1,6 @@
 # 决策路由（Decision Routing）
 
-Jev／TypeSafe 的单次智能选择使用 `JevSwitchComponent` 与 `SWITCH(...).to(...).DEFAULT(...)`，详见 [agent-jev.md](agent-jev.md)。本文介绍的 `executeRouteChain` 使用布尔 `<route>` 表达式，可命中多条 chain；Jev 选择组件不能直接用作 `<route>` 的布尔条件。
+Jev 的单次智能选择（TypeSafe／OpenRouter，2.16.3 起也支持本地 laya）使用 `JevSwitchComponent` 与 `SWITCH(...).to(...).DEFAULT(...)`，详见 [agent-jev.md](agent-jev.md)。本文介绍的 `executeRouteChain` 使用布尔 `<route>` 表达式，可命中多条 chain；Jev 选择组件不能直接用作 `<route>` 的布尔条件，但 2.16.3 起的 `JevBooleanComponent` 是真实布尔组件，可以出现在 `<route>` 中，每次求值都会发起一次 Noul 请求。
 
 > 来源文档（相对 `04.v2.16.X文档/`）：
 > - `140.🧮决策路由/010.概念以及介绍.md`

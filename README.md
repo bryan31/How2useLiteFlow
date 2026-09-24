@@ -7,6 +7,8 @@ An Agent Skill that helps AI use **[LiteFlow](https://liteflow.cc) (v2.16.2)** c
 > **Baseline (2026-09-19):** LiteFlow `2.16.2`, AgentScope Java `2.0.3`. The AgentScope entry point is `HarnessAgentComponent` from `liteflow-agent-core`. Examples use `2.16.2`; if your Maven mirror has not synchronized it, verify the repository or install matching source locally.
 >
 > **Jev addition (2026-09-21):** [Jev intelligent routing](skills/how2useliteflow/references/agent-jev.md) covers the new `liteflow-agent-jev` module and `JevSwitchComponent`, including the `typesafe` and `openrouter` providers, their default endpoints and models, configuration overrides, confidence thresholds, `DEFAULT`, errors, and offline tests. It requires JDK 17+ and works independently of AgentScope. This addition follows the current `2.16.2` source update; confirm the module is present in your source or artifacts before use.
+>
+> **Jev laya provider (2026-09-24, `2.16.3`):** `liteflow.agent.jev.provider` also accepts `laya`, pointing both Jev components at a self-hosted [laya-serve](https://github.com/NandhaKishorM/laya) server that speaks the same `/v1/systemone` protocol. Checkpoints auto-download from Hugging Face on first use, the default model `auto` lets its router pick a checkpoint by language, and `api-key` stays empty unless the server sets `LAYA_API_KEY`.
 
 ## Install
 

@@ -101,17 +101,18 @@ date, whoami, hostname, uname, env, df, du, ps, md5sum, sha256sum, jq, curl, wge
 
 ## 8. Jev 智能选择
 
-依据本次新增的 `JevConfig`、`JevProvider` 与 `JevChoiceClient` 核验，日期为 2026-09-21。以下同样省略 `liteflow.agent.` 前缀。
+依据本次新增的 `JevConfig`、`JevProvider` 与 `JevChoiceClient` 核验，日期为 2026-09-21；`jev.noul-threshold` 依据 2026-09-23 的 `2.16.3` 工作区更新核验；`JevProvider.LAYA` 与 `laya` 入口的 `api-key` 放行依据 2026-09-24 的 `2.16.3` 工作区更新核验。以下同样省略 `liteflow.agent.` 前缀。
 
 | 配置 | 默认值 | 用途与约束 |
 | --- | --- | --- |
-| `jev.provider` | `typesafe` | 仅支持 `typesafe`、`openrouter`；Java 使用 `JevProvider.TYPESAFE`／`OPENROUTER`，不能为 `null` |
-| `jev.api-key` | 未设置 | 使用 Jev 时必填，填写所选 provider 的凭据；非空白且不可包含空格、控制字符或非 ASCII 字符，建议从环境变量注入 |
-| `jev.base-url` | 随 provider 选择 | `typesafe`：`https://api.typesafe.ai/v1`，追加 `/systemone`；`openrouter`：`https://openrouter.ai/api/alpha`，追加 `/decisions`。支持末尾斜杠和网关路径，必须为 HTTP(S)，禁止内嵌凭据、query、fragment |
-| `jev.model` | 随 provider 选择 | `typesafe`：`jev-1.13.0`；`openrouter`：`typesafe/jev-1.13` |
+| `jev.provider` | `typesafe` | 仅支持 `typesafe`、`openrouter`、`laya`（`laya` 自 2.16.3 起）；Java 使用 `JevProvider.TYPESAFE`／`OPENROUTER`／`LAYA`，不能为 `null` |
+| `jev.api-key` | 未设置 | `typesafe`／`openrouter` 必填，填写所选 provider 的凭据；`laya` 仅当服务端设置 `LAYA_API_KEY` 时填写相同的值，其余情况可留空（客户端不发送 Authorization 头）；非空白时不可包含空格、控制字符或非 ASCII 字符，建议从环境变量注入 |
+| `jev.base-url` | 随 provider 选择 | `typesafe`：`https://api.typesafe.ai/v1`，追加 `/systemone`；`openrouter`：`https://openrouter.ai/api/alpha`，追加 `/decisions`；`laya`：`http://127.0.0.1:8000/v1`，追加 `/systemone`。支持末尾斜杠和网关路径，必须为 HTTP(S)，禁止内嵌凭据、query、fragment |
+| `jev.model` | 随 provider 选择 | `typesafe`：`jev-1.13.0`；`openrouter`：`typesafe/jev-1.13`；`laya`：`auto`，由其路由器按语言选择 checkpoint，可显式填 `english`／`multilingual`／`typed-decisions` |
 | `jev.timeout` | `3s` | 完整 HTTP 响应含响应体的最大等待时间，至少 `1ms` |
 | `jev.min-confidence` | `0.6` | 有限数值且在闭区间 `[0, 1]` 内；低于阈值走 `DEFAULT`，可覆写组件 `minConfidence()` |
+| `jev.noul-threshold` | `0.5` | 有限数值且在闭区间 `[0, 1]` 内；Noul 概率达到阈值（含）走 true 分支，可覆写组件 `probabilityThreshold()`；2.16.3 起 |
 
-`base-url` 与 `model` 未设置、为 `null` 或为空白时，使用所选 provider 的默认值；显式覆盖值不会随 provider 切换而重置。`base-url` 是 API 根地址，不填完整接口路径。OpenRouter 使用 Decisions API，不使用聊天接口或 `openai-compatible` 配置。
+`base-url` 与 `model` 未设置、为 `null` 或为空白时，使用所选 provider 的默认值；显式覆盖值不会随 provider 切换而重置。`base-url` 是 API 根地址，不填完整接口路径。OpenRouter 使用 Decisions API，不使用聊天接口或 `openai-compatible` 配置。`laya` 指向本地自托管的 `laya-serve`（`pip install "laya[serve]"` 后运行），首次加载模型时自动从 Hugging Face 下载 checkpoint。
 
 Spring Boot 在属性绑定时拒绝未知 `provider`，其他运行约束在执行 Jev 组件时校验。`execution-timeout`、`session-store.*`、`harness.*` 等 AgentScope 设置不控制 Jev。完整组件与 EL 示例见 [agent-jev.md](agent-jev.md)。
